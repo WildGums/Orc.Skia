@@ -22,37 +22,34 @@ namespace Orc.Skia
 
     public static partial class SKCanvasExtensions
     {
-        public static void DrawDiagonalLine(this SKCanvas canvas, Point begin, Point end, double width, Color color, LineType lineType = LineType.Solid)
+        public static void DrawDiagonalLine(this SKCanvas canvas, Point begin, Point end, SKPaint paint)
         {
-            DrawLine(canvas, begin, end, width, color, lineType);
+            DrawLine(canvas, begin, end, paint);
         }
 
-        public static void DrawHorizontalLine(this SKCanvas canvas, Point begin, Point end, double width, Color color, LineType lineType = LineType.Solid)
+        public static void DrawHorizontalLine(this SKCanvas canvas, Point begin, Point end, SKPaint paint)
         {
-            DrawLine(canvas, begin, end, width, color, lineType);
+            DrawLine(canvas, begin, end, paint);
         }
 
-        public static void DrawLineThroughPoints(this SKCanvas canvas, IEnumerable<Point> points, int width, Color color, LineType lineType = LineType.Solid)
+        public static void DrawLineThroughPoints(this SKCanvas canvas, IEnumerable<Point> points, SKPaint paint)
         {
             var allPoints = points.ToList();
             if (allPoints.Count > 0)
             {
                 var renderingPoints = allPoints.Select(p => new SKPoint((float)p.X, (float)p.Y)).ToArray();
-                var paint = SKPaintHelper.CreateLinePaint(width, color, lineType);
 
                 canvas.DrawPoints(SKPointMode.Polygon, renderingPoints, paint);
             }
         }
 
-        public static void DrawVerticalLine(this SKCanvas canvas, Point begin, Point end, double width, Color color, LineType lineType = LineType.Solid)
+        public static void DrawVerticalLine(this SKCanvas canvas, Point begin, Point end, SKPaint paint)
         {
-            DrawLine(canvas, begin, end, width, color, lineType);
+            DrawLine(canvas, begin, end, paint);
         }
 
-        public static void DrawLine(this SKCanvas canvas, Point begin, Point end, double width, Color color, LineType lineType = LineType.Solid)
+        public static void DrawLine(this SKCanvas canvas, Point begin, Point end, SKPaint paint)
         {
-            var paint = SKPaintHelper.CreateLinePaint(width, color, lineType);
-
             canvas.DrawLine((float)begin.X, (float)begin.Y, (float)end.X, (float)end.Y, paint);
         }
     }

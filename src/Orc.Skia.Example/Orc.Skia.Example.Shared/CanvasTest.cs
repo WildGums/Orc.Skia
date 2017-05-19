@@ -34,44 +34,56 @@ namespace Orc.Skia.Example
         {
             var colorData = BuildColor(255, 28, 255);
 
-            canvas.DrawHorizontalLine(new Point(10, 10), new Point(210, 15), 1, colorData);
-            canvas.DrawHorizontalLine(new Point(10, 30), new Point(210, 35), 1, colorData, LineType.Dashed);
-            canvas.DrawHorizontalLine(new Point(10, 50), new Point(210, 55), 1, colorData, LineType.Dotted);
+            var solidLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Solid);
+            var dashedLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dashed);
+            var dottedLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dotted);
+
+            canvas.DrawHorizontalLine(new Point(10, 10), new Point(210, 15), solidLinePaint);
+            canvas.DrawHorizontalLine(new Point(10, 30), new Point(210, 35), dashedLinePaint);
+            canvas.DrawHorizontalLine(new Point(10, 50), new Point(210, 55), dottedLinePaint);
 
             colorData = BuildColor(0, 0, 255);
-            canvas.DrawHorizontalLine(new Point(150, 290), new Point(440, 296), 1, colorData, LineType.Dashed);
-            canvas.DrawHorizontalLine(new Point(150, 300), new Point(440, 306), 1, colorData, LineType.Dotted);
+            canvas.DrawHorizontalLine(new Point(150, 290), new Point(440, 296), dashedLinePaint);
+            canvas.DrawHorizontalLine(new Point(150, 300), new Point(440, 306), dottedLinePaint);
 
             colorData = BuildColor(255, 0, 0);
-            canvas.DrawVerticalLine(new Point(550, 90), new Point(556, 380), 1, colorData, LineType.Dashed);
-            canvas.DrawVerticalLine(new Point(560, 90), new Point(566, 380), 1, colorData, LineType.Dotted);
+            canvas.DrawVerticalLine(new Point(550, 90), new Point(556, 380), dashedLinePaint);
+            canvas.DrawVerticalLine(new Point(560, 90), new Point(566, 380), dottedLinePaint);
 
             colorData = BuildColor(155, 155, 255);
-            canvas.DrawVerticalLine(new Point(310, 10), new Point(315, 210), 1, colorData);
-            canvas.DrawVerticalLine(new Point(330, 10), new Point(335, 210), 1, colorData, LineType.Dashed);
-            canvas.DrawVerticalLine(new Point(350, 10), new Point(355, 210), 1, colorData, LineType.Dotted);
+            canvas.DrawVerticalLine(new Point(310, 10), new Point(315, 210), solidLinePaint);
+            canvas.DrawVerticalLine(new Point(330, 10), new Point(335, 210), dashedLinePaint);
+            canvas.DrawVerticalLine(new Point(350, 10), new Point(355, 210), dottedLinePaint);
 
             colorData = BuildColor(255, 155, 155);
 
+            solidLinePaint = SKPaintHelper.CreateLinePaint(5, colorData, LineType.Solid);
+            dashedLinePaint = SKPaintHelper.CreateLinePaint(5, colorData, LineType.Dashed);
+            dottedLinePaint = SKPaintHelper.CreateLinePaint(5, colorData, LineType.Dotted);
+
             var points = new[] { new Point(10, 100), new Point(210, 100), new Point(210, 130), new Point(10, 130), new Point(10, 160), new Point(210, 160) };
-            canvas.DrawLineThroughPoints(points, 5, colorData);
+            canvas.DrawLineThroughPoints(points, solidLinePaint);
 
             points = new[] { new Point(10, 250), new Point(210, 250), new Point(210, 280), new Point(10, 280), new Point(10, 310), new Point(210, 310) };
-            canvas.DrawLineThroughPoints(points, 5, colorData, LineType.Dashed);
+            canvas.DrawLineThroughPoints(points, dashedLinePaint);
 
             points = new[] { new Point(260, 250), new Point(460, 250), new Point(460, 280), new Point(260, 280), new Point(260, 310), new Point(460, 310) };
-            canvas.DrawLineThroughPoints(points, 5, colorData, LineType.Dotted);
+            canvas.DrawLineThroughPoints(points, dottedLinePaint);
 
             colorData = BuildColor(0, 127, 127);
 
+            solidLinePaint = SKPaintHelper.CreateLinePaint(2, colorData, LineType.Solid);
+            dashedLinePaint = SKPaintHelper.CreateLinePaint(2, colorData, LineType.Dashed);
+            dottedLinePaint = SKPaintHelper.CreateLinePaint(2, colorData, LineType.Dotted);
+
             points = new[] { new Point(40, -10), new Point(40, 70), new Point(590, 70), new Point(590, 490), new Point(610, 490) };
-            canvas.DrawLineThroughPoints(points, 2, colorData);
+            canvas.DrawLineThroughPoints(points, solidLinePaint);
 
             points = new[] { new Point(50, -20), new Point(50, 80), new Point(580, 80), new Point(580, 480), new Point(610, 480) };
-            canvas.DrawLineThroughPoints(points, 2, colorData, LineType.Dashed);
+            canvas.DrawLineThroughPoints(points, dashedLinePaint);
 
             points = new[] { new Point(60, -30), new Point(60, 90), new Point(570, 90), new Point(570, 470), new Point(610, 470) };
-            canvas.DrawLineThroughPoints(points, 2, colorData, LineType.Dotted);
+            canvas.DrawLineThroughPoints(points, dottedLinePaint);
 
             var lineHeight = 20;
             var lineWidth = 250;
@@ -91,14 +103,18 @@ namespace Orc.Skia.Example
         {
             var colorData = BuildColor(148, 131, 72);
 
+            var solidLinePaint = SKPaintHelper.CreateLinePaint(3, colorData, LineType.Solid);
+            var dashedLinePaint = SKPaintHelper.CreateLinePaint(3, colorData, LineType.Dashed);
+            var dottedLinePaint = SKPaintHelper.CreateLinePaint(3, colorData, LineType.Dotted);
+
             var points = BuildVerticalZigZag(-20, 20, -20, 520, 15);
-            canvas.DrawLineThroughPoints(points, 3, colorData);
+            canvas.DrawLineThroughPoints(points, solidLinePaint);
 
             points = BuildVerticalZigZag(270, 330, -20, 520, 25);
-            canvas.DrawLineThroughPoints(points, 3, colorData, LineType.Dotted);
+            canvas.DrawLineThroughPoints(points, dashedLinePaint);
 
             points = BuildVerticalZigZag(550, 650, -20, 520, 40);
-            canvas.DrawLineThroughPoints(points, 3, colorData, LineType.Dashed);
+            canvas.DrawLineThroughPoints(points, dottedLinePaint);
         }
 
         /// <summary>
