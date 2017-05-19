@@ -3,7 +3,7 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>[[GUID.EXAMPLE_SHARED]]</SharedGUID>
+    <SharedGUID>8F819544-78F0-4E87-A340-D133CCD047BD</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <Import_RootNamespace>Orc.Skia.Example</Import_RootNamespace>

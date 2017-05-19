@@ -159,12 +159,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Orc.Skia\Orc.Skia.UWP\Orc.Skia.UWP.csproj">
-      <Project>{06c8e569-cd8a-48fe-bdb6-1dd389ea0824}</Project>
-      <Name>Orc.Skia.UWP</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="Controls\LineCanvasView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -185,6 +179,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Orc.Skia\Orc.Skia.UWP\Orc.Skia.UWP.csproj">
+      <Project>{06c8e569-cd8a-48fe-bdb6-1dd389ea0824}</Project>
+      <Name>Orc.Skia.UWP</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\Orc.Skia.Example.Shared\Orc.Skia.Example.Shared.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
