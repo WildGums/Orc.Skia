@@ -5,7 +5,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
-namespace Orc.Skia.ViewModels
+namespace Orc.Skia.Example.ViewModels
 {
     using System;
     using System.Threading.Tasks;

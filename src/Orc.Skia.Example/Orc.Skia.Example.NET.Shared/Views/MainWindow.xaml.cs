@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Orc.Skia.Views
+namespace Orc.Skia.Example.Views
 {
     public partial class MainWindow 
     {
