@@ -117,8 +117,10 @@ namespace Orc.Skia
             var source = PresentationSource.FromVisual(this);
             if (source != null)
             {
-                _dpiX = source.CompositionTarget.TransformToDevice.M11;
-                _dpiY = source.CompositionTarget.TransformToDevice.M22;
+                var transformToDevice = source.CompositionTarget.TransformToDevice;
+
+                _dpiX = transformToDevice.M11;
+                _dpiY = transformToDevice.M22;
             }
 #endif
 
@@ -180,9 +182,10 @@ namespace Orc.Skia
                     return;
                 }
 
+                var info = new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+
                 if (_bitmap == null)
                 {
-                    var info = new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
                     CreateBitmap(info);
 
                     clear = false;
@@ -192,9 +195,19 @@ namespace Orc.Skia
                 _bitmap.Lock();
 #endif
 
-                using (var surface = SKSurface.Create(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul), _pixels, width * 4))
+                using (var surface = SKSurface.Create(info, _pixels, width * 4))
                 {
                     var canvas = surface.Canvas;
+
+                    if (!_ignorePixelScaling)
+                    {
+                        var matrix = canvas.TotalMatrix;
+
+                        matrix.ScaleX = 1.0f * (float)_dpiX;
+                        matrix.ScaleY = 1.0f * (float)_dpiY;
+
+                        canvas.SetMatrix(matrix);
+                    }
 
                     if (clear)
                     {
@@ -285,11 +298,13 @@ namespace Orc.Skia
 
                 if (!_ignorePixelScaling)
                 {
-                    brush.Transform = new ScaleTransform
+                    var matrix = new ScaleTransform
                     {
                         ScaleX = 1.0 / _dpiX,
                         ScaleY = 1.0 / _dpiY
                     };
+
+                    brush.Transform = matrix;
                 }
 
                 SetValue(BackgroundProperty, brush);
