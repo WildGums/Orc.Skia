@@ -146,12 +146,12 @@ namespace Orc.Skia
 //#endif
         }
 
-        private void Update()
+        public void Update()
         {
             Update(true);
         }
 
-        private void Update(bool clear)
+        public void Update(bool clear)
         {
             if (ActualWidth == 0 || ActualHeight == 0 || Visibility != Visibility.Visible)
             {

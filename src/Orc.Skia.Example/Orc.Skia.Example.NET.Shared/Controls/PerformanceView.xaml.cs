@@ -38,7 +38,7 @@ namespace Orc.Skia.Example.Controls
 
             for (int i = 0; i < count; i++)
             {
-                skiaCanvas.Invalidate();
+                skiaCanvas.Update(true);
             }
 
             stopwatch.Stop();
