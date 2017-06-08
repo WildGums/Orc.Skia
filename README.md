@@ -1,9 +1,13 @@
-# Orc.Skia
+Orc.Skia
+========
 
-[![Join the chat at https://gitter.im/WildGums/Orc.Skia](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/WildGums/Orc.Skia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Name|Badge
+---|---
+Chat|[![Join the chat at https://gitter.im/WildGums/Orc.Skia](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/WildGums/Orc.Skia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Downloads|![NuGet downloads](https://img.shields.io/nuget/dt/orc.skia.svg)
+Stable version|![Version](https://img.shields.io/nuget/v/orc.skia.svg)
+Unstable version|![Pre-release version](https://img.shields.io/nuget/vpre/orc.skia.svg)
 
-![License](https://img.shields.io/github/license/WildGums/Orc.Skia.svg)
-![Version](https://img.shields.io/nuget/v/[NUGET.PACKAGENAME].svg)
-![Pre-release version](https://img.shields.io/nuget/vpre/Orc.Skia.svg)
+This library provides a XAML canvas for XAML platforms (WPF & UWP) to provide a DPI-aware Skia canvas.
 
-To be described.
+For documentation, please visit the [documentation portal](http://opensource.wildgums.com)
