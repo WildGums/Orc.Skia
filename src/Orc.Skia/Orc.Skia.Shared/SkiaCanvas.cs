@@ -225,7 +225,7 @@ namespace Orc.Skia
                     OnRendered(canvas);
 
 #if NET
-                    var clipDeviceBounds = canvas.ClipDeviceBounds.ToRect();
+                    var clipDeviceBounds = canvas.DeviceClipBounds.ToRect();
                     _bitmap.AddDirtyRect(clipDeviceBounds.ToInt32Rect());
 #elif NETFX_CORE
                     _bitmap.Invalidate();
