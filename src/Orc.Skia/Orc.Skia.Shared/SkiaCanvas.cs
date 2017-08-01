@@ -128,21 +128,13 @@ namespace Orc.Skia
 
                         using (new RenderingScope(this, canvas))
                         {
-                            if (_renderScopeCounter++ == 0)
-                            {
-                                canvas.Clear();
-                                isClearCanvas = true;
-                            }
-
                             var eventArgs = new CanvasRenderingEventArgs(canvas);
 
                             OnRendering(canvas);
                             Rendering?.Invoke(this, eventArgs);
-
-
+                            
                             Render(canvas, isClearCanvas);
                        
-
                             Rendered?.Invoke(this, eventArgs);
                             OnRendered(canvas);
                         }
@@ -291,21 +283,6 @@ namespace Orc.Skia
             Invalidate();
         }
 
-        protected virtual void ResumeRendering(SKCanvas canvas)
-        {
-            if (_renderScopeCounter == 0)
-            {
-                return;
-            }
-
-            if (--_renderScopeCounter != 0)
-            {
-                return;
-            }
-
-            InvalidateBitmap(canvas);
-        }
-
         protected void InvalidateBitmap(SKCanvas canvas)
         {
 #if NET
@@ -397,6 +374,7 @@ namespace Orc.Skia
                 _canvas = canvas;
                 _skCanvas = skCanvas;
                 canvas._isRendering = true;
+                canvas._renderScopeCounter++;
             }
             #endregion
 
@@ -404,7 +382,17 @@ namespace Orc.Skia
             public void Dispose()
             {
                 _canvas._isRendering = false;
-                _canvas.ResumeRendering(_skCanvas);
+                if (_canvas._renderScopeCounter == 0)
+                {
+                    return;
+                }
+
+                if (--_canvas._renderScopeCounter != 0)
+                {
+                    return;
+                }
+
+                _canvas.InvalidateBitmap(_skCanvas);
             }
             #endregion
         }
