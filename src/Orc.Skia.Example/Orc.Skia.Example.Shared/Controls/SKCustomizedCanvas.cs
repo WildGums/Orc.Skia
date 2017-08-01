@@ -49,7 +49,7 @@ namespace Orc.Skia.Example.Controls
             return base.MeasureOverride(constraint);
         }
 
-        protected override void Render(SKCanvas canvas)
+        protected override void Render(SKCanvas canvas, bool isClearCanvas)
         {
             if (canvas != null)
             {
@@ -60,12 +60,8 @@ namespace Orc.Skia.Example.Controls
         private void OnRenderingProgramChanged(object sender, DependencyPropertyValueChangedEventArgs e)
         {
             var canvas = sender as CustomizedCanvas;
-            if (canvas == null)
-            {
-                return;
-            }
 
-            canvas.Invalidate();
+            canvas?.Invalidate();
         }
         #endregion
     }

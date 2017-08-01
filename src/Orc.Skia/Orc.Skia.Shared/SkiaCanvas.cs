@@ -4,13 +4,14 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+
+
 #pragma warning disable 414
 
 namespace Orc.Skia
 {
     using System;
     using SkiaSharp;
-
 #if NETFX_CORE
     using Windows.Graphics.Display;
     using Windows.UI.Core;
@@ -23,6 +24,7 @@ namespace Orc.Skia
     using System.Windows.Controls;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
+
 #endif
 
     /// <summary>
@@ -45,6 +47,9 @@ namespace Orc.Skia
         private bool _ignorePixelScaling;
 
         private DateTime _lastTime = DateTime.Now;
+
+        private bool _isRendering = false;
+        private int _renderScopeCounter;
         #endregion
 
         #region Constructors
@@ -67,22 +72,6 @@ namespace Orc.Skia
                 Invalidate();
             }
         }
-
-        ///// <summary>
-        ///// One pixel width in 0-1 range
-        ///// </summary>
-        //public double OnePixelHeigthIn01Range
-        //{
-        //    get { return _onePixelHeigthIn01Range; }
-        //}
-
-        ///// <summary>
-        ///// One pixel width in 0-1 range
-        ///// </summary>
-        //public double OnePixelWidthIn01Range
-        //{
-        //    get { return _onePixelWidthIn01Range; }
-        //}
         #endregion
 
         #region Events
@@ -92,20 +81,119 @@ namespace Orc.Skia
         #endregion
 
         #region Methods
-        public void Clear()
+        public void Update()
         {
-            Update(true);
+            if (ActualWidth == 0 || ActualHeight == 0 || Visibility != Visibility.Visible)
+            {
+                return;
+            }
+
+            lock (_syncObject)
+            {
+                if (_dpiX == 0 || _dpiY == 0)
+                {
+                    RecalculateDpi();
+                }
+
+                var info = GetImageInfo();
+
+                var isClearCanvas = _bitmap == null;
+                if (isClearCanvas)
+                {
+                    CreateBitmap(info);
+                }
+
+#if NET
+                using (new BitmapLockScope(_bitmap))
+                {
+#endif
+                    using (var surface = SKSurface.Create(info, _pixels, info.Width * 4))
+                    {
+                        var canvas = surface.Canvas;
+
+                        if (!_ignorePixelScaling)
+                        {
+                            var matrix = canvas.TotalMatrix;
+
+                            matrix.ScaleX = 1.0f * (float) _dpiX;
+                            matrix.ScaleY = 1.0f * (float) _dpiY;
+
+                            canvas.SetMatrix(matrix);
+                        }
+
+                        if (!IsRenderingAllowed() || _isRendering)
+                        {
+                            return;
+                        }
+
+                        using (new RenderingScope(this, canvas))
+                        {
+                            if (_renderScopeCounter++ == 0)
+                            {
+                                canvas.Clear();
+                                isClearCanvas = true;
+                            }
+
+                            var eventArgs = new CanvasRenderingEventArgs(canvas);
+
+                            OnRendering(canvas);
+                            Rendering?.Invoke(this, eventArgs);
+
+
+                            Render(canvas, isClearCanvas);
+                       
+
+                            Rendered?.Invoke(this, eventArgs);
+                            OnRendered(canvas);
+                        }
+
+                        InvalidateBitmap(canvas);
+                    }
+#if NET
+                }
+#endif
+            }
         }
 
-        public virtual void OnRendering(SKCanvas canvas)
+        public Rect GetSurfaceBoundary()
         {
+            var info = GetImageInfo();
+
+            return new Rect(new Point(0, 0), new Point(info.Width, info.Height));
         }
 
-        public virtual void OnRendered(SKCanvas canvas)
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            Initialize();
         }
 
-        public bool RecalculateDpi()
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            Terminate();
+        }
+
+        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Invalidate();
+        }
+
+#if NETFX_CORE
+        private void OnCompositionTargetRendering(object sender, object e)
+#else
+        private void OnCompositionTargetRendering(object sender, EventArgs e)
+#endif
+        {
+            if (DateTime.Now - _lastTime < _frameDelay)
+            {
+                return;
+            }
+
+            Update();
+
+            _lastTime = DateTime.Now;
+        }
+
+        protected virtual bool RecalculateDpi()
         {
             var previousDpiX = _dpiX;
             var previousDpiY = _dpiY;
@@ -133,7 +221,7 @@ namespace Orc.Skia
             return false;
         }
 
-        public void Invalidate()
+        protected virtual void Invalidate()
         {
             FreeBitmap();
 
@@ -146,87 +234,9 @@ namespace Orc.Skia
 //#endif
         }
 
-        public void Update()
+        protected virtual bool IsRenderingAllowed()
         {
-            Update(true);
-        }
-
-        public void Update(bool clear)
-        {
-            if (ActualWidth == 0 || ActualHeight == 0 || Visibility != Visibility.Visible)
-            {
-                return;
-            }
-
-            lock (_syncObject)
-            {
-                if (_dpiX == 0 || _dpiY == 0)
-                {
-                    RecalculateDpi();
-                }
-
-                var info = GetImageInfo();
-
-
-                if (_bitmap == null)
-                {
-                    CreateBitmap(info);
-
-                    clear = false;
-                }
-
-#if NET
-                _bitmap.Lock();
-#endif
-
-                using (var surface = SKSurface.Create(info, _pixels, info.Width * 4))
-                {
-                    var canvas = surface.Canvas;
-
-                    if (!_ignorePixelScaling)
-                    {
-                        var matrix = canvas.TotalMatrix;
-
-                        matrix.ScaleX = 1.0f * (float)_dpiX;
-                        matrix.ScaleY = 1.0f * (float)_dpiY;
-
-                        canvas.SetMatrix(matrix);
-                    }
-
-                    if (clear)
-                    {
-                        canvas.Clear();
-                    }
-
-                    var eventArgs = new CanvasRenderingEventArgs(canvas);
-
-                    OnRendering(canvas);
-                    Rendering?.Invoke(this, eventArgs);
-
-                    Render(canvas);
-
-                    Rendered?.Invoke(this, eventArgs);
-                    OnRendered(canvas);
-
-#if NET
-                    var clipDeviceBounds = canvas.DeviceClipBounds.ToRect();
-                    _bitmap.AddDirtyRect(clipDeviceBounds.ToInt32Rect());
-#elif NETFX_CORE
-                    _bitmap.Invalidate();
-#endif
-
-#if NET
-                    _bitmap.Unlock();
-#endif
-                }
-            }
-        }
-
-        public Rect GetSurfaceBoundary()
-        {
-            var info = GetImageInfo();
-
-            return new Rect(new Point(0, 0), new Point(info.Width, info.Height));
+            return true;
         }
 
         protected SKImageInfo GetImageInfo()
@@ -234,13 +244,13 @@ namespace Orc.Skia
             int width, height;
             if (_ignorePixelScaling)
             {
-                width = (int)ActualWidth;
-                height = (int)ActualHeight;
+                width = (int) ActualWidth;
+                height = (int) ActualHeight;
             }
             else
             {
-                width = (int)(ActualWidth * _dpiX);
-                height = (int)(ActualHeight * _dpiY);
+                width = (int) (ActualWidth * _dpiX);
+                height = (int) (ActualHeight * _dpiY);
             }
 
             if (width == 0 || height == 0)
@@ -251,11 +261,19 @@ namespace Orc.Skia
             return new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
         }
 
-        protected virtual void Render(SKCanvas canvas)
+        protected virtual void Render(SKCanvas canvas, bool isClearCanvas)
         {
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        protected virtual void OnRendering(SKCanvas canvas)
+        {
+        }
+
+        protected virtual void OnRendered(SKCanvas canvas)
+        {
+        }
+
+        protected virtual void Initialize()
         {
             if (RecalculateDpi())
             {
@@ -263,28 +281,39 @@ namespace Orc.Skia
             }
         }
 
-        private void OnUnloaded(object sender, RoutedEventArgs e)
+        protected virtual void Terminate()
         {
             FreeBitmap();
         }
 
-        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+        protected virtual void Resize()
         {
             Invalidate();
         }
 
-#if NETFX_CORE
-        private void OnCompositionTargetRendering(object sender, object e)
-#else
-        private void OnCompositionTargetRendering(object sender, EventArgs e)
-#endif
+        protected virtual void ResumeRendering(SKCanvas canvas)
         {
-            if (DateTime.Now - _lastTime >= _frameDelay)
+            if (_renderScopeCounter == 0)
             {
-                Update();
-
-                _lastTime = DateTime.Now;
+                return;
             }
+
+            if (--_renderScopeCounter != 0)
+            {
+                return;
+            }
+
+            InvalidateBitmap(canvas);
+        }
+
+        protected void InvalidateBitmap(SKCanvas canvas)
+        {
+#if NET
+            var clipDeviceBounds = canvas.DeviceClipBounds.ToRect();
+            _bitmap.AddDirtyRect(clipDeviceBounds.ToInt32Rect());
+#elif NETFX_CORE
+             _bitmap.Invalidate();
+#endif            
         }
 
         private void CreateBitmap(SKImageInfo info)
@@ -329,6 +358,55 @@ namespace Orc.Skia
             SetValue(BackgroundProperty, null);
             _bitmap = null;
             _pixels = IntPtr.Zero;
+        }
+        #endregion
+
+        #region Nested classes
+        private class BitmapLockScope : IDisposable
+        {
+            #region Fields
+            private readonly WriteableBitmap _bitmap;
+            #endregion
+
+            #region Constructors
+            public BitmapLockScope(WriteableBitmap bitmap)
+            {
+                _bitmap = bitmap;
+                _bitmap.Lock();
+            }
+            #endregion
+
+            #region IDisposable Members
+            public void Dispose()
+            {
+                _bitmap.Unlock();
+            }
+            #endregion
+        }
+
+        private class RenderingScope : IDisposable
+        {
+            #region Fields
+            private readonly SkiaCanvas _canvas;
+            private readonly SKCanvas _skCanvas;
+            #endregion
+
+            #region Constructors
+            public RenderingScope(SkiaCanvas canvas, SKCanvas skCanvas)
+            {
+                _canvas = canvas;
+                _skCanvas = skCanvas;
+                canvas._isRendering = true;
+            }
+            #endregion
+
+            #region IDisposable Members
+            public void Dispose()
+            {
+                _canvas._isRendering = false;
+                _canvas.ResumeRendering(_skCanvas);
+            }
+            #endregion
         }
         #endregion
     }

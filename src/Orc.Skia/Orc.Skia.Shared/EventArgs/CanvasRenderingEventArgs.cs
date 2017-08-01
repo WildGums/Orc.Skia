@@ -8,6 +8,7 @@
 namespace Orc.Skia
 {
     using System;
+    using System.ComponentModel;
     using SkiaSharp;
 
     public class CanvasRenderingEventArgs : EventArgs
@@ -20,7 +21,7 @@ namespace Orc.Skia
         #endregion
 
         #region Properties
-        public SKCanvas Canvas { get; private set; }
+        public SKCanvas Canvas { get; }
         #endregion
     }
 }

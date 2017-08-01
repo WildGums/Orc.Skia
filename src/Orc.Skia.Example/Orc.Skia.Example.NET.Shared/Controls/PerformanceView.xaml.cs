@@ -36,9 +36,9 @@ namespace Orc.Skia.Example.Controls
 
             var stopwatch = Stopwatch.StartNew();
 
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
-                skiaCanvas.Update(true);
+                skiaCanvas.Update();
             }
 
             stopwatch.Stop();
