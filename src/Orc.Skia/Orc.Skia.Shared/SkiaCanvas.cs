@@ -165,24 +165,8 @@ namespace Orc.Skia
                     RecalculateDpi();
                 }
 
-                int width, height;
-                if (_ignorePixelScaling)
-                {
-                    width = (int) ActualWidth;
-                    height = (int) ActualHeight;
-                }
-                else
-                {
-                    width = (int) (ActualWidth * _dpiX);
-                    height = (int) (ActualHeight * _dpiY);
-                }
+                var info = GetImageInfo();
 
-                if (width == 0 || height == 0)
-                {
-                    return;
-                }
-
-                var info = new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
 
                 if (_bitmap == null)
                 {
@@ -195,7 +179,7 @@ namespace Orc.Skia
                 _bitmap.Lock();
 #endif
 
-                using (var surface = SKSurface.Create(info, _pixels, width * 4))
+                using (var surface = SKSurface.Create(info, _pixels, info.Width * 4))
                 {
                     var canvas = surface.Canvas;
 
@@ -236,6 +220,35 @@ namespace Orc.Skia
 #endif
                 }
             }
+        }
+
+        public Rect GetSurfaceBoundary()
+        {
+            var info = GetImageInfo();
+
+            return new Rect(new Point(0, 0), new Point(info.Width, info.Height));
+        }
+
+        protected SKImageInfo GetImageInfo()
+        {
+            int width, height;
+            if (_ignorePixelScaling)
+            {
+                width = (int)ActualWidth;
+                height = (int)ActualHeight;
+            }
+            else
+            {
+                width = (int)(ActualWidth * _dpiX);
+                height = (int)(ActualHeight * _dpiY);
+            }
+
+            if (width == 0 || height == 0)
+            {
+                return new SKImageInfo();
+            }
+
+            return new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
         }
 
         protected virtual void Render(SKCanvas canvas)
