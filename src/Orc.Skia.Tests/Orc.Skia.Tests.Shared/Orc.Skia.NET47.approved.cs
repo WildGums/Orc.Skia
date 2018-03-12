@@ -1,15 +1,12 @@
 ﻿[assembly: System.Resources.NeutralResourcesLanguageAttribute("en-US")]
 [assembly: System.Runtime.InteropServices.ComVisibleAttribute(false)]
 [assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.7", FrameworkDisplayName=".NET Framework 4.7")]
-
-
 public class static ModuleInitializer
 {
     public static void Initialize() { }
 }
 namespace Orc.Skia
 {
-    
     public class static AlphaBlendingHelper
     {
         public const byte FullyOpaqueAlpha = 255;
@@ -102,7 +99,7 @@ namespace Orc.Skia
         protected SkiaSharp.SKImageInfo GetImageInfo() { }
         public System.Windows.Rect GetSurfaceBoundary() { }
         protected virtual void Initialize() { }
-        protected virtual void Invalidate() { }
+        public virtual void Invalidate() { }
         protected void InvalidateBitmap(SkiaSharp.SKCanvas canvas) { }
         protected virtual bool IsRenderingAllowed() { }
         protected virtual void OnRendered(SkiaSharp.SKCanvas canvas) { }
@@ -147,7 +144,6 @@ namespace Orc.Skia
 }
 namespace Orc.Skia.Coloring
 {
-    
     public class ColorGenerator : Orc.Skia.Coloring.IColorGenerator
     {
         public const string DefaultFalseValue = "false";

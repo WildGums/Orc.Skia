@@ -13,7 +13,9 @@ namespace Orc.Skia.Example.Controls
     using Windows.UI.Xaml;
     using Windows.UI.Xaml.Controls;
     using UiEventArgs = Windows.UI.Xaml.RoutedEventArgs;
-#else
+#endif
+
+#if NET
     using System.Windows;
     using System.Windows.Controls;
     using UiEventArgs = System.EventArgs;
