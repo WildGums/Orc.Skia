@@ -1,3 +1,4 @@
+Information("Running target '{0}'", target);
 Information("Using output directory '{0}'", outputRootDirectory);
 
 //-------------------------------------------------------------
