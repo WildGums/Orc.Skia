@@ -9,8 +9,6 @@
     <Import_RootNamespace>Orc.Skia.Tests</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\SolutionAssemblyInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\GlobalSuppressions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GlobalInitialization.approvaltests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PublicApiFacts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\DummyFacts.cs" />
