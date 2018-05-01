@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net46;net47;uap10.0</TargetFrameworks>
     <AssemblyName>Orc.Skia</AssemblyName>
@@ -12,14 +12,15 @@
 
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.2" PrivateAssets="All" />
-    <PackageReference Include="Catel.Core" Version="5.3.0" />
+    <PackageReference Include="Catel.Core" Version="5.4.0" />
     <PackageReference Include="Catel.Fody" Version="3.3.0" PrivateAssets="all" />
     <PackageReference Include="Fody" Version="3.0.3" PrivateAssets="all" />
     <PackageReference Include="ModuleInit.Fody" Version="1.8.0" PrivateAssets="all" />
     <PackageReference Include="MethodTimer.Fody" Version="2.1.0" PrivateAssets="all" />
     <PackageReference Include="Obsolete.Fody" Version="4.4.0" PrivateAssets="all" />
+    <PackageReference Include="runtime.native.System.IO.Compression" Version="4.3.1" />
     <PackageReference Include="SkiaSharp" Version="1.60.0" />
-    <PackageReference Include="WpfAnalyzers" Version="2.1.2" PrivateAssets="all" />
+    <PackageReference Include="WpfAnalyzers" Version="2.1.2.1" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
