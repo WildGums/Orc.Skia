@@ -4,6 +4,7 @@
     <AssemblyName>Orc.Skia.Example.NET</AssemblyName>
     <RootNamespace>Orc.Skia.Example</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
+    <SonarQubeExclude>true</SonarQubeExclude>
   </PropertyGroup>
 
   <PropertyGroup>
