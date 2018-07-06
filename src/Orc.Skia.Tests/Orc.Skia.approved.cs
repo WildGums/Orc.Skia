@@ -32,7 +32,7 @@ namespace Orc.Skia
         public static uint Compute(byte[] buffer) { }
         public static uint Compute(uint seed, byte[] buffer) { }
         public static uint Compute(uint polynomial, uint seed, byte[] buffer) { }
-        protected override void HashCore(byte[] buffer, int start, int length) { }
+        protected override void HashCore(byte[] array, int ibStart, int cbSize) { }
         protected override byte[] HashFinal() { }
         public override void Initialize() { }
     }
@@ -84,7 +84,7 @@ namespace Orc.Skia
         public static void DrawLine(this SkiaSharp.SKCanvas canvas, System.Windows.Point begin, System.Windows.Point end, SkiaSharp.SKPaint paint) { }
         public static void DrawLineThroughPoints(this SkiaSharp.SKCanvas canvas, System.Collections.Generic.IEnumerable<System.Windows.Point> points, SkiaSharp.SKPaint paint) { }
         public static void DrawText(this SkiaSharp.SKCanvas canvas, string line, System.Windows.Rect rect, System.Windows.Media.Color color, float fontSize = 14, double width = 4, System.Nullable<double> lineSpacing = null, SkiaSharp.SKTextAlign textAlign = 0, bool clip = True) { }
-        public static void DrawText(this SkiaSharp.SKCanvas canvas, System.Collections.Generic.List<string> lines, System.Windows.Rect rect, System.Windows.Media.Color color, float fontSize = 14, double width = 4, System.Nullable<double> lineSpacing = null, SkiaSharp.SKTextAlign textAlign = 0, bool clip = True) { }
+        public static void DrawText(this SkiaSharp.SKCanvas canvas, string[] lines, System.Windows.Rect rect, System.Windows.Media.Color color, float fontSize = 14, double width = 4, System.Nullable<double> lineSpacing = null, SkiaSharp.SKTextAlign textAlign = 0, bool clip = True) { }
         public static void DrawVerticalLine(this SkiaSharp.SKCanvas canvas, System.Windows.Point begin, System.Windows.Point end, SkiaSharp.SKPaint paint) { }
         public static System.Windows.Rect MeasureTextBounds(this SkiaSharp.SKCanvas canvas, string text, System.Windows.Media.Color color, float fontSize = 14, double width = 4, SkiaSharp.SKTextAlign textAlign = 0) { }
     }
@@ -159,10 +159,10 @@ namespace Orc.Skia.Coloring
         protected virtual bool IsFalse(string strValue) { }
         protected virtual bool IsTrue(string strValue) { }
     }
-    public struct ColorHSB
+    public struct ColorHsb
     {
-        public static readonly Orc.Skia.Coloring.ColorHSB Empty;
-        public ColorHSB(double h, double s, double b) { }
+        public static readonly Orc.Skia.Coloring.ColorHsb Empty;
+        public ColorHsb(double h, double s, double b) { }
         public double Brightness { get; set; }
         public double Hue { get; set; }
         public double Saturation { get; set; }
@@ -177,7 +177,7 @@ namespace Orc.Skia.Coloring
         public static System.Windows.Media.Color HSBToRGB(double h, double s, double b) { }
         public static bool IsDarkColor(this System.Windows.Media.Color color) { }
         public static System.Windows.Media.Color MakeColorMoreSaturated(this System.Windows.Media.Color color, double coeficient) { }
-        public static Orc.Skia.Coloring.ColorHSB RGBToHSB(int red, int green, int blue) { }
+        public static Orc.Skia.Coloring.ColorHsb RGBToHSB(int red, int green, int blue) { }
         public static System.Windows.Media.Color SetBrightness(this System.Windows.Media.Color color, float brightness) { }
         public static System.Windows.Media.Color ToColor(this int colorAsInt) { }
         public static double ToGrayScale(this System.Windows.Media.Color color) { }

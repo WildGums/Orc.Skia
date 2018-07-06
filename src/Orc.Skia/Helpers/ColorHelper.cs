@@ -15,7 +15,7 @@ namespace Orc.Skia
     using System.Windows.Media;
 #endif
 
-    internal class ColorHelper
+    internal static class ColorHelper
     {
         public static uint GetAlpha(int color)
         {

@@ -28,6 +28,7 @@ namespace Orc.Skia
     using System.Windows.Controls;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
+    using Catel;
 #endif
 
     /// <summary>
@@ -110,40 +111,40 @@ namespace Orc.Skia
                 using (new BitmapLockScope(_bitmap))
                 {
 #endif
-                using (var surface = SKSurface.Create(info, _pixels, info.Width * 4))
-                {
-                    var canvas = surface.Canvas;
-
-                    if (!_ignorePixelScaling)
+                    using (var surface = SKSurface.Create(info, _pixels, info.Width * 4))
                     {
-                        var matrix = canvas.TotalMatrix;
+                        var canvas = surface.Canvas;
 
-                        matrix.ScaleX = 1.0f * (float)_dpiX;
-                        matrix.ScaleY = 1.0f * (float)_dpiY;
+                        if (!_ignorePixelScaling)
+                        {
+                            var matrix = canvas.TotalMatrix;
 
-                        canvas.SetMatrix(matrix);
+                            matrix.ScaleX = 1.0f * (float)_dpiX;
+                            matrix.ScaleY = 1.0f * (float)_dpiY;
+
+                            canvas.SetMatrix(matrix);
+                        }
+
+                        if (!IsRenderingAllowed() || _isRendering)
+                        {
+                            return;
+                        }
+
+                        using (new RenderingScope(this, canvas))
+                        {
+                            var eventArgs = new CanvasRenderingEventArgs(canvas);
+
+                            OnRendering(canvas);
+                            Rendering?.Invoke(this, eventArgs);
+
+                            Render(canvas, isClearCanvas);
+
+                            Rendered?.Invoke(this, eventArgs);
+                            OnRendered(canvas);
+                        }
+
+                        InvalidateBitmap(canvas);
                     }
-
-                    if (!IsRenderingAllowed() || _isRendering)
-                    {
-                        return;
-                    }
-
-                    using (new RenderingScope(this, canvas))
-                    {
-                        var eventArgs = new CanvasRenderingEventArgs(canvas);
-
-                        OnRendering(canvas);
-                        Rendering?.Invoke(this, eventArgs);
-
-                        Render(canvas, isClearCanvas);
-
-                        Rendered?.Invoke(this, eventArgs);
-                        OnRendered(canvas);
-                    }
-
-                    InvalidateBitmap(canvas);
-                }
 #if NET
                 }
 #endif
@@ -345,37 +346,28 @@ namespace Orc.Skia
 
         #region Nested classes
 #if NET
-        private class BitmapLockScope : IDisposable
+        private class BitmapLockScope : Disposable
         {
-            #region Fields
             private readonly WriteableBitmap _bitmap;
-            #endregion
 
-            #region Constructors
             public BitmapLockScope(WriteableBitmap bitmap)
             {
                 _bitmap = bitmap;
                 _bitmap.Lock();
             }
-            #endregion
 
-            #region IDisposable Members
-            public void Dispose()
+            protected override void DisposeManaged()
             {
                 _bitmap.Unlock();
             }
-            #endregion
         }
 #endif
 
-        private class RenderingScope : IDisposable
+        private class RenderingScope : Disposable
         {
-            #region Fields
             private readonly SkiaCanvas _canvas;
             private readonly SKCanvas _skCanvas;
-            #endregion
 
-            #region Constructors
             public RenderingScope(SkiaCanvas canvas, SKCanvas skCanvas)
             {
                 _canvas = canvas;
@@ -383,10 +375,8 @@ namespace Orc.Skia
                 canvas._isRendering = true;
                 canvas._renderScopeCounter++;
             }
-            #endregion
 
-            #region IDisposable Members
-            public void Dispose()
+            protected override void DisposeManaged()
             {
                 _canvas._isRendering = false;
                 if (_canvas._renderScopeCounter == 0)
@@ -401,7 +391,6 @@ namespace Orc.Skia
 
                 _canvas.InvalidateBitmap(_skCanvas);
             }
-            #endregion
         }
         #endregion
     }

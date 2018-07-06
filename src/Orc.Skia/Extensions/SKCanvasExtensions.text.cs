@@ -40,7 +40,7 @@ namespace Orc.Skia
             DrawText(canvas, line.SplitLines(), rect, color, fontSize, width, lineSpacing, textAlign);
         }
 
-        public static void DrawText(this SKCanvas canvas, List<string> lines, Rect rect, Color color, float fontSize = DefaultFontSize, 
+        public static void DrawText(this SKCanvas canvas, string[] lines, Rect rect, Color color, float fontSize = DefaultFontSize, 
             double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
         {
             if (lines == null)
@@ -55,7 +55,7 @@ namespace Orc.Skia
             var begin = rect.GetTopLeft();
             var currentPoint = begin;
 
-            for (var i = 0; i < lines.Count; i++)
+            for (var i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
                 var lineHeight = 0f;

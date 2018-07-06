@@ -13,16 +13,18 @@ namespace Orc.Skia
 
     internal static class StringExtensions
     {
+        private static readonly string[] LineSplitters = new[] { "\r\n", "\r", "\n" };
+
         #region Methods
-        internal static List<string> SplitLines(this string text)
+        internal static string[] SplitLines(this string text)
         {
             if (text == null)
             {
-                return null;
+                return Array.Empty<string>();
             }
 
-            var lines = text.Split(new[] {"\r\n", "\r", "\n"}, StringSplitOptions.None);
-            return lines.ToList();
+            var lines = text.Split(LineSplitters, StringSplitOptions.None);
+            return lines;
         }
         #endregion
     }

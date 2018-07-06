@@ -129,12 +129,12 @@ namespace Orc.Skia
         /// <summary>
         /// The hash core.
         /// </summary>
-        /// <param name="buffer">The buffer.</param>
-        /// <param name="start">The start.</param>
-        /// <param name="length">The length.</param>
-        protected override void HashCore(byte[] buffer, int start, int length)
+        /// <param name="array">The buffer.</param>
+        /// <param name="ibStart">The start.</param>
+        /// <param name="cbSize">The length.</param>
+        protected override void HashCore(byte[] array, int ibStart, int cbSize)
         {
-            _hash = ToNewRangeHash(_table, _hash, buffer, start, length);
+            _hash = ToNewRangeHash(_table, _hash, array, ibStart, cbSize);
         }
 
         /// <summary>

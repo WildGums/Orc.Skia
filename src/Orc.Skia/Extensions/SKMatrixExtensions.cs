@@ -18,11 +18,5 @@ namespace Orc.Skia
 
     public static class SKMatrixExtensions
     {
-        //public static Matrix ToMatrix(this SKMatrix matrix)
-        //{
-        //    return new Matrix(matrix.);
-
-        //    return new Rect(matrix.Location.ToPoint(), matrix.Size.ToSize());
-        //}
     }
 }

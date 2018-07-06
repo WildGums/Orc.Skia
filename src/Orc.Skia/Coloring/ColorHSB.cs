@@ -15,13 +15,13 @@ namespace Orc.Skia.Coloring
     /// <summary>
     /// Structure to define HSB.
     /// </summary>
-    public struct ColorHSB
+    public struct ColorHsb
     {
         #region Constants
         /// <summary>
         /// Gets an empty HSB structure.
         /// </summary>
-        public static readonly ColorHSB Empty = new ColorHSB();
+        public static readonly ColorHsb Empty = new ColorHsb();
         #endregion
 
         #region Fields
@@ -37,7 +37,7 @@ namespace Orc.Skia.Coloring
         /// <param name="h">Hue value.</param>
         /// <param name="s">Saturation value.</param>
         /// <param name="b">Brightness value.</param>
-        public ColorHSB(double h, double s, double b)
+        public ColorHsb(double h, double s, double b)
         {
             _hue = (h > 360) ? 360 : ((h < 0) ? 0 : h);
             _saturation = (s > 1) ? 1 : ((s < 0) ? 0 : s);
@@ -81,7 +81,7 @@ namespace Orc.Skia.Coloring
         /// <param name="item1">First color.</param>
         /// <param name="item2">Second color.</param>
         /// <returns></returns>
-        public static bool operator !=(ColorHSB item1, ColorHSB item2)
+        public static bool operator !=(ColorHsb item1, ColorHsb item2)
         {
             return (
                 item1.Hue != item2.Hue
@@ -96,7 +96,7 @@ namespace Orc.Skia.Coloring
         /// <param name="item1">First color.</param>
         /// <param name="item2">Second color.</param>
         /// <returns></returns>
-        public static bool operator ==(ColorHSB item1, ColorHSB item2)
+        public static bool operator ==(ColorHsb item1, ColorHsb item2)
         {
             return (
                 item1.Hue == item2.Hue
@@ -117,7 +117,7 @@ namespace Orc.Skia.Coloring
                 return false;
             }
 
-            return (this == (ColorHSB) obj);
+            return (this == (ColorHsb) obj);
         }
 
         /// <summary>

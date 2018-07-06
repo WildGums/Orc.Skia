@@ -1,5 +1,5 @@
-// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ColorsEtensions.cs" company="WildGums">
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ColorsExtensions.cs" company="WildGums">
 //   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -141,7 +141,6 @@ namespace Orc.Skia.Coloring
         /// <returns></returns>
         public static float GetPerceptiveLuminance(this Color color)
         {
-            //return 1 - (0.299f*color.R + 0.587f*color.G + 0.114f*color.B)/255;
             return 1 - (0.255f * color.R + 0.655f * color.G + 0.09f * color.B) / 255;
         }
 
@@ -182,7 +181,7 @@ namespace Orc.Skia.Coloring
         /// <summary>
         /// Converts RGB to HSB.
         /// </summary>
-        public static ColorHSB RGBToHSB(int red, int green, int blue)
+        public static ColorHsb RGBToHSB(int red, int green, int blue)
         {
             // normalize red, green and blue values
             var r = (red / 255.0);
@@ -198,7 +197,7 @@ namespace Orc.Skia.Coloring
             {
                 h = 60 * (g - b) / (max - min);
             }
-            else if (max == r && g < b)
+            else if (max == r)
             {
                 h = 60 * (g - b) / (max - min) + 360;
             }
@@ -213,7 +212,7 @@ namespace Orc.Skia.Coloring
 
             var s = (max == 0) ? 0.0 : (1.0 - (min / max));
 
-            return new ColorHSB(h, s, max);
+            return new ColorHsb(h, s, max);
         }
 
         /// <summary>
