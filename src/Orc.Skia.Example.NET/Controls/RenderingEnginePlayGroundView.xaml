@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="Orc.Skia.Example.Controls.RenderingEnginePlayGroundView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:skia="clr-namespace:Orc.Skia;assembly=Orc.Skia"
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="600">
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Background="SlateGray" Orientation="Vertical">
+            <Button Margin="12" Height="36" Content="Clear All" Click="Clear" />
+            <Button Margin="12" Height="36" Content="Draw line 1px width" Click="OnDraw1pxLineClick" />
+            <Button Margin="12" Height="36" Content="Draw line 10px width" Click="OnDraw10pxLineClick" />
+            <Button Margin="12" Height="36" Content="1px width without transform matrix" Click="OnDraw1pxWithoutTransformClick" />
+            <Button Margin="12" Height="36" Content="1px width with transform matrix" Click="OnDraw1pxWithTransformClick" />
+        </StackPanel>
+
+        <skia:SkiaCanvas Name="skiaCanvas" Grid.Column="1" />
+    </Grid>
+</UserControl>
