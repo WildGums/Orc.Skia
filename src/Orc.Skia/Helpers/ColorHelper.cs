@@ -9,9 +9,7 @@ namespace Orc.Skia
 {
 #if NETFX_CORE
     using Windows.UI;
-#endif
-
-#if NET
+#else
     using System.Windows.Media;
 #endif
 

@@ -13,7 +13,7 @@ namespace Orc.Skia.Coloring
     using Windows.UI;
 #endif
 
-#if NET
+#if NET || NETCORE
     using System.Windows.Media;
 #endif
 
