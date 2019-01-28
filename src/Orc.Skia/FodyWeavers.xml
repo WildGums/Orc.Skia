@@ -6,13 +6,13 @@
   <Catel />
   <Costura>
     <IncludeAssemblies>
-      SkiaSharp
-    </IncludeAssemblies>
+            SkiaSharp
+        </IncludeAssemblies>
     <Unmanaged32Assemblies>
-      libSkiaSharp
-    </Unmanaged32Assemblies>
+            libSkiaSharp
+        </Unmanaged32Assemblies>
     <Unmanaged64Assemblies>
-      libSkiaSharp
-    </Unmanaged64Assemblies>
+            libSkiaSharp
+        </Unmanaged64Assemblies>
   </Costura>
 </Weavers>
