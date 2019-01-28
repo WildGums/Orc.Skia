@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Weavers VerifyAssembly="true" VerifyIgnoreCodes="0x80131252,0x80131869">
-  <ModuleInit/>
-  <MethodTimer/>
-  <Obsolete/>
+<Weavers VerifyAssembly="true" VerifyIgnoreCodes="0x80131252,0x80131869,0x80131040" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <ModuleInit />
+  <MethodTimer />
+  <Obsolete />
   <Catel />
-    <Costura>
-        <IncludeAssemblies>
+  <Costura>
+    <IncludeAssemblies>
             SkiaSharp
         </IncludeAssemblies>
-        <Unmanaged32Assemblies>
+    <Unmanaged32Assemblies>
             libSkiaSharp
         </Unmanaged32Assemblies>
-        <Unmanaged64Assemblies>
+    <Unmanaged64Assemblies>
             libSkiaSharp
         </Unmanaged64Assemblies>
-    </Costura>
+  </Costura>
 </Weavers>
