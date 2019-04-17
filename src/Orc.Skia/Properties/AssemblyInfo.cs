@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AssemblyInfo.cs" company="WildGums">
 //   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
 // </copyright>
@@ -8,7 +8,7 @@
 using System.Reflection;
 using System.Resources;
 
-#if NET
+#if NET || NETCORE
 using System.Windows;
 using System.Windows.Markup;
 #endif
@@ -20,7 +20,7 @@ using System.Windows.Markup;
 [assembly: AssemblyDescription("Orc.Skia library")]
 [assembly: NeutralResourcesLanguage("en-US")]
 
-#if NET
+#if NET || NETCORE
 [assembly: XmlnsPrefix("http://schemas.wildgums.com/orc/skia", "orcskia")]
 [assembly: XmlnsDefinition("http://schemas.wildgums.com/orc/skia", "Orc.Skia")]
 //[assembly: XmlnsDefinition("http://schemas.wildgums.com/orc/skia", "Orc.Skia.Behaviors")]

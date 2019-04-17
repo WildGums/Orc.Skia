@@ -7,7 +7,7 @@
     <Authors>wildgums</Authors>
     <PackageIconUrl>https://github.com/WildGums/Assets/raw/master/packages/logo.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/WildGums/Orc.Skia</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/WildGums/Orc.Skia/blob/develop/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/WildGums/Orc.Skia</RepositoryUrl>
   </PropertyGroup>
    

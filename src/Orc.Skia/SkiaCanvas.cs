@@ -21,9 +21,7 @@ namespace Orc.Skia
     using Windows.UI.Xaml.Controls;
     using Windows.UI.Xaml.Media;
     using Windows.UI.Xaml.Media.Imaging;
-#endif
-
-#if NET
+#else
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media;
@@ -107,7 +105,7 @@ namespace Orc.Skia
                     CreateBitmap(info);
                 }
 
-#if NET
+#if NET || NETCORE
                 using (new BitmapLockScope(_bitmap))
                 {
 #endif
@@ -145,7 +143,7 @@ namespace Orc.Skia
 
                         InvalidateBitmap(canvas);
                     }
-#if NET
+#if NET || NETCORE
                 }
 #endif
             }
@@ -175,7 +173,7 @@ namespace Orc.Skia
 
 #if NETFX_CORE
         private void OnCompositionTargetRendering(object sender, object e)
-#elif NET
+#elif NET || NETCORE
         private void OnCompositionTargetRendering(object sender, EventArgs e)
 #else
         TARGET PLATFORM NOT YET SUPPORTED
@@ -199,7 +197,7 @@ namespace Orc.Skia
 #if NETFX_CORE
             var display = DisplayInformation.GetForCurrentView();
             _dpiX = _dpiY = display.LogicalDpi / 96.0f;
-#elif NET
+#elif NET || NETCORE
             var source = PresentationSource.FromVisual(this);
             if (source != null)
             {
@@ -287,7 +285,7 @@ namespace Orc.Skia
 
         protected void InvalidateBitmap(SKCanvas canvas)
         {
-#if NET
+#if NET || NETCORE
             var clipDeviceBounds = canvas.DeviceClipBounds.ToRect();
             _bitmap.AddDirtyRect(clipDeviceBounds.ToInt32Rect());
 #elif NETFX_CORE
@@ -306,7 +304,7 @@ namespace Orc.Skia
 #if NETFX_CORE
                 _bitmap = new WriteableBitmap(info.Width, info.Height);
                 _pixels = _bitmap.GetPixels();
-#elif NET
+#elif NET || NETCORE
                 _bitmap = new WriteableBitmap(info.Width, info.Height, 96d, 96d, PixelFormats.Bgra32, BitmapPalettes.Halftone256Transparent);
                 _pixels = _bitmap.BackBuffer;
 #else
@@ -345,7 +343,7 @@ namespace Orc.Skia
         #endregion
 
         #region Nested classes
-#if NET
+#if NET || NETCORE
         private class BitmapLockScope : Disposable
         {
             private readonly WriteableBitmap _bitmap;

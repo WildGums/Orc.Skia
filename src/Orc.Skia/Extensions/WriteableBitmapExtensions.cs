@@ -13,9 +13,7 @@ namespace Orc.Skia
     using Interop;
     using Windows.Foundation;
     using Windows.UI.Xaml.Media.Imaging;
-#endif
-
-#if NET
+#else
     using System.Windows.Media.Imaging;
 #endif
 

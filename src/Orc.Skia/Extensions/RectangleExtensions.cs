@@ -24,7 +24,7 @@ namespace Orc.Skia
     public static class RectangleExtensions
     {
         #region Methods
-#if NET
+#if NET || NETCORE
         public static Int32Rect ToInt32Rect(this Rect rect)
         {
             var int32Rect = new Int32Rect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
