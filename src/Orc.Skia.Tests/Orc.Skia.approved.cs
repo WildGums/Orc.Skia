@@ -94,6 +94,8 @@ namespace Orc.Skia
     }
     public class SkiaCanvas : System.Windows.Controls.Canvas
     {
+        protected double DpiX;
+        protected double DpiY;
         public SkiaCanvas() { }
         public bool IgnorePixelScaling { get; set; }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
@@ -111,6 +113,7 @@ namespace Orc.Skia
         protected virtual void Resize() { }
         protected virtual void Terminate() { }
         public void Update() { }
+        protected void Update2() { }
     }
     public class static SkiaEnvironment { }
     public class SkiaException : System.Exception
