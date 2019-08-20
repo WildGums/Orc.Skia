@@ -99,7 +99,7 @@ namespace Orc.Skia
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            //Invalidate();
+            Invalidate();
         }
 
 #if NETFX_CORE
