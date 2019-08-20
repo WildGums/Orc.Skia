@@ -250,7 +250,7 @@ namespace Orc.Skia
         {
             FreeBitmap();
 
-           // Update();
+            Update();
         }
 
         protected virtual bool IsRenderingAllowed()
