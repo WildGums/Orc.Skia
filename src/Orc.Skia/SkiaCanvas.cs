@@ -12,7 +12,6 @@ namespace Orc.Skia
 {
     using System;
     using SkiaSharp;
-
 #if NETFX_CORE
     using Windows.Foundation;
     using Windows.Graphics.Display;
@@ -44,8 +43,8 @@ namespace Orc.Skia
         private IntPtr _pixels;
         private WriteableBitmap _bitmap;
 
-        private double _dpiX;
-        private double _dpiY;
+        protected double DpiX;
+        protected double DpiY;
         private bool _ignorePixelScaling;
 
         private DateTime _lastTime = DateTime.Now;
@@ -92,7 +91,7 @@ namespace Orc.Skia
 
             lock (_syncObject)
             {
-                if (_dpiX == 0 || _dpiY == 0)
+                if (DpiX == 0 || DpiY == 0)
                 {
                     RecalculateDpi();
                 }
@@ -117,8 +116,8 @@ namespace Orc.Skia
                         {
                             var matrix = canvas.TotalMatrix;
 
-                            matrix.ScaleX = 1.0f * (float)_dpiX;
-                            matrix.ScaleY = 1.0f * (float)_dpiY;
+                            matrix.ScaleX = 1.0f * (float)DpiX;
+                            matrix.ScaleY = 1.0f * (float)DpiY;
 
                             canvas.SetMatrix(matrix);
                         }
@@ -153,6 +152,8 @@ namespace Orc.Skia
         {
             var info = GetImageInfo();
 
+        //  var info = _skImageInfo;
+
             return new Rect(new Point(0, 0), new Point(info.Width, info.Height));
         }
 
@@ -168,7 +169,8 @@ namespace Orc.Skia
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Invalidate();
+            Update2();
+            //    Invalidate();
         }
 
 #if NETFX_CORE
@@ -184,15 +186,111 @@ namespace Orc.Skia
                 return;
             }
 
-            Update();
+            Update2();
 
             _lastTime = DateTime.Now;
         }
 
+        private SKImageInfo _skImageInfo;
+
+        protected void Update2()
+        {
+            if (Visibility != Visibility.Visible)
+            {
+                return;
+            }
+
+            var size = CreateSize(out var scaleX, out var scaleY);
+            if (size.Width <= 0 || size.Height <= 0)
+            {
+                return;
+            }
+
+            _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+
+            var isClearCanvas = false;
+            if (_bitmap == null || _skImageInfo.Width != _bitmap.PixelWidth || _skImageInfo.Height != _bitmap.PixelHeight)
+            {
+                isClearCanvas = true;
+                _bitmap = new WriteableBitmap(_skImageInfo.Width, _skImageInfo.Height, 96 * scaleX, 96 * scaleY, PixelFormats.Pbgra32, null);
+            }
+
+            // draw on the bitmap
+            _bitmap.Lock();
+            using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+            {
+                var canvas = surface.Canvas;
+                using (new RenderingScope(this, canvas))
+                {
+                    var eventArgs = new CanvasRenderingEventArgs(canvas);
+
+                    OnRendering(canvas);
+                    Rendering?.Invoke(this, eventArgs);
+
+                    Render(canvas, isClearCanvas);
+
+                    Rendered?.Invoke(this, eventArgs);
+                    OnRendered(canvas);
+                }
+            }
+
+            // draw the bitmap to the screen
+            _bitmap.AddDirtyRect(new Int32Rect(0, 0, size.Width, size.Height));
+            _bitmap.Unlock();
+
+            if (isClearCanvas)
+            {
+                var brush = new ImageBrush
+                {
+                    ImageSource = _bitmap,
+                    AlignmentX = AlignmentX.Left,
+                    AlignmentY = AlignmentY.Top,
+                    Stretch = Stretch.Fill
+                };
+
+                SetValue(BackgroundProperty, brush);
+            }
+        }
+
+        private SKSizeI CreateSize(out double scaleX, out double scaleY)
+        {
+            scaleX = 1.0;
+            scaleY = 1.0;
+
+            var w = ActualWidth;
+            var h = ActualHeight;
+
+            if (!IsPositive(w) || !IsPositive(h))
+            {
+                return SKSizeI.Empty;
+            }
+
+            if (IgnorePixelScaling)
+            {
+                return new SKSizeI((int)w, (int)h);
+            }
+
+            var transformDevice = PresentationSource.FromVisual(this)?.CompositionTarget.TransformToDevice;
+            if (transformDevice == null)
+            {
+                return new SKSizeI((int)w, (int)h);
+            }
+
+            var m = (Matrix)transformDevice;
+            scaleX = m.M11;
+            scaleY = m.M22;
+            return new SKSizeI((int)(w * scaleX), (int)(h * scaleY));
+
+            bool IsPositive(double value)
+            {
+                return !double.IsNaN(value) && !double.IsInfinity(value) && value > 0;
+            }
+        }
+        
         protected virtual bool RecalculateDpi()
         {
-            var previousDpiX = _dpiX;
-            var previousDpiY = _dpiY;
+            var previousDpiX = DpiX;
+            var previousDpiY = DpiY;
 
 #if NETFX_CORE
             var display = DisplayInformation.GetForCurrentView();
@@ -203,15 +301,15 @@ namespace Orc.Skia
             {
                 var transformToDevice = source.CompositionTarget.TransformToDevice;
 
-                _dpiX = transformToDevice.M11;
-                _dpiY = transformToDevice.M22;
+                DpiX = transformToDevice.M11;
+                DpiY = transformToDevice.M22;
             }
 #else
             TARGET PLATFORM NOT YET SUPPORTED
 #endif
 
-            if (Math.Abs(_dpiX - previousDpiX) > 0.1d ||
-                Math.Abs(_dpiY - previousDpiY) > 0.1d)
+            if (Math.Abs(DpiX - previousDpiX) > 0.1d ||
+                Math.Abs(DpiY - previousDpiY) > 0.1d)
             {
                 return true;
             }
@@ -223,7 +321,7 @@ namespace Orc.Skia
         {
             FreeBitmap();
 
-            Update();
+            Update2();
         }
 
         protected virtual bool IsRenderingAllowed()
@@ -233,24 +331,26 @@ namespace Orc.Skia
 
         protected SKImageInfo GetImageInfo()
         {
-            int width, height;
-            if (_ignorePixelScaling)
-            {
-                width = (int)ActualWidth;
-                height = (int)ActualHeight;
-            }
-            else
-            {
-                width = (int)(ActualWidth * _dpiX);
-                height = (int)(ActualHeight * _dpiY);
-            }
 
-            if (width == 0 || height == 0)
-            {
-                return new SKImageInfo();
-            }
+            return _skImageInfo;
+            //int width, height;
+            //if (_ignorePixelScaling)
+            //{
+            //    width = (int)ActualWidth;
+            //    height = (int)ActualHeight;
+            //}
+            //else
+            //{
+            //    width = (int)(ActualWidth * _dpiX);
+            //    height = (int)(ActualHeight * _dpiY);
+            //}
 
-            return new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+            //if (width == 0 || height == 0)
+            //{
+            //    return new SKImageInfo();
+            //}
+
+            //return new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
         }
 
         protected virtual void Render(SKCanvas canvas, bool isClearCanvas)
@@ -316,15 +416,15 @@ namespace Orc.Skia
                     ImageSource = _bitmap,
                     AlignmentX = AlignmentX.Left,
                     AlignmentY = AlignmentY.Top,
-                    Stretch = Stretch.None
+                    Stretch = Stretch.Fill
                 };
 
-                if (!_ignorePixelScaling)
+                if (IgnorePixelScaling)
                 {
                     var matrix = new ScaleTransform
                     {
-                        ScaleX = 1.0 / _dpiX,
-                        ScaleY = 1.0 / _dpiY
+                        ScaleX = 1.0 / DpiX,
+                        ScaleY = 1.0 / DpiY
                     };
 
                     brush.Transform = matrix;
