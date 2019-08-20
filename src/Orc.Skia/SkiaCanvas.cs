@@ -144,7 +144,7 @@ namespace Orc.Skia
                     _bitmap = new WriteableBitmap(_skImageInfo.Width, _skImageInfo.Height, 96 * scaleX, 96 * scaleY, PixelFormats.Pbgra32, null);
                 }
 
-                if (!IsRenderingAllowed() || _isRendering)
+                if (!isClearCanvas && (!IsRenderingAllowed() || _isRendering))
                 {
                     return;
                 }
