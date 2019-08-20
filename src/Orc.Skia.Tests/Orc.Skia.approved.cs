@@ -113,7 +113,6 @@ namespace Orc.Skia
         protected virtual void Resize() { }
         protected virtual void Terminate() { }
         public void Update() { }
-        protected void Update2() { }
     }
     public class static SkiaEnvironment { }
     public class SkiaException : System.Exception
