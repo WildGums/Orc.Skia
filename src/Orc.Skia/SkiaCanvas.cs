@@ -36,7 +36,7 @@ namespace Orc.Skia
     public class SkiaCanvas : Canvas
     {
         #region Fields
-        private readonly TimeSpan _frameDelay = TimeSpan.FromMilliseconds(10000);
+        private readonly TimeSpan _frameDelay = TimeSpan.FromMilliseconds(5);
         private readonly object _syncObject = new object();
 
         protected double DpiX;
