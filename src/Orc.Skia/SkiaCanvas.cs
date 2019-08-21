@@ -174,7 +174,13 @@ namespace Orc.Skia
 
                 if (isClearCanvas)
                 {
-                    var brush = new ImageBrush {ImageSource = _bitmap, AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top, Stretch = Stretch.Fill};
+                    var brush = new ImageBrush
+                    {
+                        ImageSource = _bitmap,
+                        AlignmentX = AlignmentX.Left,
+                        AlignmentY = AlignmentY.Top,
+                        Stretch = Stretch.None
+                    };
 
                     SetValue(BackgroundProperty, brush);
                 }
