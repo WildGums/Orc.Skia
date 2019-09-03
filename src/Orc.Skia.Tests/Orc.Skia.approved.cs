@@ -94,6 +94,8 @@ namespace Orc.Skia
     }
     public class SkiaCanvas : System.Windows.Controls.Canvas
     {
+        protected double DpiX;
+        protected double DpiY;
         public SkiaCanvas() { }
         public bool IgnorePixelScaling { get; set; }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
