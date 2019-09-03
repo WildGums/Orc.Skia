@@ -99,6 +99,7 @@ namespace Orc.Skia
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
+            RecalculateDpi();
             Invalidate();
         }
 
@@ -135,12 +136,11 @@ namespace Orc.Skia
                     return;
                 }
 
-                _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
-
                 var isClearCanvas = false;
-                if (_bitmap == null || _skImageInfo.Width != _bitmap.PixelWidth || _skImageInfo.Height != _bitmap.PixelHeight)
+                if (_bitmap == null || size.Width != _bitmap.PixelWidth || size.Height != _bitmap.PixelHeight)
                 {
                     isClearCanvas = true;
+                    _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
                     _bitmap = new WriteableBitmap(_skImageInfo.Width, _skImageInfo.Height, 96 * scaleX, 96 * scaleY, PixelFormats.Pbgra32, null);
                 }
 
