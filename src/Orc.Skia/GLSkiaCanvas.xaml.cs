@@ -8,6 +8,7 @@
 namespace Orc.Skia
 {
     using System;
+    using System.Windows;
     using System.Windows.Controls;
     using SkiaSharp;
     using SkiaSharp.Views.Desktop;
@@ -28,6 +29,11 @@ namespace Orc.Skia
         public GLSkiaCanvas()
         {
             InitializeComponent();
+
+            Loaded += (s, e) => { // only at this point the control is ready
+                Window.GetWindow(this) // get the parent window
+                    .Closing += (s1, e1) => Dispose(); //disposing logic here
+            };
 
             _glContext.MakeCurrent();
         }
@@ -67,6 +73,13 @@ namespace Orc.Skia
 
             // draw offscreen surface onto screen
             canvas.DrawSurface(_surface, new SKPoint(0f, 0f));
+        }
+
+        private void Dispose()
+        {
+            _surface?.Dispose();
+            _grContext?.Dispose();
+            _glContext.Destroy();
         }
 
         private void DrawOffscreen(SKCanvas canvas, int width, int height)
