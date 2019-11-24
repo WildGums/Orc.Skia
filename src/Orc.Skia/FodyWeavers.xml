@@ -7,6 +7,12 @@
   <Costura>
     <IncludeAssemblies>
             SkiaSharp
+            OpenTK
+            OpenTK.GLControl
+            SkiaSharp.Views.Gtk
+            SkiaSharp.Views.Desktop.Common
+            SkiaSharp.Views.WindowsForms
+            SkiaSharp.Views.WPF
         </IncludeAssemblies>
     <Unmanaged32Assemblies>
             libSkiaSharp

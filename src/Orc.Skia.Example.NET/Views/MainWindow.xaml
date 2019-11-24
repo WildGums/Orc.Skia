@@ -25,6 +25,10 @@
             <TabItem Header="Customized Canvas" Width="183">
                 <controls:CustomizedCanvasView />
             </TabItem>
+
+            <TabItem Header="GL">
+                <controls:GLPerformanceView/>
+            </TabItem>
         </orccontrols:TabControl>
 
     </Grid>
