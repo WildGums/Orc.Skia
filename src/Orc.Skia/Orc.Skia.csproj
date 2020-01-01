@@ -16,6 +16,11 @@
     <ProjectGuid>9A158429-3DC0-4EAE-99EF-82362CD4EAE0</ProjectGuid>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Disable embedding by SkiaSharp itself -->
+    <ShouldIncludeNativeSkiaSharp>false</ShouldIncludeNativeSkiaSharp>
+  </PropertyGroup>
+  
   <ItemGroup>
     <None Remove="costura32\libSkiaSharp.dll" />
     <None Remove="costura64\libSkiaSharp.dll" />
@@ -25,7 +30,7 @@
     <EmbeddedResource Include="costura32\libSkiaSharp.dll" />
     <EmbeddedResource Include="costura64\libSkiaSharp.dll" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Catel.Analyzers" Version="1.0.0" PrivateAssets="all" />
     <PackageReference Include="Catel.Core" Version="5.12.0" />

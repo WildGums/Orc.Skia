@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>net47</TargetFrameworks>
     <AssemblyName>Orc.Skia.Example.NET</AssemblyName>
     <RootNamespace>Orc.Skia.Example</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
