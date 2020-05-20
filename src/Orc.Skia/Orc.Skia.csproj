@@ -17,12 +17,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Disable embedding by SkiaSharp itself -->
-    <ShouldIncludeNativeSkiaSharp>false</ShouldIncludeNativeSkiaSharp>
+    <!-- Disable embedding by SkiaSharp itself. Update 2020-05-20: we no longer use Costura -->
+    <ShouldIncludeNativeSkiaSharp>true</ShouldIncludeNativeSkiaSharp>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Catel.Analyzers" Version="1.0.0" PrivateAssets="all" />
     <PackageReference Include="Catel.Core" Version="5.12.6-beta0005" />
     <PackageReference Include="Catel.Fody" Version="4.4.2" PrivateAssets="all" />
     <PackageReference Include="Costura.Fody" Version="4.1.0" PrivateAssets="all" />
@@ -33,7 +32,6 @@
     <PackageReference Include="MethodTimer.Fody" Version="3.1.2" PrivateAssets="all" />
     <PackageReference Include="Obsolete.Fody" Version="5.2.1" PrivateAssets="all" />
     <PackageReference Include="SkiaSharp" Version="1.68.3" />
-    <PackageReference Include="WpfAnalyzers" Version="3.1.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
