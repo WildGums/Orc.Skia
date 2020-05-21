@@ -17,8 +17,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Disable embedding by SkiaSharp itself. Update 2020-05-20: we no longer use Costura -->
-    <ShouldIncludeNativeSkiaSharp>true</ShouldIncludeNativeSkiaSharp>
+    <!-- 
+      Disable embedding by SkiaSharp itself. We must embed it via Costura,
+      otherwise every app must set this property
+    -->
+    <ShouldIncludeNativeSkiaSharp>false</ShouldIncludeNativeSkiaSharp>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +39,16 @@
 
   <ItemGroup>
     <PackageReference Update="NETStandard.Library" Version="2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="costura32\libSkiaSharp.dll" />
+    <None Remove="costura64\libSkiaSharp.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="costura32\libSkiaSharp.dll" />
+    <EmbeddedResource Include="costura64\libSkiaSharp.dll" />
   </ItemGroup>
 
   <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props')" />
