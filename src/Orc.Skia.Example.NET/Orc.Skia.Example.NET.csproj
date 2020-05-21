@@ -1,10 +1,11 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>Orc.Skia.Example.NET</AssemblyName>
     <RootNamespace>Orc.Skia.Example</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <SonarQubeExclude>true</SonarQubeExclude>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup>
