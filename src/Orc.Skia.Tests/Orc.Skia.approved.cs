@@ -170,8 +170,8 @@ namespace Orc.Skia.Coloring
         public double Saturation { get; set; }
         public override bool Equals(object obj) { }
         public override int GetHashCode() { }
-        public static bool !=(Orc.Skia.Coloring.ColorHsb item1, Orc.Skia.Coloring.ColorHsb item2) { }
-        public static bool ==(Orc.Skia.Coloring.ColorHsb item1, Orc.Skia.Coloring.ColorHsb item2) { }
+        public static bool operator !=(Orc.Skia.Coloring.ColorHsb item1, Orc.Skia.Coloring.ColorHsb item2) { }
+        public static bool operator ==(Orc.Skia.Coloring.ColorHsb item1, Orc.Skia.Coloring.ColorHsb item2) { }
     }
     public enum ColorShade
     {
