@@ -124,7 +124,7 @@ namespace Orc.Skia.Coloring
         {
             var crc32 = new Crc32();
 
-            var bytes = salt == null ?
+            var bytes = salt is null ?
                 Encoding.GetBytes(strValue) :
                 Encoding.GetBytes(salt + strValue);
 
@@ -140,7 +140,7 @@ namespace Orc.Skia.Coloring
         /// <returns></returns>
         protected virtual string ConvertToStringValue(object value)
         {
-            return (value == null) ? _nullValue : value.ToString();
+            return (value is null) ? _nullValue : value.ToString();
         }
 
         /// <summary>

@@ -43,7 +43,7 @@ namespace Orc.Skia
         public static void DrawText(this SKCanvas canvas, string[] lines, Rect rect, Color color, float fontSize = DefaultFontSize, 
             double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
         {
-            if (lines == null)
+            if (lines is null)
             {
                 return;
             }

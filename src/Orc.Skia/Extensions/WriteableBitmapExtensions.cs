@@ -23,7 +23,7 @@ namespace Orc.Skia
         internal static IntPtr GetPixels(this WriteableBitmap bitmap)
         {
             var buffer = bitmap.PixelBuffer as IBufferByteAccess;
-            if (buffer == null)
+            if (buffer is null)
             {
                 throw new InvalidCastException("Unable to convert WriteableBitmap.PixelBuffer to IBufferByteAccess.");
             }

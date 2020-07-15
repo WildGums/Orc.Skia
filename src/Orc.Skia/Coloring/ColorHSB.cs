@@ -112,7 +112,7 @@ namespace Orc.Skia.Coloring
         /// <returns></returns>
         public override bool Equals(Object obj)
         {
-            if (obj == null || GetType() != obj.GetType())
+            if (obj is null || GetType() != obj.GetType())
             {
                 return false;
             }
