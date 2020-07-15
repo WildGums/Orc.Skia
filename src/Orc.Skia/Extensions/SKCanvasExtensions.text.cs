@@ -88,7 +88,7 @@ namespace Orc.Skia
                         lineHeight = bounds.Height;
                     }
 
-                    canvas.DrawPositionedText(charString, new[] { currentPoint.ToSKPoint() }, paint);
+                    canvas.DrawText(charString, currentPoint.X, currentPoint.Y, paint);
 
                     currentPoint.X += bounds.Width;
 
