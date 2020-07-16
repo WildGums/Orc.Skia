@@ -27,7 +27,7 @@ namespace Orc.Skia.Example.Controls
 
         public CustomizedCanvas()
         {
-            this.SubscribeToDependencyProperty("RenderingProgram", OnRenderingProgramChanged);
+            this.SubscribeToDependencyProperty(nameof(RenderingProgram), OnRenderingProgramChanged);
         }
 
         #region Properties
@@ -37,7 +37,7 @@ namespace Orc.Skia.Example.Controls
             set { SetValue(RenderingProgramProperty, value); }
         }
 
-        public static readonly DependencyProperty RenderingProgramProperty = DependencyProperty.Register("RenderingProgram", typeof(string),
+        public static readonly DependencyProperty RenderingProgramProperty = DependencyProperty.Register(nameof(RenderingProgram), typeof(string),
             typeof(CustomizedCanvas), new PropertyMetadata(null));
         #endregion
 

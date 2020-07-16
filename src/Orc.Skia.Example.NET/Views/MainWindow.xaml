@@ -5,10 +5,18 @@
               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
               xmlns:catel="http://schemas.catelproject.com"
               xmlns:orccontrols="http://schemas.wildgums.com/orc/controls"
-              xmlns:controls="clr-namespace:Orc.Skia.Example.Controls"
+              xmlns:controls="clr-namespace:Orc.Skia.Example.Controls" 
+              xmlns:orctheming="http://schemas.wildgums.com/orc/theming"
               mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="400">
 
-    <Grid>
+    <orccontrols:StackGrid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <orctheming:ThemeSwitcherView />
+
         <orccontrols:TabControl LoadTabItems="LazyLoading">
             <TabItem Header="LineCanvas Tests">
                 <controls:LineCanvasView />
@@ -27,6 +35,6 @@
             </TabItem>
         </orccontrols:TabControl>
 
-    </Grid>
+    </orccontrols:StackGrid>
 
 </catel:Window>

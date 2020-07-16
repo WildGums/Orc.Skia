@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="App.xaml.cs" company="WildGums">
 //   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
 // </copyright>
@@ -37,9 +37,9 @@ namespace Orc.Skia.Example
             languageService.PreferredCulture = CultureInfo.CurrentCulture;
             languageService.FallbackCulture = new CultureInfo("en-US");
 
-            base.OnStartup(e);
-
             this.ApplyTheme();
+
+            base.OnStartup(e);
         }
     }
 }

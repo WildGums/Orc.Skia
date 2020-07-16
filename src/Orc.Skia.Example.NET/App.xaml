@@ -1,11 +1,15 @@
-<Application x:Class="Orc.Skia.Example.NET40.App"
+<Application x:Class="Orc.Skia.Example.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="/Views/MainWindow.xaml">
 
     <Application.Resources>
         <ResourceDictionary>
-            
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="AccentColorBrush" Color="Orange" />
         </ResourceDictionary>
     </Application.Resources>
 

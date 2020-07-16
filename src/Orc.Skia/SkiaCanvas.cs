@@ -137,7 +137,7 @@ namespace Orc.Skia
                 }
 
                 var isClearCanvas = false;
-                if (_bitmap == null || size.Width != _bitmap.PixelWidth || size.Height != _bitmap.PixelHeight)
+                if (_bitmap is null || size.Width != _bitmap.PixelWidth || size.Height != _bitmap.PixelHeight)
                 {
                     isClearCanvas = true;
                     _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
@@ -206,7 +206,7 @@ namespace Orc.Skia
             }
 
             var transformDevice = PresentationSource.FromVisual(this)?.CompositionTarget.TransformToDevice;
-            if (transformDevice == null)
+            if (transformDevice is null)
             {
                 return new SKSizeI((int)w, (int)h);
             }

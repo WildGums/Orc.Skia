@@ -43,7 +43,7 @@ namespace Orc.Skia
         public static void DrawText(this SKCanvas canvas, string[] lines, Rect rect, Color color, float fontSize = DefaultFontSize, 
             double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
         {
-            if (lines == null)
+            if (lines is null)
             {
                 return;
             }
@@ -88,7 +88,7 @@ namespace Orc.Skia
                         lineHeight = bounds.Height;
                     }
 
-                    canvas.DrawPositionedText(charString, new[] { currentPoint.ToSKPoint() }, paint);
+                    canvas.DrawText(charString, (float)currentPoint.X, (float)currentPoint.Y, paint);
 
                     currentPoint.X += bounds.Width;
 
