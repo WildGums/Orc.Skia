@@ -25,7 +25,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Catel.Core" Version="5.12.8" />
     <PackageReference Include="Catel.Fody" Version="4.5.0" PrivateAssets="all" />
     <PackageReference Include="Catel.MVVM" Version="5.12.8" />
     <PackageReference Include="Costura.Fody" Version="4.1.0" PrivateAssets="all" />
@@ -36,7 +35,7 @@
     <PackageReference Include="MethodTimer.Fody" Version="3.1.2" PrivateAssets="all" />
     <PackageReference Include="Obsolete.Fody" Version="5.2.1" PrivateAssets="all" />
     <PackageReference Include="Orc.Theming" Version="4.1.0-alpha0366" />
-    <PackageReference Include="SkiaSharp" Version="2.80.1" />
+    <PackageReference Include="SkiaSharp" Version="2.80.2" />
   </ItemGroup>
 
   <ItemGroup>
