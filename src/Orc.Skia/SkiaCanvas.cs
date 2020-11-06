@@ -9,8 +9,6 @@
 
 namespace Orc.Skia
 {
-    using Catel.Windows.Data;
-
 #if NETFX_CORE
     using Windows.Foundation;
     using Windows.Graphics.Display;
@@ -23,11 +21,9 @@ namespace Orc.Skia
     using System.Windows.Controls;
 #endif
     using System;
-    using System.Collections.Generic;
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
-    using System.Windows.Shapes;
     using Catel;
     using SkiaSharp;
 
@@ -42,12 +38,6 @@ namespace Orc.Skia
         #region Fields
         private readonly TimeSpan _frameDelay = TimeSpan.FromMilliseconds(5);
         private readonly object _syncObject = new object();
-
-        private readonly Rectangle _rectangle = new Rectangle
-        {
-            Fill = Brushes.Transparent,
-            Stretch = Stretch.Fill
-        };
 
         protected double DpiX;
         protected double DpiY;
@@ -68,8 +58,6 @@ namespace Orc.Skia
             Unloaded += OnUnloaded;
             SizeChanged += OnSizeChanged;
             CompositionTarget.Rendering += OnCompositionTargetRendering;
-
-            this.SubscribeToDependencyProperty(nameof(Background), OnBackgroundChanged);
         }
         #endregion
 
@@ -133,11 +121,6 @@ namespace Orc.Skia
             _lastTime = DateTime.Now;
         }
 
-        private void OnBackgroundChanged(object sender, DependencyPropertyValueChangedEventArgs e)
-        {
-            Update();
-        }
-
         public void Update()
         {
             if (ActualWidth == 0 || ActualHeight == 0 || Visibility != Visibility.Visible)
@@ -199,12 +182,7 @@ namespace Orc.Skia
                         Stretch = Stretch.None
                     };
 
-                    _rectangle.SetCurrentValue(WidthProperty, ActualWidth);
-                    _rectangle.SetCurrentValue(HeightProperty, ActualHeight);
-                    _rectangle.SetCurrentValue(LeftProperty, 0d);
-                    _rectangle.SetCurrentValue(TopProperty, 0d);
-
-                    _rectangle.SetCurrentValue(Shape.FillProperty, brush);
+                    SetValue(BackgroundProperty, brush);
                 }
             }
         }
@@ -265,8 +243,13 @@ namespace Orc.Skia
             TARGET PLATFORM NOT YET SUPPORTED
 #endif
 
-            return Math.Abs(DpiX - previousDpiX) > 0.1d ||
-                   Math.Abs(DpiY - previousDpiY) > 0.1d;
+            if (Math.Abs(DpiX - previousDpiX) > 0.1d ||
+                Math.Abs(DpiY - previousDpiY) > 0.1d)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public virtual void Invalidate()
@@ -300,11 +283,6 @@ namespace Orc.Skia
 
         protected virtual void Initialize()
         {
-            if (!Children.Contains(_rectangle))
-            {
-                Children.Add(_rectangle);
-            }
-
             if (RecalculateDpi())
             {
                 Invalidate();
@@ -335,7 +313,7 @@ namespace Orc.Skia
 
         private void FreeBitmap()
         {
-            _rectangle.SetCurrentValue(BackgroundProperty, null);
+            SetValue(BackgroundProperty, null);
             _bitmap = null;
             _pixels = IntPtr.Zero;
         }
