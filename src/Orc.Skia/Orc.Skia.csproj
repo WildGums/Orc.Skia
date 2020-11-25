@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
-    <TargetFrameworks>net46;net47;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0-windows</TargetFrameworks>
     <AssemblyName>Orc.Skia</AssemblyName>
     <RootNamespace>Orc.Skia</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
@@ -40,13 +40,6 @@
 
   <ItemGroup>
     <PackageReference Update="NETStandard.Library" Version="2.0.3" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.1'">
-    <None Remove="costura32\libSkiaSharp.dll" />
-    <None Remove="costura64\libSkiaSharp.dll" />
-    <EmbeddedResource Include="costura32\libSkiaSharp.dll" />
-    <EmbeddedResource Include="costura64\libSkiaSharp.dll" />
   </ItemGroup>
 
   <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props')" />
