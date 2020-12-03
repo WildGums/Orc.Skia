@@ -8,8 +8,8 @@
 namespace Orc.Skia.Example
 {
     using System.Collections.Generic;
-    using Coloring;
     using SkiaSharp;
+    using Orc.Theming;
 
 #if NETFX_CORE
     using Windows.Foundation;
