@@ -232,7 +232,7 @@ namespace Orc.Skia
             _dpiX = _dpiY = display.LogicalDpi / 96.0f;
 #elif NET || NETCORE
             var source = PresentationSource.FromVisual(this);
-            if (source != null)
+            if (source is not null)
             {
                 var transformToDevice = source.CompositionTarget.TransformToDevice;
 

@@ -107,7 +107,7 @@ namespace Orc.Skia
         /// <returns></returns>
         public static Margin CurrentOrNew(Margin margin, double value = 0)
         {
-            if (margin != null)
+            if (margin is not null)
             {
                 if (margin.AddToStandard)
                 {

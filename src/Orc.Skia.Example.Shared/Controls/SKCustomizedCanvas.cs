@@ -51,7 +51,7 @@ namespace Orc.Skia.Example.Controls
 
         protected override void Render(SKCanvas canvas, bool isClearCanvas)
         {
-            if (canvas != null)
+            if (canvas is not null)
             {
                 CanvasTest.RunTests(canvas);
             }
