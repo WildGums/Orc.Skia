@@ -151,20 +151,26 @@ namespace Orc.Skia
 
                 // draw on the bitmap
                 _bitmap.Lock();
-                using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+
+                using (var vulkanContext = GRContext.CreateVulkan(new GRVkBackendContext(), new GRContextOptions()))
                 {
-                    var canvas = surface.Canvas;
-                    using (new RenderingScope(this, canvas))
+                    using (var surface = SKSurface.Create(vulkanContext, false, _skImageInfo))
+
+                    //using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
                     {
-                        var eventArgs = new CanvasRenderingEventArgs(canvas);
+                        var canvas = surface.Canvas;
+                        using (new RenderingScope(this, canvas))
+                        {
+                            var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                        OnRendering(canvas);
-                        Rendering?.Invoke(this, eventArgs);
+                            OnRendering(canvas);
+                            Rendering?.Invoke(this, eventArgs);
 
-                        Render(canvas, isClearCanvas);
+                            Render(canvas, isClearCanvas);
 
-                        Rendered?.Invoke(this, eventArgs);
-                        OnRendered(canvas);
+                            Rendered?.Invoke(this, eventArgs);
+                            OnRendered(canvas);
+                        }
                     }
                 }
 
