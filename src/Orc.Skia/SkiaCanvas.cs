@@ -42,6 +42,7 @@ namespace Orc.Skia
         protected double DpiX;
         protected double DpiY;
 
+        private bool _canUseVulkan;
         private bool _ignorePixelScaling;
         private SKImageInfo _skImageInfo;
         private DateTime _lastTime = DateTime.Now;
@@ -154,14 +155,14 @@ namespace Orc.Skia
 
                 using (var grvBackendContext = new GRVkBackendContext())
                 {
-                    using (var vulkanContext = GRContext.CreateVulkan(grvBackendContext, new GRContextOptions()))
+#pragma warning disable IDISP001 // Dispose created.
+                    var renderContext = CreateRenderContext();
+#pragma warning restore IDISP001 // Dispose created.
+                    if (renderContext is not null)
                     {
-                        // Important: check for null
-                        if (vulkanContext is not null)
+                        try
                         {
-                            using (var surface = SKSurface.Create(vulkanContext, false, _skImageInfo))
-
-                            //using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                            using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
                             {
                                 var canvas = surface.Canvas;
                                 using (new RenderingScope(this, canvas))
@@ -177,6 +178,10 @@ namespace Orc.Skia
                                     OnRendered(canvas);
                                 }
                             }
+                        }
+                        finally
+                        {
+                            renderContext?.Dispose();
                         }
                     }
                 }
@@ -198,6 +203,29 @@ namespace Orc.Skia
                     SetValue(BackgroundProperty, brush);
                 }
             }
+        }
+
+        protected GRContext CreateRenderContext()
+        {
+            GRContext renderContext = null;
+
+            if (_canUseVulkan)
+            {
+#pragma warning disable IDISP004 // Don't ignore created IDisposable.
+                renderContext = GRContext.CreateVulkan(new GRVkBackendContext(), new GRContextOptions());
+#pragma warning restore IDISP004 // Don't ignore created IDisposable.
+            }
+
+            if (renderContext is null)
+            {
+                _canUseVulkan = false;
+
+#pragma warning disable IDISP004 // Don't ignore created IDisposable.
+                renderContext = GRContext.CreateGl(new GRContextOptions());
+#pragma warning restore IDISP004 // Don't ignore created IDisposable.
+            }
+
+            return renderContext;
         }
 
         private SKSizeI CreateSize(out double scaleX, out double scaleY)
