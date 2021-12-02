@@ -152,24 +152,31 @@ namespace Orc.Skia
                 // draw on the bitmap
                 _bitmap.Lock();
 
-                using (var vulkanContext = GRContext.CreateVulkan(new GRVkBackendContext(), new GRContextOptions()))
+                using (var grvBackendContext = new GRVkBackendContext())
                 {
-                    using (var surface = SKSurface.Create(vulkanContext, false, _skImageInfo))
-
-                    //using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                    using (var vulkanContext = GRContext.CreateVulkan(grvBackendContext, new GRContextOptions()))
                     {
-                        var canvas = surface.Canvas;
-                        using (new RenderingScope(this, canvas))
+                        // Important: check for null
+                        if (vulkanContext is not null)
                         {
-                            var eventArgs = new CanvasRenderingEventArgs(canvas);
+                            using (var surface = SKSurface.Create(vulkanContext, false, _skImageInfo))
 
-                            OnRendering(canvas);
-                            Rendering?.Invoke(this, eventArgs);
+                            //using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                            {
+                                var canvas = surface.Canvas;
+                                using (new RenderingScope(this, canvas))
+                                {
+                                    var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                            Render(canvas, isClearCanvas);
+                                    OnRendering(canvas);
+                                    Rendering?.Invoke(this, eventArgs);
 
-                            Rendered?.Invoke(this, eventArgs);
-                            OnRendered(canvas);
+                                    Render(canvas, isClearCanvas);
+
+                                    Rendered?.Invoke(this, eventArgs);
+                                    OnRendered(canvas);
+                                }
+                            }
                         }
                     }
                 }
