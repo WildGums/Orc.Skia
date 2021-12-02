@@ -103,6 +103,7 @@ namespace Orc.Skia
         public bool IgnorePixelScaling { get; set; }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        protected SkiaSharp.GRContext CreateRenderContext() { }
         protected SkiaSharp.SKImageInfo GetImageInfo() { }
         public System.Windows.Rect GetSurfaceBoundary() { }
         protected virtual void Initialize() { }
