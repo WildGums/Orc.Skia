@@ -118,6 +118,14 @@ namespace Orc.Skia
         protected virtual void Terminate() { }
         public void Update() { }
     }
+    public class SkiaElement : SkiaSharp.Views.WPF.SKElement
+    {
+        public SkiaElement() { }
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        protected override void OnPaintSurface(SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e) { }
+        public void Update() { }
+    }
     public static class SkiaEnvironment { }
     public class SkiaException : System.Exception
     {

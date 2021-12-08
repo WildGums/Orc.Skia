@@ -4,7 +4,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:skia="clr-namespace:Orc.Skia;assembly=Orc.Skia"
-             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="400">
+             mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="400">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -12,12 +14,34 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Background="SlateGray" Orientation="Vertical">
-            <Button Margin="12" Height="36" Content="Render 10 x" Click="RenderClick" Tag="10" />
-            <Button Margin="12" Height="36" Content="Render 100 x" Click="RenderClick" Tag="100" />
-            <Button Margin="12" Height="36" Content="Render 1.000 x" Click="RenderClick" Tag="1000" />
-            <Button Margin="12" Height="36" Content="Render 10.000 x" Click="RenderClick" Tag="10000" />
-            <Button Margin="12" Height="36" Content="Render 100.000 x" Click="RenderClick" Tag="100000" />
+        <StackPanel Grid.Column="0"
+                    Background="SlateGray"
+                    Orientation="Vertical">
+            <Button Margin="12"
+                    Height="36"
+                    Content="Render 10 x"
+                    Click="RenderClick"
+                    Tag="10" />
+            <Button Margin="12"
+                    Height="36"
+                    Content="Render 100 x"
+                    Click="RenderClick"
+                    Tag="100" />
+            <Button Margin="12"
+                    Height="36"
+                    Content="Render 1.000 x"
+                    Click="RenderClick"
+                    Tag="1000" />
+            <Button Margin="12"
+                    Height="36"
+                    Content="Render 10.000 x"
+                    Click="RenderClick"
+                    Tag="10000" />
+            <Button Margin="12"
+                    Height="36"
+                    Content="Render 100.000 x"
+                    Click="RenderClick"
+                    Tag="100000" />
 
             <TextBlock Text="Average" />
             <TextBlock x:Name="durationAverageTextBlock" />
@@ -29,7 +53,10 @@
             <TextBlock x:Name="fpsTextBlock" />
         </StackPanel>
 
-        <skia:SkiaCanvas x:Name="skiaCanvas" Grid.Column="1" />
+        <skia:SkiaCanvas x:Name="skiaCanvas"
+                          Grid.Column="1" />
+        <!--<skia:SkiaElement x:Name="skiaCanvas"
+                          Grid.Column="1" />-->
     </Grid>
-    
+
 </UserControl>

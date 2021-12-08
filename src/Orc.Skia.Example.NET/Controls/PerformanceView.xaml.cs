@@ -7,7 +7,9 @@
 
 namespace Orc.Skia.Example.Controls
 {
+    using System;
     using System.Diagnostics;
+    using System.Threading.Tasks;
 
 #if NETFX_CORE
     using Windows.UI.Xaml;
@@ -30,7 +32,7 @@ namespace Orc.Skia.Example.Controls
         }
         #endregion
 
-        private void RenderClick(object sender, UiEventArgs e)
+        private async void RenderClick(object sender, UiEventArgs e)
         {
             var count = int.Parse((string)((Button)sender).Tag);
 
@@ -38,7 +40,20 @@ namespace Orc.Skia.Example.Controls
 
             for (var i = 0; i < count; i++)
             {
+                var tsc = new TaskCompletionSource();
+
+                EventHandler<CanvasRenderingEventArgs> handler = null;
+                handler = (sender, e) =>
+                {
+                    skiaCanvas.Rendered -= handler;
+                    tsc.SetResult();
+                };
+
+                skiaCanvas.Rendered += handler;
+
                 skiaCanvas.Update();
+
+                await tsc.Task;
             }
 
             stopwatch.Stop();
