@@ -26,6 +26,7 @@ namespace Orc.Skia
     using System.Windows.Media.Imaging;
     using Catel;
     using SkiaSharp;
+    using System.Diagnostics;
 
     /// <summary>
     /// SkiaCanvas class.
@@ -43,6 +44,8 @@ namespace Orc.Skia
         protected double DpiY;
 
         private bool _canUseVulkan;
+        private bool _canUseGl;
+
         private bool _ignorePixelScaling;
         private SKImageInfo _skImageInfo;
         private DateTime _lastTime = DateTime.Now;
@@ -59,6 +62,10 @@ namespace Orc.Skia
             Unloaded += OnUnloaded;
             SizeChanged += OnSizeChanged;
             CompositionTarget.Rendering += OnCompositionTargetRendering;
+
+            // Allow all by default
+            _canUseVulkan = true;
+            _canUseGl = true;
         }
         #endregion
 
@@ -153,36 +160,33 @@ namespace Orc.Skia
                 // draw on the bitmap
                 _bitmap.Lock();
 
-                using (var grvBackendContext = new GRVkBackendContext())
-                {
 #pragma warning disable IDISP001 // Dispose created.
-                    var renderContext = CreateRenderContext();
+                var renderContext = CreateRenderContext();
 #pragma warning restore IDISP001 // Dispose created.
-                    if (renderContext is not null)
+                if (renderContext is not null)
+                {
+                    try
                     {
-                        try
+                        using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
                         {
-                            using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
+                            var canvas = surface.Canvas;
+                            using (new RenderingScope(this, canvas))
                             {
-                                var canvas = surface.Canvas;
-                                using (new RenderingScope(this, canvas))
-                                {
-                                    var eventArgs = new CanvasRenderingEventArgs(canvas);
+                                var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                                    OnRendering(canvas);
-                                    Rendering?.Invoke(this, eventArgs);
+                                OnRendering(canvas);
+                                Rendering?.Invoke(this, eventArgs);
 
-                                    Render(canvas, isClearCanvas);
+                                Render(canvas, isClearCanvas);
 
-                                    Rendered?.Invoke(this, eventArgs);
-                                    OnRendered(canvas);
-                                }
+                                Rendered?.Invoke(this, eventArgs);
+                                OnRendered(canvas);
                             }
                         }
-                        finally
-                        {
-                            renderContext?.Dispose();
-                        }
+                    }
+                    finally
+                    {
+                        renderContext?.Dispose();
                     }
                 }
 
@@ -209,20 +213,53 @@ namespace Orc.Skia
         {
             GRContext renderContext = null;
 
+            // TODO: What is best order of performance?
+
             if (_canUseVulkan)
             {
+#pragma warning disable IDISP001 // Dispose created.
+                var backendContext = new GRVkBackendContext();
+                var contextOptions = new GRContextOptions();
+#pragma warning restore IDISP001 // Dispose created.
+
 #pragma warning disable IDISP004 // Don't ignore created IDisposable.
-                renderContext = GRContext.CreateVulkan(new GRVkBackendContext(), new GRContextOptions());
+                renderContext = GRContext.CreateVulkan(backendContext, contextOptions);
 #pragma warning restore IDISP004 // Don't ignore created IDisposable.
+
+                if (renderContext is null)
+                {
+                    _canUseVulkan = false;
+
+                    backendContext.Dispose();
+                }
             }
 
+            if (renderContext is null &&
+                _canUseGl)
+            {
+#pragma warning disable IDISP004 // Don't ignore created IDisposable.
+#pragma warning disable IDISP003 // Dispose previous before re-assigning.
+                renderContext = GRContext.CreateGl(new GRContextOptions());
+#pragma warning restore IDISP003 // Dispose previous before re-assigning.
+#pragma warning restore IDISP004 // Don't ignore created IDisposable.
+
+                if (renderContext is null)
+                {
+                    _canUseGl = false;
+                }
+            }
+
+#if DEBUG
             if (renderContext is null)
             {
-                _canUseVulkan = false;
+                Debug.WriteLine("Render context is null");
+            }
+#endif
 
-#pragma warning disable IDISP004 // Don't ignore created IDisposable.
-                renderContext = GRContext.CreateGl(new GRContextOptions());
-#pragma warning restore IDISP004 // Don't ignore created IDisposable.
+            // Fallback to software rendering?
+            if (renderContext is null)
+            {
+
             }
 
             return renderContext;
