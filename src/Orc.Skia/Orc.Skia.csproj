@@ -42,7 +42,6 @@
     <PackageReference Include="Obsolete.Fody" Version="5.2.1" PrivateAssets="all" />
     <PackageReference Include="SkiaSharp" Version="2.80.3" />
     <PackageReference Include="SkiaSharp.Views" Version="2.80.3" />
-    <PackageReference Include="SkiaSharp.Views.Gtk3" Version="2.80.3" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="2.80.3" />
     <PackageReference Include="SkiaSharp.Vulkan.SharpVk" Version="2.80.3" />
     <PackageReference Include="System.Buffers" version="4.5.1" />
