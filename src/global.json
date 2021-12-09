@@ -1,5 +1,10 @@
 {
     "msbuild-sdks": {
-        "MSBuild.Sdk.Extras": "2.0.54"
+        "MSBuild.Sdk.Extras": "3.0.38"
+    },
+    "sdk": {
+        "version": "6.0.0",
+        "rollForward": "latestMinor",
+        "allowPrerelease": false
     }
 }

@@ -18,7 +18,7 @@ namespace Orc.Skia
         #region Methods
         internal static string[] SplitLines(this string text)
         {
-            if (text == null)
+            if (text is null)
             {
                 return Array.Empty<string>();
             }

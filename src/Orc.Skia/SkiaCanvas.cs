@@ -26,6 +26,7 @@ namespace Orc.Skia
     using System.Windows.Media.Imaging;
     using Catel;
     using SkiaSharp;
+    using System.Diagnostics;
 
     /// <summary>
     /// SkiaCanvas class.
@@ -33,22 +34,25 @@ namespace Orc.Skia
     /// <remarks>
     /// Some parts are based on https://raw.githubusercontent.com/mono/SkiaSharp/master/source/SkiaSharp.Views/SkiaSharp.Views.UWP/SKXamlCanvas.cs (MIT).
     /// </remarks>
-    public class SkiaCanvas : Canvas
+    public class SkiaCanvas : Canvas, ISkiaElement
     {
         #region Fields
-        private readonly TimeSpan _frameDelay = TimeSpan.FromMilliseconds(5);
         private readonly object _syncObject = new object();
 
         protected double DpiX;
         protected double DpiY;
 
+        private bool _canUseVulkan;
+        private bool _canUseGl;
+
         private bool _ignorePixelScaling;
         private SKImageInfo _skImageInfo;
-        private DateTime _lastTime = DateTime.Now;
         private bool _isRendering = false;
         private int _renderScopeCounter;
         private IntPtr _pixels;
         private WriteableBitmap _bitmap;
+
+        private Stopwatch _stopwatch;
         #endregion
 
         #region Constructors
@@ -58,10 +62,19 @@ namespace Orc.Skia
             Unloaded += OnUnloaded;
             SizeChanged += OnSizeChanged;
             CompositionTarget.Rendering += OnCompositionTargetRendering;
+
+            _stopwatch = Stopwatch.StartNew();
+            FrameDelayInMilliseconds = 5;
+
+            // Allow all by default
+            _canUseVulkan = true;
+            _canUseGl = true;
         }
         #endregion
 
         #region Properties
+        public int FrameDelayInMilliseconds { get; set; }
+
         public bool IgnorePixelScaling
         {
             get { return _ignorePixelScaling; }
@@ -111,19 +124,19 @@ namespace Orc.Skia
         TARGET PLATFORM NOT YET SUPPORTED
 #endif
         {
-            if (DateTime.Now - _lastTime < _frameDelay)
+            if (_stopwatch.ElapsedMilliseconds < FrameDelayInMilliseconds)
             {
                 return;
             }
 
             Update();
 
-            _lastTime = DateTime.Now;
+            _stopwatch = Stopwatch.StartNew();
         }
 
         public void Update()
         {
-            if (ActualWidth == 0 || ActualHeight == 0 || Visibility != Visibility.Visible)
+            if (ActualWidth == 0 || ActualHeight == 0 || !IsVisible)
             {
                 return;
             }
@@ -137,7 +150,7 @@ namespace Orc.Skia
                 }
 
                 var isClearCanvas = false;
-                if (_bitmap == null || size.Width != _bitmap.PixelWidth || size.Height != _bitmap.PixelHeight)
+                if (_bitmap is null || size.Width != _bitmap.PixelWidth || size.Height != _bitmap.PixelHeight)
                 {
                     isClearCanvas = true;
                     _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
@@ -151,21 +164,36 @@ namespace Orc.Skia
 
                 // draw on the bitmap
                 _bitmap.Lock();
-                using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
-                {
-                    var canvas = surface.Canvas;
-                    using (new RenderingScope(this, canvas))
-                    {
-                        var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                        OnRendering(canvas);
-                        Rendering?.Invoke(this, eventArgs);
+//#pragma warning disable IDISP001 // Dispose created.
+//                var renderContext = CreateRenderContext();
+//#pragma warning restore IDISP001 // Dispose created.
+//                if (renderContext is not null)
+//                {
+//                    try
+//                    {
+                        using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                        //using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
+                        {
+                            var canvas = surface.Canvas;
+                            using (new RenderingScope(this, canvas))
+                            {
+                                var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                        Render(canvas, isClearCanvas);
+                                OnRendering(canvas);
+                                Rendering?.Invoke(this, eventArgs);
 
-                        Rendered?.Invoke(this, eventArgs);
-                        OnRendered(canvas);
-                    }
+                                Render(canvas, isClearCanvas);
+
+                                Rendered?.Invoke(this, eventArgs);
+                                OnRendered(canvas);
+                            }
+                        //}
+                    //}
+                    //finally
+                    //{
+                    //    renderContext?.Dispose();
+                    //}
                 }
 
                 // draw the bitmap to the screen
@@ -187,6 +215,62 @@ namespace Orc.Skia
             }
         }
 
+        protected GRContext CreateRenderContext()
+        {
+            GRContext renderContext = null;
+
+            // TODO: What is best order of performance?
+
+            if (_canUseVulkan)
+            {
+#pragma warning disable IDISP001 // Dispose created.
+                var backendContext = new GRVkBackendContext();
+                var contextOptions = new GRContextOptions();
+#pragma warning restore IDISP001 // Dispose created.
+
+#pragma warning disable IDISP004 // Don't ignore created IDisposable.
+                renderContext = GRContext.CreateVulkan(backendContext, contextOptions);
+#pragma warning restore IDISP004 // Don't ignore created IDisposable.
+
+                if (renderContext is null)
+                {
+                    _canUseVulkan = false;
+
+                    backendContext.Dispose();
+                }
+            }
+
+            if (renderContext is null &&
+                _canUseGl)
+            {
+#pragma warning disable IDISP004 // Don't ignore created IDisposable.
+#pragma warning disable IDISP003 // Dispose previous before re-assigning.
+                renderContext = GRContext.CreateGl(new GRContextOptions());
+#pragma warning restore IDISP003 // Dispose previous before re-assigning.
+#pragma warning restore IDISP004 // Don't ignore created IDisposable.
+
+                if (renderContext is null)
+                {
+                    _canUseGl = false;
+                }
+            }
+
+#if DEBUG
+            if (renderContext is null)
+            {
+                Debug.WriteLine("Render context is null");
+            }
+#endif
+
+            // Fallback to software rendering?
+            if (renderContext is null)
+            {
+
+            }
+
+            return renderContext;
+        }
+
         private SKSizeI CreateSize(out double scaleX, out double scaleY)
         {
             scaleX = 1.0;
@@ -206,7 +290,7 @@ namespace Orc.Skia
             }
 
             var transformDevice = PresentationSource.FromVisual(this)?.CompositionTarget.TransformToDevice;
-            if (transformDevice == null)
+            if (transformDevice is null)
             {
                 return new SKSizeI((int)w, (int)h);
             }
@@ -232,7 +316,7 @@ namespace Orc.Skia
             _dpiX = _dpiY = display.LogicalDpi / 96.0f;
 #elif NET || NETCORE
             var source = PresentationSource.FromVisual(this);
-            if (source != null)
+            if (source is not null)
             {
                 var transformToDevice = source.CompositionTarget.TransformToDevice;
 

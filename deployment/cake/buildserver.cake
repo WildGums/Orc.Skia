@@ -1,8 +1,6 @@
 // Customize this file when using a different build server
 #l "buildserver-continuaci.cake"
 
-#addin "nuget:?package=MagicChunks&version=2.0.0.119"
-
 using System.Runtime.InteropServices;
 
 public interface IBuildServer
@@ -75,9 +73,14 @@ public class BuildServerIntegration : IIntegration
     {
         var value = defaultValue;
 
-        if (bool.TryParse(GetVariable(variableName, "unknown", showValue: showValue), out var retrievedValue))
+        if (bool.TryParse(GetVariable(variableName, "unknown", showValue: false), out var retrievedValue))
         {
             value = retrievedValue;
+        }
+
+        if (showValue)
+        {
+            PrintVariableValue(variableName, value.ToString());
         }
 
         return value;
@@ -91,15 +94,13 @@ public class BuildServerIntegration : IIntegration
 
         if (!_buildServerVariableCache.TryGetValue(cacheKey, out string value))
         {
-            value = GetVariableForCache(variableName, defaultValue, showValue);
-            //if (value != defaultValue &&
-            //    !string.IsNullOrEmpty(value) && 
-            //    !string.IsNullOrEmpty(defaultValue))
-            //{
-                var valueForLog = showValue ? value : "********";
-                CakeContext.Information("{0}: '{1}'", variableName, valueForLog);
-            //}
-            
+            value = GetVariableForCache(variableName, defaultValue);
+
+            if (showValue)
+            {
+                PrintVariableValue(variableName, value);
+            }
+
             _buildServerVariableCache[cacheKey] = value;
         }
         //else
@@ -112,7 +113,7 @@ public class BuildServerIntegration : IIntegration
 
     //-------------------------------------------------------------
 
-    private string GetVariableForCache(string variableName, string defaultValue = null, bool showValue = false)
+    private string GetVariableForCache(string variableName, string defaultValue = null)
     {
         var argumentValue = CakeContext.Argument(variableName, "non-existing");
         if (argumentValue != "non-existing")
@@ -132,7 +133,7 @@ public class BuildServerIntegration : IIntegration
             }
         }
 
-        var overrideFile = "./build.cakeoverrides";
+        var overrideFile = System.IO.Path.Combine(".", "build.cakeoverrides");
         if (System.IO.File.Exists(overrideFile))
         {
             var sb = new StringBuilder(string.Empty, 256);
@@ -141,7 +142,14 @@ public class BuildServerIntegration : IIntegration
             {
                 CakeContext.Information("Variable '{0}' is specified via build.cakeoverrides", variableName);
             
-                return sb.ToString();
+                var sbValue = sb.ToString();
+                if (sbValue == "[ignore]" ||
+                    sbValue == "[empty]")
+                {
+                    return string.Empty;
+                }
+
+                return sbValue;
             }
         }
         
@@ -178,4 +186,13 @@ public class BuildServerIntegration : IIntegration
         
         return defaultValue ?? string.Empty;
     }
+    
+    //-------------------------------------------------------------
+
+    private void PrintVariableValue(string variableName, string value, bool isSensitive = false)
+    {
+        var valueForLog = isSensitive ? "********" : value;
+        CakeContext.Information("{0}: '{1}'", variableName, valueForLog);
+    }
 }
+

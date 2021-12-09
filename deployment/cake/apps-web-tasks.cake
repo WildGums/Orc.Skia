@@ -1,12 +1,8 @@
-#pragma warning disable 1998
-
 #l "apps-web-variables.cake"
 #l "lib-octopusdeploy.cake"
 
-#addin "nuget:?package=MagicChunks&version=2.0.0.119"
-#addin "nuget:?package=Newtonsoft.Json&version=11.0.2"
-#addin "nuget:?package=Microsoft.Azure.KeyVault.Core&version=1.0.0"
-#addin "nuget:?package=WindowsAzure.Storage&version=9.1.1"
+#addin "nuget:?package=Microsoft.Azure.KeyVault.Core&version=3.0.5"
+#addin "nuget:?package=WindowsAzure.Storage&version=9.3.3"
 
 //-------------------------------------------------------------
 
@@ -83,7 +79,7 @@ public class WebProcessor : ProcessorBase
                 PlatformTarget = PlatformTarget.MSIL
             };
 
-            ConfigureMsBuild(BuildContext, msBuildSettings, webApp);
+            ConfigureMsBuild(BuildContext, msBuildSettings, webApp, "build");
 
             // Always disable SourceLink
             msBuildSettings.WithProperty("EnableSourceLink", "false");
@@ -91,14 +87,15 @@ public class WebProcessor : ProcessorBase
             // Note: we need to set OverridableOutputPath because we need to be able to respect
             // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
             // are properties passed in using the command line)
-            var outputDirectory = string.Format("{0}/{1}/", BuildContext.General.OutputRootDirectory, webApp);
+            var outputDirectory = System.IO.Path.Combine(BuildContext.General.OutputRootDirectory, webApp);
             CakeContext.Information("Output directory: '{0}'", outputDirectory);
+            msBuildSettings.WithProperty("OverridableOutputRootPath", BuildContext.General.OutputRootDirectory);
             msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
             msBuildSettings.WithProperty("PackageOutputPath", BuildContext.General.OutputRootDirectory);
 
             // TODO: Enable GitLink / SourceLink, see RepositoryUrl, RepositoryBranchName, RepositoryCommitId variables
 
-            CakeContext.MSBuild(projectFileName, msBuildSettings);
+            RunMsBuild(BuildContext, webApp, projectFileName, msBuildSettings, "build");
         }
     }
 
@@ -113,11 +110,17 @@ public class WebProcessor : ProcessorBase
         
         foreach (var webApp in BuildContext.Web.Items)
         {
+            if (!ShouldDeployProject(BuildContext, webApp))
+            {
+                CakeContext.Information("Web app '{0}' should not be deployed", webApp);
+                continue;
+            }
+
             BuildContext.CakeContext.LogSeparator("Packaging web app '{0}'", webApp);
 
-            var projectFileName = string.Format("./src/{0}/{0}.csproj", webApp);
+            var projectFileName = System.IO.Path.Combine(".", "src", webApp, $"{webApp}.csproj");
 
-            var outputDirectory = string.Format("{0}/{1}/", BuildContext.General.OutputRootDirectory, webApp);
+            var outputDirectory = System.IO.Path.Combine(BuildContext.General.OutputRootDirectory, webApp);
             CakeContext.Information("Output directory: '{0}'", outputDirectory);
 
             CakeContext.Information("1) Using 'dotnet publish' to package '{0}'", webApp);
@@ -127,6 +130,7 @@ public class WebProcessor : ProcessorBase
             // Note: we need to set OverridableOutputPath because we need to be able to respect
             // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
             // are properties passed in using the command line)
+            msBuildSettings.WithProperty("OverridableOutputRootPath", BuildContext.General.OutputRootDirectory);
             msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
             msBuildSettings.WithProperty("PackageOutputPath", outputDirectory);
             msBuildSettings.WithProperty("ConfigurationName", BuildContext.General.Solution.ConfigurationName);
@@ -171,7 +175,7 @@ public class WebProcessor : ProcessorBase
 
             BuildContext.CakeContext.LogSeparator("Deploying web app '{0}'", webApp);
 
-            var packageToPush = string.Format("{0}/{1}.{2}.nupkg", BuildContext.General.OutputRootDirectory, webApp, BuildContext.General.Version.NuGet);
+            var packageToPush = System.IO.Path.Combine(BuildContext.General.OutputRootDirectory, string.Format("{0}.{1}.nupkg", webApp, BuildContext.General.Version.NuGet));
             var octopusRepositoryUrl = BuildContext.OctopusDeploy.GetRepositoryUrl(webApp);
             var octopusRepositoryApiKey = BuildContext.OctopusDeploy.GetRepositoryApiKey(webApp);
             var octopusDeploymentTarget = BuildContext.OctopusDeploy.GetDeploymentTarget(webApp);

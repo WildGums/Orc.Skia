@@ -1,10 +1,7 @@
-#pragma warning disable 1998
-
 #l "docker-variables.cake"
 #l "lib-octopusdeploy.cake"
 
-#addin "nuget:?package=Cake.FileHelpers&version=3.0.0"
-#addin "nuget:?package=Cake.Docker&version=0.9.9"
+#addin "nuget:?package=Cake.Docker&version=1.0.0"
 
 //-------------------------------------------------------------
 
@@ -50,7 +47,7 @@ public class DockerImagesProcessor : ProcessorBase
         var dockerRegistryUrl = GetDockerRegistryUrl(projectName);
 
         var tag = string.Format("{0}/{1}:{2}", dockerRegistryUrl, GetDockerImageName(projectName), version);
-        return tag.ToLower();
+        return tag.TrimStart(' ', '/').ToLower();
     }
 
     private void ConfigureDockerSettings(AutoToolSettings dockerSettings)
@@ -125,7 +122,7 @@ public class DockerImagesProcessor : ProcessorBase
                 PlatformTarget = PlatformTarget.MSIL
             };
 
-            ConfigureMsBuild(BuildContext, msBuildSettings, dockerImage);
+            ConfigureMsBuild(BuildContext, msBuildSettings, dockerImage, "build");
 
             // Always disable SourceLink
             msBuildSettings.WithProperty("EnableSourceLink", "false");
@@ -133,12 +130,13 @@ public class DockerImagesProcessor : ProcessorBase
             // Note: we need to set OverridableOutputPath because we need to be able to respect
             // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
             // are properties passed in using the command line)
-            var outputDirectory = string.Format("{0}/{1}/", BuildContext.General.OutputRootDirectory, dockerImage);
+            var outputDirectory = GetProjectOutputDirectory(BuildContext, dockerImage);
             CakeContext.Information("Output directory: '{0}'", outputDirectory);
+            msBuildSettings.WithProperty("OverridableOutputRootPath", BuildContext.General.OutputRootDirectory);
             msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
             msBuildSettings.WithProperty("PackageOutputPath", BuildContext.General.OutputRootDirectory);
 
-            CakeContext.MSBuild(projectFileName, msBuildSettings);
+            RunMsBuild(BuildContext, dockerImage, projectFileName, msBuildSettings, "build");
         }        
     }
 
@@ -155,23 +153,29 @@ public class DockerImagesProcessor : ProcessorBase
 
         foreach (var dockerImage in BuildContext.DockerImages.Items)
         {
+            if (!ShouldDeployProject(BuildContext, dockerImage))
+            {
+                CakeContext.Information("Docker image '{0}' should not be deployed", dockerImage);
+                continue;
+            }
+
             BuildContext.CakeContext.LogSeparator("Packaging docker image '{0}'", dockerImage);
 
-            var projectFileName = string.Format("./src/{0}/{0}.csproj", dockerImage);
-            var dockerImageSpecificationDirectory = string.Format("./deployment/docker/{0}/", dockerImage);
-            var dockerImageSpecificationFileName = string.Format("{0}/{1}", dockerImageSpecificationDirectory, dockerImage);
+            var projectFileName = GetProjectFileName(BuildContext, dockerImage);
+            var dockerImageSpecificationDirectory = System.IO.Path.Combine(".", "deployment", "docker", dockerImage);
+            var dockerImageSpecificationFileName = System.IO.Path.Combine(dockerImageSpecificationDirectory, dockerImage);
 
-            var outputRootDirectory =  string.Format("{0}/{1}/output", BuildContext.General.OutputRootDirectory, dockerImage);
+            var outputRootDirectory = System.IO.Path.Combine(BuildContext.General.OutputRootDirectory, dockerImage, "output");
 
             CakeContext.Information("1) Preparing ./config for package '{0}'", dockerImage);
 
             // ./config
-            var confTargetDirectory = string.Format("{0}/conf", outputRootDirectory);
+            var confTargetDirectory = System.IO.Path.Combine(outputRootDirectory, "conf");
             CakeContext.Information("Conf directory: '{0}'", confTargetDirectory);
 
             CakeContext.CreateDirectory(confTargetDirectory);
 
-            var confSourceDirectory = string.Format("{0}*", dockerImageSpecificationDirectory);
+            var confSourceDirectory = string.Format("{0}/*", dockerImageSpecificationDirectory);
             CakeContext.Information("Copying files from '{0}' => '{1}'", confSourceDirectory, confTargetDirectory);
 
             CakeContext.CopyFiles(confSourceDirectory, confTargetDirectory, true);
@@ -181,14 +185,17 @@ public class DockerImagesProcessor : ProcessorBase
             CakeContext.Information("2) Preparing ./output using 'dotnet publish' for package '{0}'", dockerImage);
 
             // ./output
-            var outputDirectory = string.Format("{0}/output", outputRootDirectory);
+            var outputDirectory = System.IO.Path.Combine(outputRootDirectory, "output");
             CakeContext.Information("Output directory: '{0}'", outputDirectory);
 
             var msBuildSettings = new DotNetCoreMSBuildSettings();
 
+            ConfigureMsBuildForDotNetCore(BuildContext, msBuildSettings, dockerImage, "pack");
+
             // Note: we need to set OverridableOutputPath because we need to be able to respect
             // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
             // are properties passed in using the command line)
+            msBuildSettings.WithProperty("OverridableOutputRootPath", BuildContext.General.OutputRootDirectory);
             msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
             msBuildSettings.WithProperty("PackageOutputPath", outputDirectory);
             msBuildSettings.WithProperty("ConfigurationName", BuildContext.General.Solution.ConfigurationName);
@@ -225,7 +232,7 @@ public class DockerImagesProcessor : ProcessorBase
             {
                 NoCache = true, // Don't use cache, always make sure to fetch the right images
                 File = dockerImageSpecificationFileName,
-                Platform = "linux",
+                //Platform = "linux",
                 Tag = new string[] { GetDockerImageTag(dockerImage, BuildContext.General.Version.NuGet) }
             };
 

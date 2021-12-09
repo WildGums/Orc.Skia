@@ -1,7 +1,13 @@
+#pragma warning disable CS1998
+
 #l "lib-generic.cake"
+#l "lib-logging.cake"
+#l "lib-msbuild.cake"
 #l "lib-nuget.cake"
+#l "lib-signing.cake"
 #l "lib-sourcelink.cake"
 #l "issuetrackers.cake"
+#l "installers.cake"
 #l "sourcecontrol.cake"
 #l "notifications.cake"
 #l "generic-tasks.cake"
@@ -15,13 +21,18 @@
 #l "github-pages-tasks.cake"
 #l "vsextensions-tasks.cake"
 #l "tests.cake"
+#l "templates-tasks.cake"
 
-#addin "nuget:?package=System.Net.Http&version=4.3.3"
-#addin "nuget:?package=Newtonsoft.Json&version=11.0.2"
-#addin "nuget:?package=Cake.Sonar&version=1.1.22"
+#addin "nuget:?package=Cake.FileHelpers&version=4.0.1"
+#addin "nuget:?package=Cake.Sonar&version=1.1.25"
+#addin "nuget:?package=MagicChunks&version=2.0.0.119"
+#addin "nuget:?package=Newtonsoft.Json&version=13.0.1"
+#addin "nuget:?package=System.Net.Http&version=4.3.4"
 
-#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.6.0"
-#tool "nuget:?package=GitVersion.CommandLine&version=5.1.2-beta1.17&prerelease"
+// Note: the SonarQube tool must be installed as a global .NET tool:
+// `dotnet tool install --global dotnet-sonarscanner --ignore-failed-sources`
+//#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.8.0"
+#tool "nuget:?package=dotnet-sonarscanner&version=5.3.2"
 
 //-------------------------------------------------------------
 // BACKWARDS COMPATIBILITY CODE - START
@@ -62,14 +73,17 @@ public class BuildContext : BuildContextBase
     {
         Processors = new List<IProcessor>();
         AllProjects = new List<string>();
+        Variables = new Dictionary<string, string>();  
     }
 
     public List<IProcessor> Processors { get; private set; }
     public Dictionary<string, object> Parameters { get; set; }
-
+    public Dictionary<string, string> Variables { get; private set; }
+    
     // Integrations
     public BuildServerIntegration BuildServer { get; set; }
     public IssueTrackerIntegration IssueTracker { get; set; }
+    public InstallerIntegration Installer { get; set; }
     public NotificationsIntegration Notifications { get; set; }
     public SourceControlIntegration SourceControl { get; set; }
     public OctopusDeployIntegration OctopusDeploy { get; set; }
@@ -82,6 +96,7 @@ public class BuildContext : BuildContextBase
     public DependenciesContext Dependencies { get; set; }
     public DockerImagesContext DockerImages { get; set; }
     public GitHubPagesContext GitHubPages { get; set; }
+    public TemplatesContext Templates { get; set; }
     public ToolsContext Tools { get; set; }
     public UwpContext Uwp { get; set; }
     public VsExtensionsContext VsExtensions { get; set; }
@@ -126,26 +141,16 @@ Setup<BuildContext>(setupContext =>
     buildContext.Dependencies = InitializeDependenciesContext(buildContext, buildContext);
     buildContext.DockerImages = InitializeDockerImagesContext(buildContext, buildContext);
     buildContext.GitHubPages = InitializeGitHubPagesContext(buildContext, buildContext);
+    buildContext.Templates = InitializeTemplatesContext(buildContext, buildContext);
     buildContext.Tools = InitializeToolsContext(buildContext, buildContext);
     buildContext.Uwp = InitializeUwpContext(buildContext, buildContext);
     buildContext.VsExtensions = InitializeVsExtensionsContext(buildContext, buildContext);
     buildContext.Web = InitializeWebContext(buildContext, buildContext);
     buildContext.Wpf = InitializeWpfContext(buildContext, buildContext);
 
-    // All projects, but dependencies first & tests last
-    buildContext.AllProjects.AddRange(buildContext.Dependencies.Items);
-    buildContext.AllProjects.AddRange(buildContext.Components.Items);
-    buildContext.AllProjects.AddRange(buildContext.DockerImages.Items);
-    buildContext.AllProjects.AddRange(buildContext.GitHubPages.Items);
-    buildContext.AllProjects.AddRange(buildContext.Tools.Items);
-    buildContext.AllProjects.AddRange(buildContext.Uwp.Items);
-    buildContext.AllProjects.AddRange(buildContext.VsExtensions.Items);
-    buildContext.AllProjects.AddRange(buildContext.Web.Items);
-    buildContext.AllProjects.AddRange(buildContext.Wpf.Items);
-    buildContext.AllProjects.AddRange(buildContext.Tests.Items);
-
     // Other integrations last
     buildContext.IssueTracker = new IssueTrackerIntegration(buildContext);
+    buildContext.Installer = new InstallerIntegration(buildContext);
     buildContext.Notifications = new NotificationsIntegration(buildContext);
     buildContext.OctopusDeploy = new OctopusDeployIntegration(buildContext);
     buildContext.SourceControl = new SourceControlIntegration(buildContext);
@@ -156,7 +161,8 @@ Setup<BuildContext>(setupContext =>
 
     setupContext.LogSeparator("Creating processors");
 
-    // Note: always put dependencies processor first (it's a dependency after all)
+    // Note: always put templates and dependencies processor first (it's a dependency after all)
+    buildContext.Processors.Add(new TemplatesProcessor(buildContext));
     buildContext.Processors.Add(new DependenciesProcessor(buildContext));
     buildContext.Processors.Add(new ComponentsProcessor(buildContext));
     buildContext.Processors.Add(new DockerImagesProcessor(buildContext));
@@ -166,6 +172,14 @@ Setup<BuildContext>(setupContext =>
     buildContext.Processors.Add(new VsExtensionsProcessor(buildContext));
     buildContext.Processors.Add(new WebProcessor(buildContext));
     buildContext.Processors.Add(new WpfProcessor(buildContext));
+    // !!! Note: we add test projects *after* preparing all the other processors, see Prepare task !!!
+
+    setupContext.LogSeparator("Registering variables for templates");
+
+    // Preparing variables for templates
+    buildContext.Variables["GitVersion_MajorMinorPatch"] = buildContext.General.Version.MajorMinorPatch;
+    buildContext.Variables["GitVersion_FullSemVer"] = buildContext.General.Version.FullSemVer;
+    buildContext.Variables["GitVersion_NuGetVersion"] = buildContext.General.Version.NuGet;
 
     setupContext.LogSeparator("Build context is ready, displaying state info");
 
@@ -217,6 +231,35 @@ Task("Prepare")
     {
         await processor.PrepareAsync();
     }
+
+    // Now add all projects, but dependencies first & tests last
+    buildContext.AllProjects.AddRange(buildContext.Dependencies.Items);
+    buildContext.AllProjects.AddRange(buildContext.Components.Items);
+    buildContext.AllProjects.AddRange(buildContext.DockerImages.Items);
+    buildContext.AllProjects.AddRange(buildContext.GitHubPages.Items);
+    buildContext.AllProjects.AddRange(buildContext.Tools.Items);
+    buildContext.AllProjects.AddRange(buildContext.Uwp.Items);
+    buildContext.AllProjects.AddRange(buildContext.VsExtensions.Items);
+    buildContext.AllProjects.AddRange(buildContext.Web.Items);
+    buildContext.AllProjects.AddRange(buildContext.Wpf.Items);
+
+    // Once we know all the projects that will be built, we calculate which
+    // test projects need to be built as well
+
+    var testProcessor = new TestProcessor(buildContext);
+
+    await testProcessor.PrepareAsync();
+
+    buildContext.Processors.Add(testProcessor);
+
+    buildContext.AllProjects.AddRange(buildContext.Tests.Items);
+
+    buildContext.CakeContext.LogSeparator("Final projects to process");
+
+    foreach (var item in buildContext.AllProjects.ToList())
+    {
+        buildContext.CakeContext.Information($"- {item}");
+    }
 });
 
 //-------------------------------------------------------------
@@ -251,23 +294,58 @@ Task("Build")
                       !string.IsNullOrWhiteSpace(sonarUrl);
     if (enableSonar)
     {
-        SonarBegin(new SonarBeginSettings 
+        var sonarSettings = new SonarBeginSettings 
         {
             // SonarQube info
             Url = sonarUrl,
-            Login = buildContext.General.SonarQube.Username,
-            Password = buildContext.General.SonarQube.Password,
 
             // Project info
             Key = buildContext.General.SonarQube.Project,
-            // Branch only works with the branch plugin
-            //Branch = RepositoryBranchName,
             Version = buildContext.General.Version.FullSemVer,
-            
+
+            // Use core clr version of SonarQube
+            UseCoreClr = true,
+
             // Minimize extreme logging
             Verbose = false,
             Silent = true,
-        });
+
+            // Support waiting for the quality gate
+            ArgumentCustomization = args => args
+                .Append("/d:sonar.qualitygate.wait=true")
+        };
+
+        if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Organization))
+        {
+            sonarSettings.Organization = buildContext.General.SonarQube.Organization;
+        }
+
+        if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Username))
+        {
+            sonarSettings.Login = buildContext.General.SonarQube.Username;
+        }
+
+        if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Password))
+        {
+            sonarSettings.Password = buildContext.General.SonarQube.Password;
+        }
+
+        // see https://cakebuild.net/api/Cake.Sonar/SonarBeginSettings/ for more information on
+        // what to set for SonarCloud
+
+        // Branch only works with the branch plugin. Documentation A says it's outdated, but
+        // B still mentions it:
+        // A: https://docs.sonarqube.org/latest/branches/overview/
+        // B: https://docs.sonarqube.org/latest/analysis/analysis-parameters/
+        if (buildContext.General.SonarQube.SupportBranches)
+        {
+            // TODO: How to support PR?
+            sonarSettings.Branch = buildContext.General.Repository.BranchName;
+        }
+
+        Information("Beginning SonarQube");
+
+        SonarBegin(sonarSettings);
     }
     else
     {
@@ -276,91 +354,81 @@ Task("Build")
 
     try
     {
+        if (buildContext.General.Solution.BuildSolution)
+        {
+            BuildSolution(buildContext);
+        }
+
         foreach (var processor in buildContext.Processors)
         {
+            if (processor is TestProcessor)
+            {
+                // Build test projects *after* SonarQube (not part of SQ analysis)
+                continue;
+            }
+
             await processor.BuildAsync();
-        }        
+        }
     }
     finally
     {
         if (enableSonar)
         {
-            SonarEnd(new SonarEndSettings 
+            try
             {
-                Login = buildContext.General.SonarQube.Username,
-                Password = buildContext.General.SonarQube.Password,
-            });
+                await buildContext.SourceControl.MarkBuildAsPendingAsync("SonarQube");
 
-            var projectSpecificSonarUrl = $"{sonarUrl}/dashboard?id={buildContext.General.SonarQube.Project}";
+                var sonarEndSettings = new SonarEndSettings
+                {
+                    // Use core clr version of SonarQube
+                    UseCoreClr = true
+                };
 
-            Information($"Not checking the actual SonarQube quality gates, please visit {projectSpecificSonarUrl} for details about the quality gate");
+                if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Username))
+                {
+                    sonarEndSettings.Login = buildContext.General.SonarQube.Username;
+                }
 
-            // Information("Checking whether the project passed the SonarQube gateway...");
-                
-            // var status = "none";
+                if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Password))
+                {
+                    sonarEndSettings.Password = buildContext.General.SonarQube.Password;
+                }
 
-            // // We need to use /api/qualitygates/project_status
-            // var client = new System.Net.Http.HttpClient();
-            // using (client)
-            // {
-            //     var queryUri = string.Format("{0}/api/qualitygates/project_status?projectKey={1}", sonarUrl, buildContext.General.SonarQube.Project);
+                Information("Ending SonarQube");
 
-            //     System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls;
+                SonarEnd(sonarEndSettings);
 
-            //     var byteArray = Encoding.ASCII.GetBytes(string.Format("{0}:{1}", buildContext.General.SonarQube.Username, buildContext.General.SonarQube.Password));
-            //     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-            //     client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                await buildContext.SourceControl.MarkBuildAsSucceededAsync("SonarQube");
+            }
+            catch (Exception)
+            {
+                var projectSpecificSonarUrl = $"{sonarUrl}/dashboard?id={buildContext.General.SonarQube.Project}";
 
-            //     Debug("Invoking GET request: '{0}'", queryUri);
+                if (buildContext.General.SonarQube.SupportBranches)
+                {
+                    projectSpecificSonarUrl += $"&branch={buildContext.General.Repository.BranchName}";
+                }
 
-            //     var response = await client.GetAsync(new Uri(queryUri));
+                var failedDescription = $"SonarQube failed, please visit '{projectSpecificSonarUrl}' for more details";
 
-            //     Debug("Parsing request contents");
-
-            //     var content = response.Content;
-            //     var jsonContent = await content.ReadAsStringAsync();
-
-            //     Debug(jsonContent);
-
-            //     dynamic result = Newtonsoft.Json.Linq.JObject.Parse(jsonContent);
-            //     status = result.projectStatus.status;
-            // }
-
-            // Information("SonarQube gateway status returned from request: '{0}'", status);
-
-            // if (string.IsNullOrWhiteSpace(status))
-            // {
-            //     status = "none";
-            // }
-
-            // status = status.ToLower();
-
-            // switch (status)
-            // {
-            //     case "error":
-            //         throw new Exception(string.Format("The SonarQube gateway for '{0}' returned ERROR, please check the error(s) at {1}/dashboard?id={0}", buildContext.General.SonarQube.Project, sonarUrl));
-
-            //     case "warn":
-            //         Warning("The SonarQube gateway for '{0}' returned WARNING, please check the warning(s) at {1}/dashboard?id={0}", buildContext.General.SonarQube.Project, sonarUrl);
-            //         break;
-
-            //     case "none":
-            //         Warning("The SonarQube gateway for '{0}' returned NONE, please check why no gateway status is available at {1}/dashboard?id={0}", buildContext.General.SonarQube.Project, sonarUrl);
-            //         break;
-
-            //     case "ok":
-            //         Information("The SonarQube gateway for '{0}' returned OK, well done! If you want to show off the results, check out {1}/dashboard?id={0}", buildContext.General.SonarQube.Project, sonarUrl);
-            //         break;
-
-            //     default:
-            //         throw new Exception(string.Format("Unexpected SonarQube gateway status '{0}' for project '{1}'", status, buildContext.General.SonarQube.Project));
-            // }
+                await buildContext.SourceControl.MarkBuildAsFailedAsync("SonarQube", failedDescription);
+                throw;
+            }
         }
     }
 
-    BuildTestProjects(buildContext);
+    var testProcessor = buildContext.Processors.FirstOrDefault(x => x is TestProcessor) as TestProcessor;
+    if (testProcessor is not null)
+    {
+        // Build test projects *after* SonarQube (not part of SQ analysis). Unfortunately, because of this, we cannot yet mark
+        // the build as succeeded once we end the SQ session. Therefore, if SQ fails, both the SQ *and* build checks
+        // will be marked as failed if SQ fails.
+        await testProcessor.BuildAsync();
+    }
 
     await buildContext.SourceControl.MarkBuildAsSucceededAsync("Build");
+
+    Information("Completed build for version '{0}'", buildContext.General.Version.NuGet);
 })
 .OnError<BuildContext>((ex, buildContext) => 
 {
@@ -372,6 +440,7 @@ Task("Build")
 //-------------------------------------------------------------
 
 Task("Test")
+    .IsDependentOn("Prepare")
     // Note: no dependency on 'build' since we might have already built the solution
     .Does<BuildContext>(async buildContext =>
 {    
@@ -385,6 +454,8 @@ Task("Test")
     }
 
     await buildContext.SourceControl.MarkBuildAsSucceededAsync("Test");
+
+    Information("Completed tests for version '{0}'", buildContext.General.Version.NuGet);
 })
 .OnError<BuildContext>((ex, buildContext) => 
 {
@@ -408,6 +479,8 @@ Task("Package")
     {
         await processor.PackageAsync();
     }
+
+    Information("Completed packaging for version '{0}'", buildContext.General.Version.NuGet);
 });
 
 //-------------------------------------------------------------
@@ -435,8 +508,9 @@ Task("PackageLocal")
         {
             Information("Copying build artifact for '{0}'", component);
         
-            var sourceFile = string.Format("{0}/{1}.{2}.nupkg", buildContext.General.OutputRootDirectory, 
-                component, buildContext.General.Version.NuGet);
+            var sourceFile = System.IO.Path.Combine(buildContext.General.OutputRootDirectory, 
+                $"{component}.{buildContext.General.Version.NuGet}.nupkg");
+                
             CopyFiles(new [] { sourceFile }, localPackagesDirectory);
         }
         catch (Exception)
@@ -445,6 +519,8 @@ Task("PackageLocal")
             Warning("Failed to copy build artifacts for '{0}'", component);
         }
     }
+
+    Information("Copied build artifacts for version '{0}'", buildContext.General.Version.NuGet);
 });
 
 //-------------------------------------------------------------
