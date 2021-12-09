@@ -34,7 +34,7 @@ namespace Orc.Skia
     /// <remarks>
     /// Some parts are based on https://raw.githubusercontent.com/mono/SkiaSharp/master/source/SkiaSharp.Views/SkiaSharp.Views.UWP/SKXamlCanvas.cs (MIT).
     /// </remarks>
-    public class SkiaCanvas : Canvas
+    public class SkiaCanvas : Canvas, ISkiaElement
     {
         #region Fields
         private readonly object _syncObject = new object();

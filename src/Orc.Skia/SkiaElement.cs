@@ -5,7 +5,7 @@
     using SkiaSharp.Views.Desktop;
     using SkiaSharp.Views.WPF;
 
-    public class SkiaElement : SKElement
+    public class SkiaElement : SKElement, ISkiaElement
     {
         public event EventHandler<CanvasRenderingEventArgs> Rendering;
 
