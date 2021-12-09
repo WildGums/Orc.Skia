@@ -1,11 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SkiaCanvas.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿#pragma warning disable 414
 
-
-#pragma warning disable 414
 
 namespace Orc.Skia
 {
@@ -165,35 +159,34 @@ namespace Orc.Skia
                 // draw on the bitmap
                 _bitmap.Lock();
 
-//#pragma warning disable IDISP001 // Dispose created.
-//                var renderContext = CreateRenderContext();
-//#pragma warning restore IDISP001 // Dispose created.
-//                if (renderContext is not null)
-//                {
-//                    try
-//                    {
-                        using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
-                        //using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
+#pragma warning disable IDISP001 // Dispose created.
+                var renderContext = CreateRenderContext();
+#pragma warning restore IDISP001 // Dispose created.
+                if (renderContext is not null)
+                {
+                    try
+                    {
+                        // using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                        using var surface = SKSurface.Create(renderContext, false, _skImageInfo);
+
+                        var canvas = surface.Canvas;
+                        using (new RenderingScope(this, canvas))
                         {
-                            var canvas = surface.Canvas;
-                            using (new RenderingScope(this, canvas))
-                            {
-                                var eventArgs = new CanvasRenderingEventArgs(canvas);
+                            var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                                OnRendering(canvas);
-                                Rendering?.Invoke(this, eventArgs);
+                            OnRendering(canvas);
+                            Rendering?.Invoke(this, eventArgs);
 
-                                Render(canvas, isClearCanvas);
+                            Render(canvas, isClearCanvas);
 
-                                Rendered?.Invoke(this, eventArgs);
-                                OnRendered(canvas);
-                            }
-                        //}
-                    //}
-                    //finally
-                    //{
-                    //    renderContext?.Dispose();
-                    //}
+                            Rendered?.Invoke(this, eventArgs);
+                            OnRendered(canvas);
+                        }
+                    }
+                    finally
+                    {
+                        renderContext?.Dispose();
+                    }
                 }
 
                 // draw the bitmap to the screen
