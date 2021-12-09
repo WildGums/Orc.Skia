@@ -37,7 +37,6 @@ namespace Orc.Skia
     public class SkiaCanvas : Canvas
     {
         #region Fields
-        private readonly TimeSpan _frameDelay = TimeSpan.FromMilliseconds(5);
         private readonly object _syncObject = new object();
 
         protected double DpiX;
@@ -48,11 +47,12 @@ namespace Orc.Skia
 
         private bool _ignorePixelScaling;
         private SKImageInfo _skImageInfo;
-        private DateTime _lastTime = DateTime.Now;
         private bool _isRendering = false;
         private int _renderScopeCounter;
         private IntPtr _pixels;
         private WriteableBitmap _bitmap;
+
+        private Stopwatch _stopwatch;
         #endregion
 
         #region Constructors
@@ -63,6 +63,9 @@ namespace Orc.Skia
             SizeChanged += OnSizeChanged;
             CompositionTarget.Rendering += OnCompositionTargetRendering;
 
+            _stopwatch = Stopwatch.StartNew();
+            FrameDelayInMilliseconds = 5;
+
             // Allow all by default
             _canUseVulkan = true;
             _canUseGl = true;
@@ -70,6 +73,8 @@ namespace Orc.Skia
         #endregion
 
         #region Properties
+        public int FrameDelayInMilliseconds { get; set; }
+
         public bool IgnorePixelScaling
         {
             get { return _ignorePixelScaling; }
@@ -119,19 +124,19 @@ namespace Orc.Skia
         TARGET PLATFORM NOT YET SUPPORTED
 #endif
         {
-            if (DateTime.Now - _lastTime < _frameDelay)
+            if (_stopwatch.ElapsedMilliseconds < FrameDelayInMilliseconds)
             {
                 return;
             }
 
             Update();
 
-            _lastTime = DateTime.Now;
+            _stopwatch = Stopwatch.StartNew();
         }
 
         public void Update()
         {
-            if (ActualWidth == 0 || ActualHeight == 0 || Visibility != Visibility.Visible)
+            if (ActualWidth == 0 || ActualHeight == 0 || !IsVisible)
             {
                 return;
             }
