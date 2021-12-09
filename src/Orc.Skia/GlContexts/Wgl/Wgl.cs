@@ -1,10 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Wgl.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
+﻿// ReSharper disable All
+#pragma warning disable IDE1006 // Naming Styles
 namespace Orc.Skia
 {
     using System;
@@ -85,6 +80,7 @@ namespace Orc.Skia
         public static readonly wglGetPbufferDCARBDelegate wglGetPbufferDCARB;
         public static readonly wglReleasePbufferDCARBDelegate wglReleasePbufferDCARB;
         public static readonly wglSwapIntervalEXTDelegate wglSwapIntervalEXT;
+
         #endregion
 
         #region Constructors
@@ -188,7 +184,7 @@ namespace Orc.Skia
         #region Methods
         public static bool HasExtension(IntPtr dc, string ext)
         {
-            if (wglGetExtensionsStringARB == null)
+            if (wglGetExtensionsStringARB is null)
             {
                 return false;
             }
@@ -299,3 +295,4 @@ namespace Orc.Skia
     [return: MarshalAs(UnmanagedType.Bool)]
     public delegate bool wglSwapIntervalEXTDelegate(int interval);
 }
+#pragma warning restore IDE1006 // Naming Styles

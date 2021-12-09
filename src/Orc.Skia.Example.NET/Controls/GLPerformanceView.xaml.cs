@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GLPerformanceView.xaml.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia.Example.Controls
+﻿namespace Orc.Skia.Example.Controls
 {
     using System.Diagnostics;
     using System.Windows;
@@ -23,7 +16,7 @@ namespace Orc.Skia.Example.Controls
         {
             InitializeComponent();
 
-            skiaCanvas.Rendering += OnSkiaCanvasRendering;
+            GLSkCanvas.Rendering += OnSkiaCanvasRendering;
         }
         #endregion
 
@@ -36,7 +29,7 @@ namespace Orc.Skia.Example.Controls
 
             for (var i = 0; i < count; i++)
             {
-                skiaCanvas.Update();
+                GLSkCanvas.Update();
             }
 
             stopwatch.Stop();

@@ -5,7 +5,7 @@
   <Obsolete />
   <Catel />
   <Costura>
-    <IncludeAssemblies>
+    <!--<IncludeAssemblies>
             SkiaSharp
             OpenTK
             OpenTK.GLControl
@@ -13,7 +13,7 @@
             SkiaSharp.Views.Desktop.Common
             SkiaSharp.Views.WindowsForms
             SkiaSharp.Views.WPF
-        </IncludeAssemblies>
+        </IncludeAssemblies>-->
     <Unmanaged32Assemblies>
             libSkiaSharp
         </Unmanaged32Assemblies>

@@ -26,7 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Update="Catel.Analyzers" Version="1.4.2" />
     <PackageReference Update="NETStandard.Library" Version="2.0.3" />
+    <PackageReference Update="WpfAnalyzers" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>

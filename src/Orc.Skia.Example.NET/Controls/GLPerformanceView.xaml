@@ -28,6 +28,6 @@
             <TextBlock x:Name="fpsTextBlock" />
         </StackPanel>
 
-        <orcskia:GLSkiaCanvas x:Name="skiaCanvas" Grid.Column="1"/>
+        <orcskia:GLSkiaCanvas x:Name="GLSkCanvas" Grid.Column="1"/>
     </Grid>
 </UserControl>

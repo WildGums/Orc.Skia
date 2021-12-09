@@ -1,29 +1,21 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GLSkiaCanvas.xaml.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia
+﻿namespace Orc.Skia
 {
     using System;
     using System.Windows;
-    using System.Windows.Controls;
     using SkiaSharp;
     using SkiaSharp.Views.Desktop;
 
     /// <summary>
     /// Interaction logic for GLSkiaCanvas.xaml
     /// </summary>
-    public partial class GLSkiaCanvas : UserControl
+    public partial class GLSkiaCanvas
     {
         private SKSurface _surface;
         private GRContext _grContext;
         private SKSize _screenCanvasSize;
         private SKImageInfo _info;
 
-        private readonly WglContext _glContext = new WglContext();
+        private readonly WglContext _glContext = new();
 
         #region Constructors
         public GLSkiaCanvas()
@@ -62,7 +54,7 @@ namespace Orc.Skia
                 _surface?.Dispose();
                 _grContext?.Dispose();
 
-                _grContext = GRContext.Create(GRBackend.OpenGL);
+                _grContext = GRContext.CreateGl();
                 _surface = SKSurface.Create(_grContext, true, new SKImageInfo(width, height));
 
                 _screenCanvasSize = canvasSize;
