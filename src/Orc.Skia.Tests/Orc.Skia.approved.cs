@@ -14,6 +14,12 @@ namespace Orc.Skia
         public CanvasRenderingEventArgs(SkiaSharp.SKCanvas canvas) { }
         public SkiaSharp.SKCanvas Canvas { get; }
     }
+    public interface ISkiaElement
+    {
+        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
+        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        void Update();
+    }
     public enum LineType
     {
         Solid = 0,
@@ -95,11 +101,12 @@ namespace Orc.Skia
         public static System.Windows.Size ToSize(this SkiaSharp.SKSize size) { }
         public static System.Windows.Size ToSize(this SkiaSharp.SKSizeI size) { }
     }
-    public class SkiaCanvas : System.Windows.Controls.Canvas
+    public class SkiaCanvas : System.Windows.Controls.Canvas, Orc.Skia.ISkiaElement
     {
         protected double DpiX;
         protected double DpiY;
         public SkiaCanvas() { }
+        public int FrameDelayInMilliseconds { get; set; }
         public bool IgnorePixelScaling { get; set; }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
@@ -118,7 +125,7 @@ namespace Orc.Skia
         protected virtual void Terminate() { }
         public void Update() { }
     }
-    public class SkiaElement : SkiaSharp.Views.WPF.SKElement
+    public class SkiaElement : SkiaSharp.Views.WPF.SKElement, Orc.Skia.ISkiaElement
     {
         public SkiaElement() { }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
