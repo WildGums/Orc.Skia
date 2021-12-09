@@ -62,7 +62,9 @@
 
                     var stopwatch = Stopwatch.StartNew();
 
-                    skiaElement.Update();
+                    // Instead of calling Update, call InvalidateRect for fair comparison
+                    skiaFxElement.InvalidateVisual();
+                    //skiaElement.Update();
 
                     await tsc.Task;
 
