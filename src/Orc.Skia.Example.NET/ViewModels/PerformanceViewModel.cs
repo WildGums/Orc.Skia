@@ -17,10 +17,29 @@
             {
                 new PerformanceTest
                 {
-                    Name = "SkiaCanvas",
+                    Name = "SkiaCanvas (Raster)",
                     CanvasElement = new SkiaCanvas
                     {
-                        FrameDelayInMilliseconds = 0 // for performance test only
+                        FrameDelayInMilliseconds = 0, // for performance test only
+                        RenderingType = RenderingType.Raster
+                    }
+                },
+                new PerformanceTest
+                {
+                    Name = "SkiaCanvas (OpenGL)",
+                    CanvasElement = new SkiaCanvas
+                    {
+                        FrameDelayInMilliseconds = 0, // for performance test only
+                        RenderingType = RenderingType.OpenGL
+                    }
+                },
+                new PerformanceTest
+                {
+                    Name = "SkiaCanvas (Vulkan)",
+                    CanvasElement = new SkiaCanvas
+                    {
+                        FrameDelayInMilliseconds = 0, // for performance test only
+                        RenderingType = RenderingType.Vulkan
                     }
                 },
                 new PerformanceTest

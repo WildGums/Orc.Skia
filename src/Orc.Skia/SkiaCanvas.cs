@@ -56,6 +56,8 @@ namespace Orc.Skia
 
         public static Win32VkContext _vulkanContext;
         internal static WglContext _wglContext;
+
+        private readonly DispatcherTimer _vulkanInitTimer = new() { Interval = TimeSpan.FromMilliseconds(2000) };
         #endregion
 
         #region Constructors
@@ -72,6 +74,8 @@ namespace Orc.Skia
             // Allow all by default
             _canUseVulkan = true;
             _canUseGl = true;
+
+            _vulkanInitTimer.Tick +=OnVulkanInitTimerTick;
         }
         #endregion
 
@@ -204,11 +208,11 @@ namespace Orc.Skia
 
                    if (renderContext is not null)
                    {
-                       using (var surface2 = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
-                       {
-                           surface2.Canvas.DrawSurface(surface, new SKPoint(0f, 0f));
-                       }
-                   }
+                        using (var surface2 = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                        {
+                            surface2.Canvas.DrawSurface(surface, new SKPoint(0f, 0f));
+                        }
+                    }
                 }
                 finally
                 {
@@ -233,10 +237,15 @@ namespace Orc.Skia
                 }
             }
         }
-        
+
         private GRContext CreateVulkan()
         {
-            _vulkanContext ??= new Win32VkContext();
+            if (_vulkanContext is null)
+            {
+                _vulkanInitTimer.Start();
+
+                return null;
+            }
 
             using var grVkBackendContext = new GRSharpVkBackendContext
             {
@@ -251,6 +260,13 @@ namespace Orc.Skia
             var grContext = GRContext.CreateVulkan(grVkBackendContext);
 
             return grContext;
+        }
+
+        private void OnVulkanInitTimerTick(object sender, EventArgs e)
+        {
+            _vulkanInitTimer.Stop();
+
+            _vulkanContext ??= new Win32VkContext();
         }
 
         private GRContext CreateOpenGL()
