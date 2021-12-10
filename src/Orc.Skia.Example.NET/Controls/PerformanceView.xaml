@@ -107,6 +107,19 @@
                                 <TextBlock Text="FPS" />
                                 <TextBlock Text="{Binding Result.FramesPerSecond}" />
                             </orccontrols:StackGrid>
+
+                            <ProgressBar Visibility="{Binding IsRunningTests, Converter={catel:BooleanToCollapsingVisibilityConverter}}"
+                                         Grid.RowSpan="2"
+                                         IsEnabled="True"
+                                         IsIndeterminate="True"
+                                         Minimum="0"
+                                         Maximum="100"
+                                         Value="50"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"
+                                         Width="64"
+                                         Height="64"
+                                         Style="{StaticResource Orc.Styles.ProgressBar.Circular}"/>
                         </orccontrols:StackGrid>
                     </GroupBox>
                 </DataTemplate>

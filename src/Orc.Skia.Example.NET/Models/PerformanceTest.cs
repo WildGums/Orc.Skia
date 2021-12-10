@@ -9,5 +9,7 @@
         public ISkiaElement CanvasElement { get; set; }
 
         public PerformanceTestResult Result { get; set; }
+
+        public bool IsRunningTests { get; set; }
     }
 }

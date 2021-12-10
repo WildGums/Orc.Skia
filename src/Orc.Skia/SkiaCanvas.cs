@@ -42,9 +42,6 @@ namespace Orc.Skia
         protected double DpiY;
 #pragma warning restore IDE1006 // Naming Styles
 
-        private bool _canUseVulkan;
-        private bool _canUseGl;
-
         private bool _ignorePixelScaling;
         private SKImageInfo _skImageInfo;
         private bool _isRendering = false;
@@ -54,10 +51,8 @@ namespace Orc.Skia
 
         private Stopwatch _stopwatch;
 
-        public static Win32VkContext _vulkanContext;
+        internal static Win32VkContext _vulkanContext;
         internal static WglContext _wglContext;
-
-        private readonly DispatcherTimer _vulkanInitTimer = new() { Interval = TimeSpan.FromMilliseconds(2000) };
         #endregion
 
         #region Constructors
@@ -70,12 +65,6 @@ namespace Orc.Skia
 
             _stopwatch = Stopwatch.StartNew();
             FrameDelayInMilliseconds = 5;
-
-            // Allow all by default
-            _canUseVulkan = true;
-            _canUseGl = true;
-
-            _vulkanInitTimer.Tick +=OnVulkanInitTimerTick;
         }
         #endregion
 
@@ -153,6 +142,11 @@ namespace Orc.Skia
 
         public void Update()
         {
+            if (TestTemp.CurrentRenderingType != RenderingType)
+            {
+                return;
+            }
+
             if (ActualWidth == 0 || ActualHeight == 0 || !IsVisible)
             {
                 return;
@@ -238,16 +232,12 @@ namespace Orc.Skia
             }
         }
 
-        private GRContext CreateVulkan()
+        protected virtual GRContext CreateVulkan()
         {
-            if (_vulkanContext is null)
-            {
-                _vulkanInitTimer.Start();
+            _vulkanContext ??= new Win32VkContext();
 
-                return null;
-            }
-
-            using var grVkBackendContext = new GRSharpVkBackendContext
+#pragma warning disable IDISP001 // Dispose created.
+            var grVkBackendContext = new GRSharpVkBackendContext
             {
                 VkInstance = _vulkanContext.Instance,
                 VkPhysicalDevice = _vulkanContext.PhysicalDevice,
@@ -256,20 +246,14 @@ namespace Orc.Skia
                 GraphicsQueueIndex = _vulkanContext.GraphicsFamily,
                 GetProcedureAddress = _vulkanContext.SharpVkGetProc
             };
+#pragma warning restore IDISP001 // Dispose created.
 
             var grContext = GRContext.CreateVulkan(grVkBackendContext);
 
             return grContext;
         }
 
-        private void OnVulkanInitTimerTick(object sender, EventArgs e)
-        {
-            _vulkanInitTimer.Stop();
-
-            _vulkanContext ??= new Win32VkContext();
-        }
-
-        private GRContext CreateOpenGL()
+        protected virtual GRContext CreateOpenGl()
         {
             if (_wglContext is null)
             {
@@ -280,7 +264,7 @@ namespace Orc.Skia
             return GRContext.CreateGl();
         }
         
-        protected GRContext CreateRenderContext()
+        protected virtual GRContext CreateRenderContext()
         {
             if (RenderingType == RenderingType.Vulkan)
             {
@@ -289,7 +273,7 @@ namespace Orc.Skia
 
             if (RenderingType == RenderingType.OpenGL)
             {
-                return CreateOpenGL();
+                return CreateOpenGl();
             }
 
             //otherwise use Raster
@@ -447,8 +431,6 @@ namespace Orc.Skia
 
         protected virtual void Initialize()
         {
-            _wglContext?.MakeCurrent();
-
             if (RecalculateDpi())
             {
                 Invalidate();
@@ -458,7 +440,11 @@ namespace Orc.Skia
         protected virtual void Terminate()
         {
             _vulkanContext?.Dispose();
+            _vulkanContext = null;
+
             _wglContext?.Destroy();
+            ((IDisposable)_wglContext)?.Dispose();
+            _wglContext = null;
 
             FreeBitmap();
         }

@@ -9,12 +9,20 @@
 
     public class PerformanceViewModel : ViewModelBase
     {
+        private readonly Random _random = new Random();
+
         public PerformanceViewModel()
         {
             RunTests = new TaskCommand<string>(OnRunTestsExecuteAsync);
 
             PerformanceTests = new List<PerformanceTest>(new[]
             {
+                new PerformanceTest
+                {
+                    Name = "SkiaElement (SkiaSharp)",
+                    CanvasElement = new SkiaElement()
+                },
+
                 new PerformanceTest
                 {
                     Name = "SkiaCanvas (Raster)",
@@ -24,15 +32,7 @@
                         RenderingType = RenderingType.Raster
                     }
                 },
-                new PerformanceTest
-                {
-                    Name = "SkiaCanvas (OpenGL)",
-                    CanvasElement = new SkiaCanvas
-                    {
-                        FrameDelayInMilliseconds = 0, // for performance test only
-                        RenderingType = RenderingType.OpenGL
-                    }
-                },
+
                 new PerformanceTest
                 {
                     Name = "SkiaCanvas (Vulkan)",
@@ -42,10 +42,15 @@
                         RenderingType = RenderingType.Vulkan
                     }
                 },
+
                 new PerformanceTest
                 {
-                    Name = "SkiaElement",
-                    CanvasElement = new SkiaElement()
+                    Name = "SkiaCanvas (OpenGL)",
+                    CanvasElement = new SkiaCanvas
+                    {
+                        FrameDelayInMilliseconds = 0, // for performance test only
+                        RenderingType = RenderingType.OpenGL
+                    }
                 }
             });
         }
@@ -60,9 +65,13 @@
 
             foreach (var performanceTest in PerformanceTests)
             {
+                performanceTest.IsRunningTests = true;
+
                 var skiaElement = performanceTest.CanvasElement;
                 var skiaFxElement = (FrameworkElement)skiaElement;
                 var performanceTestResult = new PerformanceTestResult();
+
+                TestTemp.CurrentRenderingType = (skiaElement as SkiaCanvas)?.RenderingType;
 
                 skiaElement.Rendering += OnSkiaRendering;
 
@@ -95,12 +104,20 @@
                 skiaElement.Rendering -= OnSkiaRendering;
 
                 performanceTest.Result = performanceTestResult;
+
+                // Pause for better results
+                await Task.Delay(100);
+
+                performanceTest.IsRunningTests = false;
             }
         }
 
         private void OnSkiaRendering(object sender, CanvasRenderingEventArgs e)
         {
-            CanvasTest.RunTests(e.Canvas);
+            var left = _random.Next(0, 100);
+            var top = _random.Next(0, 100);
+
+            CanvasTest.RunTests(e.Canvas, left, top);
         }
     }
 }

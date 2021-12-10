@@ -53,7 +53,7 @@ namespace Orc.Skia.Example.Controls
         {
             if (canvas is not null)
             {
-                CanvasTest.RunTests(canvas);
+                CanvasTest.RunTests(canvas, 0, 0);
             }
         }
 

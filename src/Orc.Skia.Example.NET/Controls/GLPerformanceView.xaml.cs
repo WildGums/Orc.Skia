@@ -44,7 +44,7 @@
 
         private void OnSkiaCanvasRendering(object sender, CanvasRenderingEventArgs e)
         {
-            CanvasTest.RunTests(e.Canvas);
+            CanvasTest.RunTests(e.Canvas, 0, 0);
         }
         #endregion
     }

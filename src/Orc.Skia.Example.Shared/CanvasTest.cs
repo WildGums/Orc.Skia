@@ -32,7 +32,7 @@ namespace Orc.Skia.Example
         /// The run tests.
         /// </summary>
         /// <param name="canvas">The canvas.</param>
-        internal static void RunTests(SKCanvas canvas)
+        internal static void RunTests(SKCanvas canvas, int leftOffset, int topOffset)
         {
             var colorData = BuildColor(255, 28, 255);
 
@@ -40,22 +40,22 @@ namespace Orc.Skia.Example
             var dashedLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dashed);
             var dottedLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dotted);
 
-            canvas.DrawHorizontalLine(new Point(10, 10), new Point(210, 15), solidLinePaint);
-            canvas.DrawHorizontalLine(new Point(10, 30), new Point(210, 35), dashedLinePaint);
-            canvas.DrawHorizontalLine(new Point(10, 50), new Point(210, 55), dottedLinePaint);
+            canvas.DrawHorizontalLine(new Point(10 + leftOffset, 10), new Point(210, 15), solidLinePaint);
+            canvas.DrawHorizontalLine(new Point(10 + leftOffset, 30), new Point(210, 35), dashedLinePaint);
+            canvas.DrawHorizontalLine(new Point(10 + leftOffset, 50), new Point(210, 55), dottedLinePaint);
 
             colorData = BuildColor(0, 0, 255);
-            canvas.DrawHorizontalLine(new Point(150, 290), new Point(440, 296), dashedLinePaint);
-            canvas.DrawHorizontalLine(new Point(150, 300), new Point(440, 306), dottedLinePaint);
+            canvas.DrawHorizontalLine(new Point(150 + leftOffset, 290), new Point(440, 296), dashedLinePaint);
+            canvas.DrawHorizontalLine(new Point(150 + leftOffset, 300), new Point(440, 306), dottedLinePaint);
 
             colorData = BuildColor(255, 0, 0);
-            canvas.DrawVerticalLine(new Point(550, 90), new Point(556, 380), dashedLinePaint);
-            canvas.DrawVerticalLine(new Point(560, 90), new Point(566, 380), dottedLinePaint);
+            canvas.DrawVerticalLine(new Point(550 + leftOffset, 90), new Point(556, 380), dashedLinePaint);
+            canvas.DrawVerticalLine(new Point(560 + leftOffset, 90), new Point(566, 380), dottedLinePaint);
 
             colorData = BuildColor(155, 155, 255);
-            canvas.DrawVerticalLine(new Point(310, 10), new Point(315, 210), solidLinePaint);
-            canvas.DrawVerticalLine(new Point(330, 10), new Point(335, 210), dashedLinePaint);
-            canvas.DrawVerticalLine(new Point(350, 10), new Point(355, 210), dottedLinePaint);
+            canvas.DrawVerticalLine(new Point(310 + leftOffset, 10), new Point(315, 210), solidLinePaint);
+            canvas.DrawVerticalLine(new Point(330 + leftOffset, 10), new Point(335, 210), dashedLinePaint);
+            canvas.DrawVerticalLine(new Point(350 + leftOffset, 10), new Point(355, 210), dottedLinePaint);
 
             colorData = BuildColor(255, 155, 155);
 
