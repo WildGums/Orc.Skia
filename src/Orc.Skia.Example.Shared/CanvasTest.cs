@@ -9,6 +9,7 @@
 
 namespace Orc.Skia.Example
 {
+    using System;
     using System.Collections.Generic;
     using SkiaSharp;
     using Orc.Theming;
@@ -28,6 +29,32 @@ namespace Orc.Skia.Example
     public class CanvasTest
     {
         #region Methods
+        internal static void RunLineTests(SKCanvas canvas)
+        {
+            var rand = new Random();
+
+            canvas.Clear(SKColor.Parse("#003366"));
+            for (var i = 0; i < 10000; i++)
+            {
+                var paint = new SKPaint
+                {
+                    Color = new SKColor(
+                        red: (byte)rand.Next(255),
+                        green: (byte)rand.Next(255),
+                        blue: (byte)rand.Next(255),
+                        alpha: (byte)rand.Next(255)),
+                    StrokeWidth = rand.Next(1, 10),
+                    IsAntialias = true
+                };
+                canvas.DrawLine(
+                    x0: rand.Next(400),
+                    y0: rand.Next(588),
+                    x1: rand.Next(400),
+                    y1: rand.Next(588),
+                    paint: paint);
+            }
+        }
+
         /// <summary>
         /// The run tests.
         /// </summary>

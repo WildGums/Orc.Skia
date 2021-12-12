@@ -51,15 +51,15 @@
                 //    }
                 //},
 
-                //new PerformanceTest
-                //{
-                //    Name = "SkiaCanvas (OpenGL)",
-                //    CanvasElement = new SkiaCanvas
-                //    {
-                //        FrameDelayInMilliseconds = 0, // for performance test only
-                //        RenderingType = RenderingType.OpenGL
-                //    }
-                //}
+                new PerformanceTest
+                {
+                    Name = "SkiaCanvas (OpenGL)",
+                    CanvasElement = new SkiaCanvas
+                    {
+                        FrameDelayInMilliseconds = 0, // for performance test only
+                        RenderingType = RenderingType.OpenGL
+                    }
+                }
             });
         }
 
@@ -127,12 +127,12 @@
                 return;
             }
 
-            var left = _random.Next(0, 100);
-            var top = _random.Next(0, 100);
+      //      var left = _random.Next(0, 100);
+      //      var top = _random.Next(0, 100);
 
-            e.Canvas.Clear(Color.White.ToSKColor());
+          //  e.Canvas.Clear(Color.White.ToSKColor());
 
-            CanvasTest.RunTests(e.Canvas, left, top);
+            CanvasTest.RunLineTests(e.Canvas);
         }
     }
 }
