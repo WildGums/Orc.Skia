@@ -35,6 +35,7 @@
             </TabItem>
 
             <TabItem Header="GL">
+                <WindowsFormsHost x:Name="Host"/>
                 <!--<controls:GLPerformanceView/>-->
             </TabItem>
         </orccontrols:TabControl>

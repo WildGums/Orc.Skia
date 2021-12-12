@@ -3,9 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Drawing;
     using System.Threading.Tasks;
     using System.Windows;
     using Catel.MVVM;
+    using SkiaSharp.Views.Desktop;
 
     public class PerformanceViewModel : ViewModelBase
     {
@@ -17,6 +19,12 @@
 
             PerformanceTests = new List<PerformanceTest>(new[]
             {
+                new PerformanceTest()
+                {
+                    Name = "Host",
+                    CanvasElement = new HostFormSkiaCanvas()
+                },
+
                 new PerformanceTest
                 {
                     Name = "SkiaElement (SkiaSharp)",
@@ -33,25 +41,25 @@
                     }
                 },
 
-                new PerformanceTest
-                {
-                    Name = "SkiaCanvas (Vulkan)",
-                    CanvasElement = new SkiaCanvas
-                    {
-                        FrameDelayInMilliseconds = 0, // for performance test only
-                        RenderingType = RenderingType.Vulkan
-                    }
-                },
+                //new PerformanceTest
+                //{
+                //    Name = "SkiaCanvas (Vulkan)",
+                //    CanvasElement = new SkiaCanvas
+                //    {
+                //        FrameDelayInMilliseconds = 0, // for performance test only
+                //        RenderingType = RenderingType.Vulkan
+                //    }
+                //},
 
-                new PerformanceTest
-                {
-                    Name = "SkiaCanvas (OpenGL)",
-                    CanvasElement = new SkiaCanvas
-                    {
-                        FrameDelayInMilliseconds = 0, // for performance test only
-                        RenderingType = RenderingType.OpenGL
-                    }
-                }
+                //new PerformanceTest
+                //{
+                //    Name = "SkiaCanvas (OpenGL)",
+                //    CanvasElement = new SkiaCanvas
+                //    {
+                //        FrameDelayInMilliseconds = 0, // for performance test only
+                //        RenderingType = RenderingType.OpenGL
+                //    }
+                //}
             });
         }
 
@@ -83,7 +91,7 @@
                     handler = (sender, e) =>
                     {
                         skiaElement.Rendered -= handler;
-                        tsc.SetResult();
+                       tsc.SetResult();
                     };
 
                     skiaElement.Rendered += handler;
@@ -91,8 +99,8 @@
                     var stopwatch = Stopwatch.StartNew();
 
                     // Instead of calling Update, call InvalidateRect for fair comparison
-                    skiaFxElement.InvalidateVisual();
-                    //skiaElement.Update();
+                //    skiaFxElement.InvalidateVisual();
+                   skiaElement.Update();
 
                     await tsc.Task;
 
@@ -114,8 +122,15 @@
 
         private void OnSkiaRendering(object sender, CanvasRenderingEventArgs e)
         {
+            if (e.Canvas is null)
+            {
+                return;
+            }
+
             var left = _random.Next(0, 100);
             var top = _random.Next(0, 100);
+
+            e.Canvas.Clear(Color.White.ToSKColor());
 
             CanvasTest.RunTests(e.Canvas, left, top);
         }
