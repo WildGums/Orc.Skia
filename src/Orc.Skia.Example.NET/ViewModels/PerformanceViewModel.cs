@@ -19,6 +19,16 @@
 
             PerformanceTests = new List<PerformanceTest>(new[]
             {
+                //new PerformanceTest
+                //{
+                //    Name = "SkiaCanvas (OpenGL)",
+                //    CanvasElement = new SkiaCanvas
+                //    {
+                //        FrameDelayInMilliseconds = 0, // for performance test only
+                //        RenderingType = RenderingType.OpenGL
+                //    }
+                //},
+
                 new PerformanceTest()
                 {
                     Name = "Host",
@@ -49,17 +59,8 @@
                 //        FrameDelayInMilliseconds = 0, // for performance test only
                 //        RenderingType = RenderingType.Vulkan
                 //    }
-                //},
+                // //},
 
-                new PerformanceTest
-                {
-                    Name = "SkiaCanvas (OpenGL)",
-                    CanvasElement = new SkiaCanvas
-                    {
-                        FrameDelayInMilliseconds = 0, // for performance test only
-                        RenderingType = RenderingType.OpenGL
-                    }
-                }
             });
         }
 
@@ -98,9 +99,20 @@
 
                     var stopwatch = Stopwatch.StartNew();
 
+                    if (skiaElement is HostFormSkiaCanvas hostForm)
+                    {
+                        skiaElement.Update();
+                    }
+                    else
+                    {
+                        skiaFxElement.InvalidateVisual();
+                    }
+
                     // Instead of calling Update, call InvalidateRect for fair comparison
-                //    skiaFxElement.InvalidateVisual();
-                   skiaElement.Update();
+                    //skiaFxElement.InvalidateVisual();
+
+
+                 //   skiaElement.Update();
 
                     await tsc.Task;
 
@@ -130,9 +142,11 @@
       //      var left = _random.Next(0, 100);
       //      var top = _random.Next(0, 100);
 
-          //  e.Canvas.Clear(Color.White.ToSKColor());
+           // e.Canvas.Clear(Color.White.ToSKColor());
 
-            CanvasTest.RunLineTests(e.Canvas);
+            CanvasTest.RunTextTests(e.Canvas);
+     //       CanvasTest.RunLineTests(e.Canvas);
+            CanvasTest.RunRectsTests(e.Canvas);
         }
     }
 }

@@ -29,6 +29,52 @@ namespace Orc.Skia.Example
     public class CanvasTest
     {
         #region Methods
+        internal static void RunRectsTests(SKCanvas canvas)
+        {
+            canvas.Clear(SKColor.Parse("#003366"));
+
+            var lineHeight = 20;
+            var lineWidth = 250;
+
+            var rand = new Random();
+
+          
+
+            for (var i = lineHeight; i < 1000; i += lineHeight)
+            {
+                var paint = new SKPaint
+                {
+                    Color = new SKColor(
+                        red: (byte)rand.Next(255),
+                        green: (byte)rand.Next(255),
+                        blue: (byte)rand.Next(255),
+                        alpha: (byte)rand.Next(255)),
+                    StrokeWidth = rand.Next(1, 10),
+                    IsAntialias = true
+                };
+
+                canvas.DrawRect(new Rect(rand.Next(20, 300), i, lineWidth, lineHeight).ToSKRect(), paint);
+
+                // ("Text is also part of performance", new Rect(rand.Next(20, 300), i, lineWidth, lineHeight), Colors.DarkGreen, 14f);
+            }
+        }
+
+
+        internal static void RunTextTests(SKCanvas canvas)
+        {
+            canvas.Clear(SKColor.Parse("#003366"));
+
+            var lineHeight = 20;
+            var lineWidth = 250;
+
+            var rand = new Random();
+
+            for (var i = lineHeight; i < 1000; i += lineHeight)
+            {
+                canvas.DrawText("Text is also part of performance", new Rect(rand.Next(20, 300), i, lineWidth, lineHeight), Colors.DarkGreen, 14f);
+            }
+        }
+
         internal static void RunLineTests(SKCanvas canvas)
         {
             var rand = new Random();
