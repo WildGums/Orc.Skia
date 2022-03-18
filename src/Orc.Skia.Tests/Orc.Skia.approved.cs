@@ -1,5 +1,5 @@
 ﻿[assembly: System.Resources.NeutralResourcesLanguage("en-US")]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v6.0", FrameworkDisplayName="")]
 [assembly: System.Windows.Markup.XmlnsDefinition("http://schemas.wildgums.com/orc/skia", "Orc.Skia")]
 [assembly: System.Windows.Markup.XmlnsPrefix("http://schemas.wildgums.com/orc/skia", "orcskia")]
 [assembly: System.Windows.ThemeInfo(System.Windows.ResourceDictionaryLocation.None, System.Windows.ResourceDictionaryLocation.SourceAssembly)]
@@ -13,6 +13,12 @@ namespace Orc.Skia
     {
         public CanvasRenderingEventArgs(SkiaSharp.SKCanvas canvas) { }
         public SkiaSharp.SKCanvas Canvas { get; }
+    }
+    public interface ISkiaElement
+    {
+        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
+        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        void Update();
     }
     public enum LineType
     {
@@ -95,14 +101,16 @@ namespace Orc.Skia
         public static System.Windows.Size ToSize(this SkiaSharp.SKSize size) { }
         public static System.Windows.Size ToSize(this SkiaSharp.SKSizeI size) { }
     }
-    public class SkiaCanvas : System.Windows.Controls.Canvas
+    public class SkiaCanvas : System.Windows.Controls.Canvas, Orc.Skia.ISkiaElement
     {
         protected double DpiX;
         protected double DpiY;
         public SkiaCanvas() { }
+        public int FrameDelayInMilliseconds { get; set; }
         public bool IgnorePixelScaling { get; set; }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        protected SkiaSharp.GRContext CreateRenderContext() { }
         protected SkiaSharp.SKImageInfo GetImageInfo() { }
         public System.Windows.Rect GetSurfaceBoundary() { }
         protected virtual void Initialize() { }
@@ -115,6 +123,14 @@ namespace Orc.Skia
         protected virtual void Render(SkiaSharp.SKCanvas canvas, bool isClearCanvas) { }
         protected virtual void Resize() { }
         protected virtual void Terminate() { }
+        public void Update() { }
+    }
+    public class SkiaElement : SkiaSharp.Views.WPF.SKElement, Orc.Skia.ISkiaElement
+    {
+        public SkiaElement() { }
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        protected override void OnPaintSurface(SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e) { }
         public void Update() { }
     }
     public static class SkiaEnvironment { }
