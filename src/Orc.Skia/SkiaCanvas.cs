@@ -136,7 +136,7 @@ namespace Orc.Skia
 
         public void Update()
         {
-            if (ActualWidth == 0 || ActualHeight == 0 || !IsVisible)
+            if (ActualWidth == 0 || ActualHeight == 0 /*|| !IsVisible*/)
             {
                 return;
             }
