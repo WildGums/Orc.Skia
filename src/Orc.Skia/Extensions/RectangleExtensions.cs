@@ -1,36 +1,18 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RectangleExtensions.cs" company="WildGums">
-//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia
+﻿namespace Orc.Skia
 {
     using System;
-    
-#if NETFX_CORE
-    using Windows.Foundation;
-    using Windows.UI;
-    using Windows.UI.Xaml.Media;
-#else
     using System.Windows;
-    using System.Windows.Media;
-#endif
 
     /// <summary>
     /// Rectangle extension class
     /// </summary>
     public static class RectangleExtensions
     {
-        #region Methods
-#if NET || NETCORE
         public static Int32Rect ToInt32Rect(this Rect rect)
         {
             var int32Rect = new Int32Rect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
             return int32Rect;
         }
-#endif
 
         public static Point GetTopLeft(this Rect rect)
         {
@@ -98,6 +80,5 @@ namespace Orc.Skia
             rect.Width = Math.Max(0, rect.Width - value);
             return rect;
         }
-        #endregion
     }
 }

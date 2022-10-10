@@ -1,25 +1,8 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SkiaCanvas.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-#pragma warning disable 414
+﻿#pragma warning disable 414
 
 namespace Orc.Skia
 {
-#if NETFX_CORE
-    using Windows.Foundation;
-    using Windows.Graphics.Display;
-    using Windows.UI.Core;
-    using Windows.UI.Xaml;
-    using Windows.UI.Xaml.Controls;
-    using Windows.UI.Xaml.Media;
-    using Windows.UI.Xaml.Media.Imaging;
-#else
     using System.Windows.Controls;
-#endif
     using System;
     using System.Windows;
     using System.Windows.Media;
@@ -36,7 +19,6 @@ namespace Orc.Skia
     /// </remarks>
     public class SkiaCanvas : Canvas, ISkiaElement
     {
-        #region Fields
         private readonly object _syncObject = new object();
 
         protected double DpiX;
@@ -50,12 +32,10 @@ namespace Orc.Skia
         private bool _isRendering = false;
         private int _renderScopeCounter;
         private IntPtr _pixels;
-        private WriteableBitmap _bitmap;
+        private WriteableBitmap? _bitmap;
 
         private Stopwatch _stopwatch;
-        #endregion
 
-        #region Constructors
         public SkiaCanvas()
         {
             Loaded += OnLoaded;
@@ -70,9 +50,7 @@ namespace Orc.Skia
             _canUseVulkan = true;
             _canUseGl = true;
         }
-        #endregion
 
-        #region Properties
         public int FrameDelayInMilliseconds { get; set; }
 
         public bool IgnorePixelScaling
@@ -84,15 +62,11 @@ namespace Orc.Skia
                 Invalidate();
             }
         }
-        #endregion
 
-        #region Events
-        public event EventHandler<CanvasRenderingEventArgs> Rendering;
+        public event EventHandler<CanvasRenderingEventArgs>? Rendering;
 
-        public event EventHandler<CanvasRenderingEventArgs> Rendered;
-        #endregion
+        public event EventHandler<CanvasRenderingEventArgs>? Rendered;
 
-        #region Methods
         public Rect GetSurfaceBoundary()
         {
             var info = GetImageInfo();
@@ -100,29 +74,23 @@ namespace Orc.Skia
             return new Rect(new Point(0, 0), new Point(info.Width, info.Height));
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnLoaded(object? sender, RoutedEventArgs e)
         {
             Initialize();
         }
 
-        private void OnUnloaded(object sender, RoutedEventArgs e)
+        private void OnUnloaded(object? sender, RoutedEventArgs e)
         {
             Terminate();
         }
 
-        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+        private void OnSizeChanged(object? sender, SizeChangedEventArgs e)
         {
             RecalculateDpi();
             Invalidate();
         }
 
-#if NETFX_CORE
-        private void OnCompositionTargetRendering(object sender, object e)
-#elif NET || NETCORE
-        private void OnCompositionTargetRendering(object sender, EventArgs e)
-#else
-        TARGET PLATFORM NOT YET SUPPORTED
-#endif
+        private void OnCompositionTargetRendering(object? sender, EventArgs e)
         {
             if (_stopwatch.ElapsedMilliseconds < FrameDelayInMilliseconds)
             {
@@ -165,30 +133,30 @@ namespace Orc.Skia
                 // draw on the bitmap
                 _bitmap.Lock();
 
-//#pragma warning disable IDISP001 // Dispose created.
-//                var renderContext = CreateRenderContext();
-//#pragma warning restore IDISP001 // Dispose created.
-//                if (renderContext is not null)
-//                {
-//                    try
-//                    {
-                        using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
-                        //using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
-                        {
-                            var canvas = surface.Canvas;
-                            using (new RenderingScope(this, canvas))
-                            {
-                                var eventArgs = new CanvasRenderingEventArgs(canvas);
+                //#pragma warning disable IDISP001 // Dispose created.
+                //                var renderContext = CreateRenderContext();
+                //#pragma warning restore IDISP001 // Dispose created.
+                //                if (renderContext is not null)
+                //                {
+                //                    try
+                //                    {
+                using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                //using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
+                {
+                    var canvas = surface.Canvas;
+                    using (new RenderingScope(this, canvas))
+                    {
+                        var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                                OnRendering(canvas);
-                                Rendering?.Invoke(this, eventArgs);
+                        OnRendering(canvas);
+                        Rendering?.Invoke(this, eventArgs);
 
-                                Render(canvas, isClearCanvas);
+                        Render(canvas, isClearCanvas);
 
-                                Rendered?.Invoke(this, eventArgs);
-                                OnRendered(canvas);
-                            }
-                        //}
+                        Rendered?.Invoke(this, eventArgs);
+                        OnRendered(canvas);
+                    }
+                    //}
                     //}
                     //finally
                     //{
@@ -217,7 +185,7 @@ namespace Orc.Skia
 
         protected GRContext CreateRenderContext()
         {
-            GRContext renderContext = null;
+            GRContext? renderContext = null;
 
             // TODO: What is best order of performance?
 
@@ -265,7 +233,7 @@ namespace Orc.Skia
             // Fallback to software rendering?
             if (renderContext is null)
             {
-
+                throw new InvalidOperationException("Render context could not be created");
             }
 
             return renderContext;
@@ -385,14 +353,12 @@ namespace Orc.Skia
 
         protected void InvalidateBitmap(SKCanvas canvas)
         {
-#if NET || NETCORE
-            var clipDeviceBounds = canvas.DeviceClipBounds.ToRect();
-            _bitmap.AddDirtyRect(clipDeviceBounds.ToInt32Rect());
-#elif NETFX_CORE
-            _bitmap.Invalidate();
-#else
-        TARGET PLATFORM NOT YET SUPPORTED
-#endif
+            var bitmap = _bitmap;
+            if (bitmap is not null)
+            {
+                var clipDeviceBounds = canvas.DeviceClipBounds.ToRect();
+                bitmap.AddDirtyRect(clipDeviceBounds.ToInt32Rect());
+            }
         }
 
         private void FreeBitmap()
@@ -401,17 +367,12 @@ namespace Orc.Skia
             _bitmap = null;
             _pixels = IntPtr.Zero;
         }
-        #endregion
 
-        #region Nested classes
         private class RenderingScope : Disposable
         {
-            #region Fields
             private readonly SkiaCanvas _canvas;
             private readonly SKCanvas _skCanvas;
-            #endregion
 
-            #region Constructors
             public RenderingScope(SkiaCanvas canvas, SKCanvas skCanvas)
             {
                 _canvas = canvas;
@@ -419,9 +380,7 @@ namespace Orc.Skia
                 canvas._isRendering = true;
                 canvas._renderScopeCounter++;
             }
-            #endregion
 
-            #region Methods
             protected override void DisposeManaged()
             {
                 _canvas._isRendering = false;
@@ -437,8 +396,6 @@ namespace Orc.Skia
 
                 _canvas.InvalidateBitmap(_skCanvas);
             }
-            #endregion
         }
-        #endregion
     }
 }

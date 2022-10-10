@@ -16,8 +16,8 @@ namespace Orc.Skia
     }
     public interface ISkiaElement
     {
-        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
-        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendered;
+        event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendering;
         void Update();
     }
     public enum LineType
@@ -108,8 +108,8 @@ namespace Orc.Skia
         public SkiaCanvas() { }
         public int FrameDelayInMilliseconds { get; set; }
         public bool IgnorePixelScaling { get; set; }
-        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
-        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendered;
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendering;
         protected SkiaSharp.GRContext CreateRenderContext() { }
         protected SkiaSharp.SKImageInfo GetImageInfo() { }
         public System.Windows.Rect GetSurfaceBoundary() { }
@@ -128,8 +128,8 @@ namespace Orc.Skia
     public class SkiaElement : SkiaSharp.Views.WPF.SKElement, Orc.Skia.ISkiaElement
     {
         public SkiaElement() { }
-        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
-        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendering;
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendered;
+        public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendering;
         protected override void OnPaintSurface(SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e) { }
         public void Update() { }
     }

@@ -1,19 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SKRectExtensions.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia
+﻿namespace Orc.Skia
 {
     using SkiaSharp;
-
-#if NETFX_CORE
-    using Windows.Foundation;
-#else
     using System.Windows;
-#endif
 
     public static class SKRectExtensions
     {
@@ -37,12 +25,9 @@ namespace Orc.Skia
             return new Rect(rect.Location.ToPoint(), rect.Size.ToSize());
         }
 
-#if !NETFX_CORE
-
         public static Int32Rect ToInt32Rect(this SKRectI rect)
         {
             return new Int32Rect(rect.Left, rect.Top, rect.Width, rect.Height);
         }
-#endif
     }
 }

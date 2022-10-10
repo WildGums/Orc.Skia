@@ -1,15 +1,14 @@
 ﻿namespace Orc.Skia
 {
     using System;
-    using System.Windows.Media;
     using SkiaSharp.Views.Desktop;
     using SkiaSharp.Views.WPF;
 
     public class SkiaElement : SKElement, ISkiaElement
     {
-        public event EventHandler<CanvasRenderingEventArgs> Rendering;
+        public event EventHandler<CanvasRenderingEventArgs>? Rendering;
 
-        public event EventHandler<CanvasRenderingEventArgs> Rendered;
+        public event EventHandler<CanvasRenderingEventArgs>? Rendered;
 
         public void Update()
         {

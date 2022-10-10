@@ -1,27 +1,13 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MatrixExtensions.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia
+﻿namespace Orc.Skia
 {
-#if NETFX_CORE
-    using Windows.Foundation;
-    using Windows.UI;
-    using Windows.UI.Xaml.Media;
-#else
     using System.Windows;
     using System.Windows.Media;
-#endif
 
     /// <summary>
     /// Matrix object extensions.
     /// </summary>
     public static class MatrixExtensions
     {
-        #region Methods
         public static Matrix Copy(this Matrix matrix)
         {
             return new Matrix(matrix.M11,
@@ -54,6 +40,5 @@ namespace Orc.Skia
             var transformedRect = matrixTransform.TransformBounds(rectangle);
             return transformedRect;
         }
-        #endregion
     }
 }

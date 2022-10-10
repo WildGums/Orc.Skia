@@ -1,23 +1,8 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SKCanvasExtensions.text.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia
+﻿namespace Orc.Skia
 {
-    using System;
-    using System.Collections.Generic;
     using SkiaSharp;
-
-#if NETFX_CORE
-    using Windows.Foundation;
-    using Windows.UI;
-#else
     using System.Windows;
     using System.Windows.Media;
-#endif
 
     public static partial class SKCanvasExtensions
     {

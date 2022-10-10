@@ -1,18 +1,10 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Margin.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia
+﻿namespace Orc.Skia
 {
     /// <summary>
     /// Margin setting for rendering request.
     /// </summary>
     public class Margin
     {
-        #region Constructors
         /// <summary>
         /// Margin object constructor with double value for all sides.
         /// </summary>
@@ -60,9 +52,7 @@ namespace Orc.Skia
             Left = (int) left;
             Right = (int) right;
         }
-        #endregion
 
-        #region Properties
         /// <summary>
         /// If this margin should be added to standard font margin.
         /// </summary>
@@ -96,9 +86,7 @@ namespace Orc.Skia
         /// Margin value on top.
         /// </summary>
         public int Top { get; set; }
-        #endregion
 
-        #region Methods
         /// <summary>
         /// Returns given <see cref="Margin"/> instance or new if given <paramref name="margin"/> value is null.
         /// </summary>
@@ -120,6 +108,5 @@ namespace Orc.Skia
 
             return new Margin(value);
         }
-        #endregion
     }
 }
