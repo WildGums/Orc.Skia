@@ -27,6 +27,7 @@ namespace Orc.Skia
     using Catel;
     using SkiaSharp;
     using System.Diagnostics;
+    using Catel.Logging;
 
     /// <summary>
     /// SkiaCanvas class.
@@ -37,6 +38,8 @@ namespace Orc.Skia
     public class SkiaCanvas : Canvas, ISkiaElement
     {
         #region Fields
+        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+
         private readonly object _syncObject = new object();
 
         protected double DpiX;
@@ -112,6 +115,8 @@ namespace Orc.Skia
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
+            Log.Debug($"Size changed");
+
             RecalculateDpi();
             Invalidate();
         }
@@ -138,6 +143,7 @@ namespace Orc.Skia
         {
             if (ActualWidth == 0 || ActualHeight == 0 /*|| !IsVisible*/)
             {
+                Log.Debug("Actual width or height is 0, cannot update");
                 return;
             }
 
@@ -146,6 +152,7 @@ namespace Orc.Skia
                 var size = CreateSize(out var scaleX, out var scaleY);
                 if (size.Width <= 0 || size.Height <= 0)
                 {
+                    Log.Debug("Width or height is 0, cannot update");
                     return;
                 }
 
@@ -159,8 +166,11 @@ namespace Orc.Skia
 
                 if (!isClearCanvas && (!IsRenderingAllowed() || _isRendering))
                 {
+                    Log.Debug("Rendering not allowed");
                     return;
                 }
+
+                Log.Debug("Locking bitmap");
 
                 // draw on the bitmap
                 _bitmap.Lock();
@@ -199,6 +209,8 @@ namespace Orc.Skia
                 // draw the bitmap to the screen
                 _bitmap.AddDirtyRect(new Int32Rect(0, 0, size.Width, size.Height));
                 _bitmap.Unlock();
+
+                Log.Debug("Unlocked bitmap");
 
                 if (isClearCanvas)
                 {
@@ -338,6 +350,8 @@ namespace Orc.Skia
 
         public virtual void Invalidate()
         {
+            Log.Debug($"Invalidate");
+
             FreeBitmap();
 
             Update();
@@ -397,6 +411,8 @@ namespace Orc.Skia
 
         private void FreeBitmap()
         {
+            Log.Debug("Free bitmap");
+
             SetValue(BackgroundProperty, null);
             _bitmap = null;
             _pixels = IntPtr.Zero;
