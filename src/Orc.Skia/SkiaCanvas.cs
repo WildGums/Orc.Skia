@@ -166,7 +166,6 @@ namespace Orc.Skia
 
                 if (!isClearCanvas && (!IsRenderingAllowed() || _isRendering))
                 {
-                    Log.Debug("Rendering not allowed");
                     return;
                 }
 
