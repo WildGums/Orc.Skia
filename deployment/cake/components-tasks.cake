@@ -124,6 +124,13 @@ public class ComponentsProcessor : ProcessorBase
             };
 
             ConfigureMsBuild(BuildContext, msBuildSettings, component, "build");
+            
+            // Note: we need to set OverridableOutputPath because we need to be able to respect
+            // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+            // are properties passed in using the command line)
+            var outputDirectory = GetProjectOutputDirectory(BuildContext, component);
+            CakeContext.Information("Output directory: '{0}'", outputDirectory);
+            msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
 
             // SourceLink specific stuff
             if (IsSourceLinkSupported(BuildContext, component, projectFileName))
@@ -169,7 +176,6 @@ public class ComponentsProcessor : ProcessorBase
                 CakeContext.Information("Component '{0}' should not be deployed", component);
                 continue;
             }
-
 
             // Special exception for Blazor projects
             var isBlazorProject = IsBlazorProject(BuildContext, component);
@@ -221,6 +227,10 @@ public class ComponentsProcessor : ProcessorBase
 
             ConfigureMsBuild(BuildContext, msBuildSettings, component, "pack");
 
+            // Note: we need to set OverridableOutputPath because we need to be able to respect
+            // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+            // are properties passed in using the command line)
+            msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
             msBuildSettings.WithProperty("ConfigurationName", configurationName);
             msBuildSettings.WithProperty("PackageVersion", BuildContext.General.Version.NuGet);
 
@@ -254,10 +264,23 @@ public class ComponentsProcessor : ProcessorBase
             {
                 CakeContext.Information("Allowing build and package restore during package phase since this is a Blazor project which requires the 'obj' directory");
 
-                msBuildSettings.WithProperty("ResolveNuGetPackages", "true");
+                // Don't use WithProperty since that will concatenate, and we need to overwrite the
+                // value here
+                //msBuildSettings.WithProperty("ResolveNuGetPackages", "true");
+                msBuildSettings.Properties["ResolveNuGetPackages"] = new List<string>
+                { 
+                    "true"
+                };
+                
                 msBuildSettings.Restore = true;
                 noBuild = false;
             }
+
+            // As described in the this issue: https://github.com/NuGet/Home/issues/4360
+            // we should not use IsTool, but set BuildOutputTargetFolder instead
+            msBuildSettings.WithProperty("CopyLocalLockFileAssemblies", "true");
+            msBuildSettings.WithProperty("IncludeBuildOutput", "true");
+            msBuildSettings.WithProperty("NoDefaultExcludes", "true");
 
             msBuildSettings.WithProperty("NoBuild", noBuild.ToString());
             msBuildSettings.Targets.Add("Pack");
