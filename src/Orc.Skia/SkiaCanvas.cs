@@ -141,6 +141,9 @@ namespace Orc.Skia
 
         public void Update()
         {
+            var stopwatch = Stopwatch.StartNew();
+            var isEmptyBitmap = _bitmap is null;
+
             if (ActualWidth == 0 || ActualHeight == 0 /*|| !IsVisible*/)
             {
                 Log.Debug("Actual width or height is 0, cannot update");
@@ -206,7 +209,12 @@ namespace Orc.Skia
                 }
 
                 // draw the bitmap to the screen
-                _bitmap.AddDirtyRect(new Int32Rect(0, 0, size.Width, size.Height));
+                var dirtyRect = new Int32Rect(0, 0, size.Width, size.Height);
+
+                Log.Debug($"Add dirty rect: {dirtyRect}");
+
+                _bitmap.AddDirtyRect(dirtyRect);
+
                 _bitmap.Unlock();
 
                 Log.Debug("Unlocked bitmap");
@@ -223,6 +231,15 @@ namespace Orc.Skia
 
                     SetValue(BackgroundProperty, brush);
                 }
+            }
+
+            if (isEmptyBitmap)
+            {
+                Log.Debug($"New bitmap: {stopwatch.ElapsedMilliseconds} ms");
+            }
+            else
+            {
+                Log.Debug($"Existing bitmap: {stopwatch.ElapsedMilliseconds} ms");
             }
         }
 
