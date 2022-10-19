@@ -66,6 +66,7 @@ namespace Orc.Skia
 
             _stopwatch = Stopwatch.StartNew();
             FrameDelayInMilliseconds = 5;
+            ForceNewBitmaps = ForceNewBitmapsDefaultValue;
 
             // Allow all by default
             _canUseVulkan = true;
@@ -75,6 +76,8 @@ namespace Orc.Skia
 
         #region Properties
         public int FrameDelayInMilliseconds { get; set; }
+
+        public static bool ForceNewBitmapsDefaultValue { get; set; }
 
         public bool ForceNewBitmaps { get; set; }
 
