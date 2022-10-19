@@ -106,6 +106,7 @@ namespace Orc.Skia
         protected double DpiX;
         protected double DpiY;
         public SkiaCanvas() { }
+        public bool ForceNewBitmaps { get; set; }
         public int FrameDelayInMilliseconds { get; set; }
         public bool IgnorePixelScaling { get; set; }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs> Rendered;
@@ -124,6 +125,7 @@ namespace Orc.Skia
         protected virtual void Resize() { }
         protected virtual void Terminate() { }
         public void Update() { }
+        protected virtual void Update(bool isInternal) { }
     }
     public class SkiaElement : SkiaSharp.Views.WPF.SKElement, Orc.Skia.ISkiaElement
     {

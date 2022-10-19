@@ -10,7 +10,7 @@
                    d:DesignHeight="300"
                    d:DesignWidth="400">
 
-    <Grid>
+    <Grid x:Name="layoutRoot">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300" />
             <ColumnDefinition />
@@ -60,9 +60,16 @@
                     <GroupBox Header="{Binding Name}">
                         <orccontrols:StackGrid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
+
+                            <Button Margin="12"
+                                    Height="36"
+                                    Content="Render 1 x"
+                                    Command="{Binding ElementName=layoutRoot, Path=DataContext.RunTest}"
+                                    CommandParameter="{Binding }" />
 
                             <Border BorderBrush="Red"
                                     BorderThickness="1">
