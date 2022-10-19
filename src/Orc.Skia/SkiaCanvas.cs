@@ -38,8 +38,6 @@ namespace Orc.Skia
     public class SkiaCanvas : Canvas, ISkiaElement
     {
         #region Fields
-        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-
         private readonly object _syncObject = new object();
 
         protected double DpiX;
@@ -78,7 +76,7 @@ namespace Orc.Skia
         #region Properties
         public int FrameDelayInMilliseconds { get; set; }
 
-        public bool ForceNewBitmaps { get; set; } = true;
+        public bool ForceNewBitmaps { get; set; }
 
         public bool IgnorePixelScaling
         {
@@ -117,8 +115,6 @@ namespace Orc.Skia
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Log.Debug($"Size changed");
-
             RecalculateDpi();
             Invalidate();
         }
@@ -152,7 +148,6 @@ namespace Orc.Skia
 
             if (ActualWidth == 0 || ActualHeight == 0 /*|| !IsVisible*/)
             {
-                Log.Debug("Actual width or height is 0, cannot update");
                 return;
             }
 
@@ -161,7 +156,6 @@ namespace Orc.Skia
                 var size = CreateSize(out var scaleX, out var scaleY);
                 if (size.Width <= 0 || size.Height <= 0)
                 {
-                    Log.Debug("Width or height is 0, cannot update");
                     return;
                 }
 
@@ -184,8 +178,6 @@ namespace Orc.Skia
                     _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
                     _bitmap = new WriteableBitmap(_skImageInfo.Width, _skImageInfo.Height, 96 * scaleX, 96 * scaleY, PixelFormats.Pbgra32, null);
                 }
-
-                Log.Debug("Locking bitmap");
 
                 // draw on the bitmap
                 _bitmap.Lock();
@@ -229,8 +221,6 @@ namespace Orc.Skia
                 }
 
                 _bitmap.Unlock();
-
-                Log.Debug("Unlocked bitmap");
 
                 if (isClearCanvas)
                 {
@@ -370,11 +360,9 @@ namespace Orc.Skia
 
         public virtual void Invalidate()
         {
-            Log.Debug($"Invalidate");
-
             FreeBitmap();
 
-            Update();
+            Update(true);
         }
 
         protected virtual bool IsRenderingAllowed()
@@ -435,8 +423,6 @@ namespace Orc.Skia
             {
                 return;
             }
-
-            Log.Debug("Free bitmap");
 
             SetValue(BackgroundProperty, null);
             _bitmap = null;
