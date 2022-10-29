@@ -27,6 +27,7 @@ namespace Orc.Skia
     using Catel;
     using SkiaSharp;
     using System.Diagnostics;
+    using Catel.Logging;
 
     /// <summary>
     /// SkiaCanvas class.
@@ -65,6 +66,7 @@ namespace Orc.Skia
 
             _stopwatch = Stopwatch.StartNew();
             FrameDelayInMilliseconds = 5;
+            ForceNewBitmaps = ForceNewBitmapsDefaultValue;
 
             // Allow all by default
             _canUseVulkan = true;
@@ -74,6 +76,10 @@ namespace Orc.Skia
 
         #region Properties
         public int FrameDelayInMilliseconds { get; set; }
+
+        public static bool ForceNewBitmapsDefaultValue { get; set; }
+
+        public bool ForceNewBitmaps { get; set; }
 
         public bool IgnorePixelScaling
         {
@@ -129,13 +135,20 @@ namespace Orc.Skia
                 return;
             }
 
-            Update();
+            Update(true);
 
             _stopwatch = Stopwatch.StartNew();
         }
 
         public void Update()
         {
+            Update(false);
+        }
+
+        protected virtual void Update(bool isInternal)
+        {
+            var isClearCanvas = _bitmap is null;
+
             if (ActualWidth == 0 || ActualHeight == 0 /*|| !IsVisible*/)
             {
                 return;
@@ -149,12 +162,9 @@ namespace Orc.Skia
                     return;
                 }
 
-                var isClearCanvas = false;
                 if (_bitmap is null || size.Width != _bitmap.PixelWidth || size.Height != _bitmap.PixelHeight)
                 {
                     isClearCanvas = true;
-                    _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
-                    _bitmap = new WriteableBitmap(_skImageInfo.Width, _skImageInfo.Height, 96 * scaleX, 96 * scaleY, PixelFormats.Pbgra32, null);
                 }
 
                 if (!isClearCanvas && (!IsRenderingAllowed() || _isRendering))
@@ -162,33 +172,43 @@ namespace Orc.Skia
                     return;
                 }
 
+                if (isClearCanvas || (!isInternal && ForceNewBitmaps))
+                {
+                    isClearCanvas = true;
+
+                    FreeBitmap();
+
+                    _skImageInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+                    _bitmap = new WriteableBitmap(_skImageInfo.Width, _skImageInfo.Height, 96 * scaleX, 96 * scaleY, PixelFormats.Pbgra32, null);
+                }
+
                 // draw on the bitmap
                 _bitmap.Lock();
 
-//#pragma warning disable IDISP001 // Dispose created.
-//                var renderContext = CreateRenderContext();
-//#pragma warning restore IDISP001 // Dispose created.
-//                if (renderContext is not null)
-//                {
-//                    try
-//                    {
-                        using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
-                        //using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
-                        {
-                            var canvas = surface.Canvas;
-                            using (new RenderingScope(this, canvas))
-                            {
-                                var eventArgs = new CanvasRenderingEventArgs(canvas);
+                //#pragma warning disable IDISP001 // Dispose created.
+                //                var renderContext = CreateRenderContext();
+                //#pragma warning restore IDISP001 // Dispose created.
+                //                if (renderContext is not null)
+                //                {
+                //                    try
+                //                    {
+                using (var surface = SKSurface.Create(_skImageInfo, _bitmap.BackBuffer, _bitmap.BackBufferStride))
+                //using (var surface = SKSurface.Create(renderContext, false, _skImageInfo))
+                {
+                    var canvas = surface.Canvas;
+                    using (new RenderingScope(this, canvas))
+                    {
+                        var eventArgs = new CanvasRenderingEventArgs(canvas);
 
-                                OnRendering(canvas);
-                                Rendering?.Invoke(this, eventArgs);
+                        OnRendering(canvas);
+                        Rendering?.Invoke(this, eventArgs);
 
-                                Render(canvas, isClearCanvas);
+                        Render(canvas, isClearCanvas);
 
-                                Rendered?.Invoke(this, eventArgs);
-                                OnRendered(canvas);
-                            }
-                        //}
+                        Rendered?.Invoke(this, eventArgs);
+                        OnRendered(canvas);
+                    }
+                    //}
                     //}
                     //finally
                     //{
@@ -197,7 +217,12 @@ namespace Orc.Skia
                 }
 
                 // draw the bitmap to the screen
-                _bitmap.AddDirtyRect(new Int32Rect(0, 0, size.Width, size.Height));
+                if (!isClearCanvas)
+                {
+                    var dirtyRect = new Int32Rect(0, 0, size.Width, size.Height);
+                    _bitmap.AddDirtyRect(dirtyRect);
+                }
+
                 _bitmap.Unlock();
 
                 if (isClearCanvas)
@@ -340,7 +365,7 @@ namespace Orc.Skia
         {
             FreeBitmap();
 
-            Update();
+            Update(true);
         }
 
         protected virtual bool IsRenderingAllowed()
@@ -397,6 +422,11 @@ namespace Orc.Skia
 
         private void FreeBitmap()
         {
+            if (_bitmap is null)
+            {
+                return;
+            }
+
             SetValue(BackgroundProperty, null);
             _bitmap = null;
             _pixels = IntPtr.Zero;
