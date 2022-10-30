@@ -10,7 +10,6 @@ namespace Orc.Skia
     using Catel;
     using SkiaSharp;
     using System.Diagnostics;
-    using Catel.Logging;
 
     /// <summary>
     /// SkiaCanvas class.
@@ -140,7 +139,7 @@ namespace Orc.Skia
                     return;
                 }
 
-                if (isClearCanvas || (!isInternal && ForceNewBitmaps))
+                if (_bitmap is null || isClearCanvas || (!isInternal && ForceNewBitmaps))
                 {
                     isClearCanvas = true;
 
