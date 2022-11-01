@@ -17,28 +17,40 @@
 
         private const float FramePerSeconds = 60;
 
-        private readonly DispatcherTimer _timer = new();
-        private readonly Stopwatch _watch = new();
+        private readonly DispatcherTimer _invalidationTimer = new();
+        private readonly Stopwatch _frameWatcher = new();
 
         public Animation Animation
         {
-            get
-            {
-                return (Animation)GetValue(AnimationProperty);
-            }
-            set
-            {
-                throw Log.ErrorAndCreateException<InvalidOperationException>("An attempt ot modify read-only property. Use \"OneWayToSource\" Mode Binding");
-            }
+            get => (Animation)GetValue(AnimationProperty);
+            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt ot modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
         }
 
         public static readonly DependencyProperty AnimationProperty =
             DependencyProperty.Register(nameof(Animation), typeof(Animation), typeof(LottieCanvas), new PropertyMetadata(null));
 
+        public bool Repeat
+        {
+            get => (bool)GetValue(RepeatProperty);
+            set => SetValue(RepeatProperty, value);
+        }
+
+        public static readonly DependencyProperty RepeatProperty =
+            DependencyProperty.Register(nameof(Repeat), typeof(bool), typeof(LottieCanvas), new PropertyMetadata(true));
+
+        public bool IsPlaying
+        {
+            get => (bool)GetValue(IsPlayingProperty);
+            set => SetValue(IsPlayingProperty, value);
+        }
+
+        public static readonly DependencyProperty IsPlayingProperty =
+            DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(LottieCanvas), new PropertyMetadata(false));
+
         public Uri UriSource
         {
-            get { return (Uri)GetValue(UriSourceProperty); }
-            set { SetValue(UriSourceProperty, value); }
+            get => (Uri)GetValue(UriSourceProperty);
+            set => SetValue(UriSourceProperty, value);
         }
 
         public static readonly DependencyProperty UriSourceProperty =
@@ -76,8 +88,8 @@
 
         public Stream StreamSource
         {
-            get { return (Stream)GetValue(StreamSourceProperty); }
-            set { SetValue(StreamSourceProperty, value); }
+            get => (Stream)GetValue(StreamSourceProperty);
+            set => SetValue(StreamSourceProperty, value);
         }
 
         public static readonly DependencyProperty StreamSourceProperty =
@@ -116,11 +128,26 @@
 
             SetCurrentValue(AnimationProperty, animation);
 
-            _timer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramePerSeconds, 1 / animation.Fps));
-            _timer.Tick += (s, e) => Invalidate();
+            _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramePerSeconds, 1 / animation.Fps));
+            _invalidationTimer.Tick += (s, e) => Invalidate();
 
-            _timer.Start();
-            _watch.Start();
+            StartAnimation();
+        }
+
+        public void StartAnimation()
+        {
+            IsPlaying = true;
+            _invalidationTimer.Start();
+            _frameWatcher.Restart();
+        }
+
+
+        public void StopAnimation()
+        {
+            IsPlaying = false;
+
+            _invalidationTimer.Stop();
+            _frameWatcher.Stop();
         }
 
         protected override void Render(SKCanvas canvas, bool isClearCanvas)
@@ -131,9 +158,16 @@
                 return;
             }
 
-            if (_watch.Elapsed > animation.Duration)
+            if (_frameWatcher.Elapsed > animation.Duration)
             {
-                _watch.Restart();
+                if (Repeat)
+                {
+                    StartAnimation();
+                }
+                else
+                {
+                    StopAnimation();
+                }
             }
 
             RenderAnimation(animation, canvas);
@@ -143,13 +177,13 @@
         {
             Argument.IsNotNull(() => animation);
 
-            var renderTimeStart = _watch.Elapsed.TotalMilliseconds;
+            var renderTimeStart = _frameWatcher.Elapsed.TotalMilliseconds;
 
-            animation.SeekFrameTime((float)_watch.Elapsed.TotalSeconds, null);
+            animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
 
             animation.Render(canvas, new SKRect(0, 0, (float)ActualWidth, (float)ActualHeight));
 
-            var renderTime = _watch.Elapsed.TotalMilliseconds - renderTimeStart;
+            var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
 
             Log.Debug($"Frame render time: {renderTime} ms");
         }

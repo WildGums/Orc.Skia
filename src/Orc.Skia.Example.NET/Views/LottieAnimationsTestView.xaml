@@ -66,11 +66,16 @@
 
             </GroupBox>
 
+            <CheckBox x:Name="RepeatCheckBox"
+                      IsChecked="True"
+                      Content="Repeat"/>
+
         </StackPanel>
 
         <skia:LottieCanvas x:Name="canvas" Grid.Column="1"
                            Animation="{Binding AnimationInPlayback, Mode=OneWayToSource}"
-                           UriSource="{Binding SelectedFile, Converter={skia:StringToUriConverter}}"/>
+                           UriSource="{Binding SelectedFile, Converter={skia:StringToUriConverter}}"
+                           Repeat="{Binding ElementName=RepeatCheckBox, Path=IsChecked}"/>
 
     </Grid>
 </catel:UserControl>
