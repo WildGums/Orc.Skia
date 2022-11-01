@@ -7,7 +7,6 @@
              xmlns:controls="http://schemas.wildgums.com/orc/controls"
              xmlns:orctheming="http://schemas.wildgums.com/orc/theming"
              xmlns:skia="clr-namespace:Orc.Skia;assembly=Orc.Skia"
-             xmlns:localControls="clr-namespace:Orc.Skia.Example.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -18,14 +17,14 @@
 
         <StackPanel Grid.Column="0" Background="SlateGray" Orientation="Vertical">
 
-                <controls:OpenFilePicker SelectedFile="{Binding SelectedFile}"
-                                         HorizontalAlignment="Stretch"
-                                         HorizontalContentAlignment="Stretch"
-                                         Background="White"
-                                         Margin="8"
-                                         Padding="2"
-                                         LabelText="Open Lottie animation file"
-                                         Filter="Файлы Lottie (*.json)|*.json"/>
+            <controls:OpenFilePicker SelectedFile="{Binding SelectedFile}"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Stretch"
+                                     Background="White"
+                                     Margin="8"
+                                     Padding="2"
+                                     LabelText="Open Lottie animation file"
+                                     Filter="Файлы Lottie (*.json)|*.json"/>
 
             <GroupBox Header="File info">
                 <Grid>
@@ -66,10 +65,12 @@
                 </Grid>
 
             </GroupBox>
-     
+
         </StackPanel>
 
-        <localControls:LottieCanvas x:Name="canvas" Grid.Column="1"/>
- 
+        <skia:LottieCanvas x:Name="canvas" Grid.Column="1"
+                           Animation="{Binding AnimationInPlayback, Mode=OneWayToSource}"
+                           UriSource="{Binding SelectedFile, Converter={skia:StringToUriConverter}}"/>
+
     </Grid>
 </catel:UserControl>
