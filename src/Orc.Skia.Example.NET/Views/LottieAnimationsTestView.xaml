@@ -43,14 +43,14 @@
                         Version:
                     </TextBlock>
 
-                    <TextBlock Text="{Binding Version}"
+                    <TextBlock Text="{Binding AnimationInPlayback.Version}"
                                Grid.Column="1"/>
 
                     <TextBlock Grid.Row="1">
                         Duration:
                     </TextBlock>
 
-                    <TextBlock Text="{Binding Duration}"
+                    <TextBlock Text="{Binding AnimationInPlayback.Duration}"
                                Grid.Column="1"
                                Grid.Row="1"/>
 
@@ -58,7 +58,7 @@
                         FPS:
                     </TextBlock>
 
-                    <TextBlock Text="{Binding Fps}"
+                    <TextBlock Text="{Binding AnimationInPlayback.Fps}"
                                Grid.Column="1"
                                Grid.Row="2"/>
 
