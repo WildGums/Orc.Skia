@@ -5,6 +5,7 @@
     using System.IO;
     using System.Web;
     using System.Windows;
+    using System.Windows.Controls;
     using System.Windows.Media.Animation;
     using System.Windows.Threading;
     using Catel;
@@ -276,9 +277,9 @@
 
         private void RenderAnimation(Animation animation, SKCanvas canvas)
         {
-            Argument.IsNotNull(() => animation);
-
+#if DEBUG
             var renderTimeStart = _frameWatcher.Elapsed.TotalMilliseconds;
+#endif
 
             //animation.SeekFrame(_frame);
             animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
