@@ -21,8 +21,9 @@
         private readonly DispatcherTimer _invalidationTimer = new();
         private readonly Stopwatch _frameWatcher = new();
 
-        private int _frame = 0;
         private int _repeatCount = 0;
+
+        private bool _isDirty = false;
 
         public LottieCanvas()
         {
@@ -157,9 +158,8 @@
             {
                 if (IsPlaying)
                 {
+                    _isDirty = true;
                     Update();
-
-                    _frame++;
                 }
             };
 
@@ -170,7 +170,6 @@
         {
             SetCurrentValue(IsPlayingProperty, true);
 
-            _frame = 0;
             _invalidationTimer.Start();
             _frameWatcher.Restart();
         }
@@ -253,7 +252,14 @@
                 }
             }
 
+            if (!_isDirty)
+            {
+                return;
+            }
+
             RenderAnimation(animation, canvas);
+
+            _isDirty = false;
         }
 
         /// <summary>
@@ -288,7 +294,6 @@
             var renderTimeStart = _frameWatcher.Elapsed.TotalMilliseconds;
 #endif
 
-            //animation.SeekFrame(_frame);
             animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
 
             animation.Render(canvas, new SKRect(0, 0, (float)ActualWidth, (float)ActualHeight));
