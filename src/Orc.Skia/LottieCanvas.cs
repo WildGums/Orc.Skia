@@ -83,6 +83,11 @@
                 // Sync sources
                 SetCurrentValue(StreamSourceProperty, null);
 
+                if (uri is null)
+                {
+                    return;
+                }
+
                 if (uri.IsFile)
                 {
                     using (var fileStream = File.OpenRead(HttpUtility.UrlDecode(uri.AbsolutePath)))
