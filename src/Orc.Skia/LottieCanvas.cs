@@ -16,7 +16,7 @@
     {
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 
-        private const float FramePerSeconds = 60;
+        private const float FramesPerSecond = 60;
 
         private readonly DispatcherTimer _invalidationTimer = new();
         private readonly Stopwatch _frameWatcher = new();
@@ -140,7 +140,7 @@
 
             SetCurrentValue(AnimationProperty, animation);
 
-            _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramePerSeconds, 1 / animation.Fps));
+            _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramesPerSecond, 1 / animation.Fps));
             _invalidationTimer.Tick += (s, e) =>
             {
                 if (IsPlaying)
