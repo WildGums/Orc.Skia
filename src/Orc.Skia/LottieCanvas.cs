@@ -177,6 +177,11 @@
 
         public void ResumeAnimation()
         {
+            if (!CanRestart())
+            {
+                return;
+            }
+
             SetCurrentValue(IsPlayingProperty, true);
 
             _invalidationTimer.Start();
@@ -226,6 +231,12 @@
                 {
                     ResumeAnimation();
                 }
+            }
+
+            if (MouseOver == AnimationMouseOverBehavior.None)
+            {
+                // Always try resume, ResumeAnimation() handles cases when animation cannot continue
+                ResumeAnimation();
             }
 
             if (!halt && _frameWatcher.Elapsed > animation.Duration)
