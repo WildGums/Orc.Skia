@@ -24,7 +24,7 @@
                                      Margin="8"
                                      Padding="2"
                                      LabelText="Open Lottie animation file"
-                                     Filter="Файлы Lottie (*.json)|*.json"/>
+                                     Filter="Lottie animation (*.json)|*.json"/>
 
             <GroupBox Header="File info">
                 <Grid>

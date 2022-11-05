@@ -5,6 +5,7 @@
     using System.IO;
     using System.Web;
     using System.Windows;
+    using System.Windows.Media.Animation;
     using System.Windows.Threading;
     using Catel;
     using Catel.Logging;
@@ -20,28 +21,30 @@
         private readonly DispatcherTimer _invalidationTimer = new();
         private readonly Stopwatch _frameWatcher = new();
 
+        private int _repeatCount = 0;
+
         public Animation Animation
         {
             get => (Animation)GetValue(AnimationProperty);
-            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt ot modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
+            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
         }
 
         public static readonly DependencyProperty AnimationProperty =
             DependencyProperty.Register(nameof(Animation), typeof(Animation), typeof(LottieCanvas), new PropertyMetadata(null));
 
-        public bool Repeat
+        public RepeatBehavior Repeat
         {
-            get => (bool)GetValue(RepeatProperty);
+            get => (RepeatBehavior)GetValue(RepeatProperty);
             set => SetValue(RepeatProperty, value);
         }
 
         public static readonly DependencyProperty RepeatProperty =
-            DependencyProperty.Register(nameof(Repeat), typeof(bool), typeof(LottieCanvas), new PropertyMetadata(true));
+            DependencyProperty.Register(nameof(Repeat), typeof(RepeatBehavior), typeof(LottieCanvas), new PropertyMetadata(RepeatBehavior.Forever));
 
         public bool IsPlaying
         {
             get => (bool)GetValue(IsPlayingProperty);
-            set => SetValue(IsPlayingProperty, value);
+            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(IsPlaying)}\". Use \"OneWayToSource\" Mode Binding");
         }
 
         public static readonly DependencyProperty IsPlayingProperty =
@@ -136,7 +139,10 @@
 
         public void StartAnimation()
         {
-            IsPlaying = true;
+            _repeatCount++;
+
+            SetCurrentValue(IsPlayingProperty, true);
+
             _invalidationTimer.Start();
             _frameWatcher.Restart();
         }
@@ -144,7 +150,7 @@
 
         public void StopAnimation()
         {
-            IsPlaying = false;
+            SetCurrentValue(IsPlayingProperty, false);
 
             _invalidationTimer.Stop();
             _frameWatcher.Stop();
@@ -160,7 +166,7 @@
 
             if (_frameWatcher.Elapsed > animation.Duration)
             {
-                if (Repeat)
+                if (CanRestart())
                 {
                     StartAnimation();
                 }
@@ -173,6 +179,34 @@
             RenderAnimation(animation, canvas);
         }
 
+        /// <summary>
+        /// Support different Repeat behaviors.
+        /// Repeat count prevail over time
+        /// </summary>
+        /// <returns></returns>
+        private bool CanRestart()
+        {
+            if (Repeat == RepeatBehavior.Forever)
+            {
+                return true;
+            }
+            else
+            {
+                if (Repeat.HasCount && Repeat.Count < _repeatCount)
+                {
+                    return true;
+                }
+
+                if (Repeat.HasDuration && Repeat.Duration < _frameWatcher.Elapsed)
+                {
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         private void RenderAnimation(Animation animation, SKCanvas canvas)
         {
             Argument.IsNotNull(() => animation);
@@ -183,9 +217,11 @@
 
             animation.Render(canvas, new SKRect(0, 0, (float)ActualWidth, (float)ActualHeight));
 
+#if DEBUG
             var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
 
             Log.Debug($"Frame render time: {renderTime} ms");
+#endif
         }
     }
 }
