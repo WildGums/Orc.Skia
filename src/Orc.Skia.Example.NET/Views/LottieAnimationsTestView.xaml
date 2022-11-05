@@ -70,12 +70,49 @@
                       IsChecked="True"
                       Content="Repeat"/>
 
+            <GroupBox Header="Mouse over behavior">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <RadioButton Content="None" IsChecked="True" GroupName="MouseOverBehavior"
+                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="0"/>
+                    <RadioButton Content="Start" Grid.Column="1" GroupName="MouseOverBehavior"
+                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="1"/>
+                    <RadioButton Content="Stop" Grid.Column="2" GroupName="MouseOverBehavior"
+                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="2"/>
+                </Grid>
+            </GroupBox>
+           
         </StackPanel>
 
-        <skia:LottieCanvas x:Name="canvas" Grid.Column="1"
+        <Border Grid.Column="1" BorderThickness="1" Margin="60">
+            <Border.BorderBrush>
+                <DrawingBrush Viewport="0,0,8,8" ViewportUnits="Absolute" TileMode="Tile">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <GeometryDrawing Brush="Black">
+                                <GeometryDrawing.Geometry>
+                                    <GeometryGroup>
+                                        <RectangleGeometry Rect="0,0,50,50" />
+                                        <RectangleGeometry Rect="50,50,50,50" />
+                                    </GeometryGroup>
+                                </GeometryDrawing.Geometry>
+                            </GeometryDrawing>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Border.BorderBrush>
+            <skia:LottieCanvas x:Name="canvas"
                            Animation="{Binding AnimationInPlayback, Mode=OneWayToSource}"
+                           MouseOver="{Binding MouseOverBehavior}"
                            UriSource="{Binding SelectedFile, Converter={skia:StringToUriConverter}}"
-                           Repeat="{Binding ElementName=RepeatCheckBox, Path=IsChecked}"/>
+                           Repeat="{Binding ElementName=RepeatCheckBox, Path=IsChecked, Converter={skia:BooleanToRepeatBehaviorConverter}}"/>
+        </Border>
+      
 
     </Grid>
 </catel:UserControl>

@@ -41,6 +41,15 @@
         public static readonly DependencyProperty RepeatProperty =
             DependencyProperty.Register(nameof(Repeat), typeof(RepeatBehavior), typeof(LottieCanvas), new PropertyMetadata(RepeatBehavior.Forever));
 
+        public AnimationMouseOverBehavior MouseOver
+        {
+            get => (AnimationMouseOverBehavior)GetValue(MouseOverProperty);
+            set => SetValue(MouseOverProperty, value);
+        }
+
+        public static readonly DependencyProperty MouseOverProperty =
+         DependencyProperty.Register(nameof(MouseOver), typeof(AnimationMouseOverBehavior), typeof(LottieCanvas), new PropertyMetadata(AnimationMouseOverBehavior.None));
+
         public bool IsPlaying
         {
             get => (bool)GetValue(IsPlayingProperty);
@@ -132,21 +141,32 @@
             SetCurrentValue(AnimationProperty, animation);
 
             _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramePerSeconds, 1 / animation.Fps));
-            _invalidationTimer.Tick += (s, e) => Invalidate();
+            _invalidationTimer.Tick += (s, e) =>
+            {
+                if (IsPlaying)
+                {
+                    Invalidate();
+                }
+            };
 
             StartAnimation();
         }
 
         public void StartAnimation()
         {
-            _repeatCount++;
-
             SetCurrentValue(IsPlayingProperty, true);
 
             _invalidationTimer.Start();
             _frameWatcher.Restart();
         }
 
+        public void ResumeAnimation()
+        {
+            SetCurrentValue(IsPlayingProperty, true);
+
+            _invalidationTimer.Start();
+            _frameWatcher.Start();
+        }
 
         public void StopAnimation()
         {
@@ -164,10 +184,42 @@
                 return;
             }
 
-            if (_frameWatcher.Elapsed > animation.Duration)
+            bool halt = false;
+
+            // Check mouse
+            if (MouseOver == AnimationMouseOverBehavior.Start)
+            {
+                if (IsMouseOver)
+                {
+                    ResumeAnimation();
+                }
+                else
+                {
+                    StopAnimation();
+                    halt = true;
+                }
+
+            }
+
+            if (MouseOver == AnimationMouseOverBehavior.Stop)
+            {
+                if (IsMouseOver)
+                {
+                    StopAnimation();
+                    halt = true;
+                }
+                else
+                {
+                    ResumeAnimation();
+                }
+            }
+
+            if (!halt && _frameWatcher.Elapsed > animation.Duration)
             {
                 if (CanRestart())
                 {
+                    _repeatCount++;
+
                     StartAnimation();
                 }
                 else
@@ -192,12 +244,12 @@
             }
             else
             {
-                if (Repeat.HasCount && Repeat.Count < _repeatCount)
+                if (Repeat.HasCount && Repeat.Count >= _repeatCount)
                 {
                     return true;
                 }
 
-                if (Repeat.HasDuration && Repeat.Duration < _frameWatcher.Elapsed)
+                if (Repeat.HasDuration && Repeat.Duration >= _frameWatcher.Elapsed)
                 {
 
                     return true;
