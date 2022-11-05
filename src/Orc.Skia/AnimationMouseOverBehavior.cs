@@ -2,8 +2,8 @@
 {
     public enum AnimationMouseOverBehavior
     {
-        None,
-        Start,
-        Stop,
+        None = 0,
+        Start = 1,
+        Stop = 2,
     }
 }

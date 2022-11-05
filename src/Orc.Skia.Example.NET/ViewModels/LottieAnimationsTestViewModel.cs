@@ -21,9 +21,8 @@
 
         private Task OnSetMouseOverBehaviorCommandExecuteAsync(string arg)
         {
-            MouseOverBehavior = (AnimationMouseOverBehavior)int.Parse(arg);
+            MouseOverBehavior = System.Enum.Parse<AnimationMouseOverBehavior>(arg);
             return Task.CompletedTask;
         }
-
     }
 }

@@ -79,11 +79,11 @@
                     </Grid.ColumnDefinitions>
 
                     <RadioButton Content="None" IsChecked="True" GroupName="MouseOverBehavior"
-                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="0"/>
+                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="None"/>
                     <RadioButton Content="Start" Grid.Column="1" GroupName="MouseOverBehavior"
-                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="1"/>
+                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="Start"/>
                     <RadioButton Content="Stop" Grid.Column="2" GroupName="MouseOverBehavior"
-                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="2"/>
+                                 Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="Stop"/>
                 </Grid>
             </GroupBox>
            

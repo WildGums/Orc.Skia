@@ -5,7 +5,6 @@
     using System.IO;
     using System.Web;
     using System.Windows;
-    using System.Windows.Controls;
     using System.Windows.Media.Animation;
     using System.Windows.Threading;
     using Catel;
@@ -200,7 +199,7 @@
                 return;
             }
 
-            bool halt = false;
+            var halt = false;
 
             // Check mouse
             if (MouseOver == AnimationMouseOverBehavior.Start)
@@ -214,7 +213,6 @@
                     StopAnimation();
                     halt = true;
                 }
-
             }
 
             if (MouseOver == AnimationMouseOverBehavior.Stop)
@@ -258,21 +256,19 @@
             {
                 return true;
             }
-            else
+
+            if (Repeat.HasCount && Repeat.Count >= _repeatCount)
             {
-                if (Repeat.HasCount && Repeat.Count >= _repeatCount)
-                {
-                    return true;
-                }
-
-                if (Repeat.HasDuration && Repeat.Duration >= _frameWatcher.Elapsed)
-                {
-
-                    return true;
-                }
-
-                return false;
+                return true;
             }
+
+            if (Repeat.HasDuration && Repeat.Duration >= _frameWatcher.Elapsed)
+            {
+
+                return true;
+            }
+
+            return false;
         }
 
         private void RenderAnimation(Animation animation, SKCanvas canvas)
