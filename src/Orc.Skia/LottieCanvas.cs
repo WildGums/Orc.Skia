@@ -23,6 +23,12 @@
 
         private int _repeatCount = 0;
 
+        public LottieCanvas()
+        {
+            // Required for animations
+            ForceNewBitmaps = true;
+        }
+
         public Animation Animation
         {
             get => (Animation)GetValue(AnimationProperty);
@@ -145,7 +151,7 @@
             {
                 if (IsPlaying)
                 {
-                    Invalidate();
+                    Update();
                 }
             };
 
