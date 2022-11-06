@@ -27,8 +27,6 @@
 
         public LottieCanvas()
         {
-            // Required for animations
-            ForceNewBitmaps = true;
         }
 
         public Animation Animation
@@ -293,6 +291,8 @@
 #if DEBUG
             var renderTimeStart = _frameWatcher.Elapsed.TotalMilliseconds;
 #endif
+
+            canvas.Clear();
 
             animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
 
