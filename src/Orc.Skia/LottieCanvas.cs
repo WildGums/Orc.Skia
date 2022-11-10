@@ -5,6 +5,7 @@
     using System.IO;
     using System.Web;
     using System.Windows;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Threading;
     using Catel;
@@ -19,14 +20,24 @@
         private const float FramesPerSecond = 60;
 
         private readonly DispatcherTimer _invalidationTimer = new();
+        private readonly DispatcherTimer _resizeTimer = new();
         private readonly Stopwatch _frameWatcher = new();
 
         private int _repeatCount = 0;
 
         private bool _isDirty = false;
+        private SKRect _renderSize;
+
+#if DEBUG
+#pragma warning disable IDISP006 // Implement IDisposable
+        private readonly SKPaint _debugPaint = SKPaintHelper.CreateLinePaint(2d, Colors.Red);
+#pragma warning restore IDISP006 // Implement IDisposable
+#endif
 
         public LottieCanvas()
         {
+            _resizeTimer.Interval = TimeSpan.FromMilliseconds(100);
+            _resizeTimer.Tick += OnResizeTimerTick;
         }
 
         public Animation Animation
@@ -151,6 +162,8 @@
 
             SetCurrentValue(AnimationProperty, animation);
 
+            CalculateRenderOffset();
+
             _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramesPerSecond, 1 / animation.Fps));
             _invalidationTimer.Tick += (s, e) =>
             {
@@ -191,6 +204,55 @@
 
             _invalidationTimer.Stop();
             _frameWatcher.Stop();
+        }
+
+        private void CalculateRenderOffset()
+        {
+            var animation = Animation;
+            if (animation is null)
+            {
+                return;
+            }
+
+            var left = 0f;
+            var top = 0f;
+            var width = 0f;
+            var height = 0f;
+
+            var renderSizeDip = RenderSize;
+            var renderSizePixels = CreateSize(out var scaleX, out var scaleY);
+
+            var animationSize = animation.Size;
+            if (animationSize != default)
+            {
+                var correctAnimationSize = new SKSize(animationSize.Width * (float)scaleX,
+                    animationSize.Height * (float)scaleY);
+
+                var ratioX = (float)(renderSizeDip.Width / correctAnimationSize.Width);
+                var ratioY = (float)(renderSizeDip.Height / correctAnimationSize.Height);
+
+                var ratio = Math.Min(ratioX, ratioY);
+
+                width = correctAnimationSize.Width * ratio;
+                height = correctAnimationSize.Height * ratio;
+
+                left = ((float)renderSizeDip.Width - width) / 2f;
+                top = ((float)renderSizeDip.Height - height) / 2f;
+            }
+
+            var leftScaled = left * (float)scaleX;
+            var topScaled = top * (float)scaleY;
+            var widthScaled = (left + width) * (float)scaleX;
+            var heightScaled = (top + height) * (float)scaleY;
+
+            _renderSize = new SKRect(leftScaled, topScaled, widthScaled, heightScaled);
+        }
+
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+
+            ScheduleRenderSizeUpdate();
         }
 
         protected override void Render(SKCanvas canvas, bool isClearCanvas)
@@ -260,6 +322,19 @@
             _isDirty = false;
         }
 
+        private void ScheduleRenderSizeUpdate()
+        {
+            _resizeTimer.Stop();
+            _resizeTimer.Start();
+        }
+
+        private void OnResizeTimerTick(object sender, EventArgs e)
+        {
+            _resizeTimer.Stop();
+
+            CalculateRenderOffset();
+        }
+
         /// <summary>
         /// Support different Repeat behaviors.
         /// Repeat count prevail over time
@@ -294,9 +369,12 @@
 
             canvas.Clear();
 
-            animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
+#if DEBUG
+            canvas.DrawRect(_renderSize, _debugPaint);
+#endif
 
-            animation.Render(canvas, new SKRect(0, 0, (float)ActualWidth, (float)ActualHeight));
+            animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
+            animation.Render(canvas, _renderSize);
 
 #if DEBUG
             var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
