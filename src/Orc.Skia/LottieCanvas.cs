@@ -1,4 +1,9 @@
-﻿namespace Orc.Skia
+﻿#if DEBUG
+//#define DEBUG_BACKGROUND
+//#define DEBUG_TIMING
+#endif
+
+namespace Orc.Skia
 {
     using System;
     using System.Diagnostics;
@@ -28,7 +33,7 @@
         private bool _isDirty = false;
         private SKRect _renderSize;
 
-#if DEBUG
+#if DEBUG_BACKGROUND
 #pragma warning disable IDISP006 // Implement IDisposable
         private readonly SKPaint _debugPaint = SKPaintHelper.CreateLinePaint(2d, Colors.Red);
 #pragma warning restore IDISP006 // Implement IDisposable
@@ -36,7 +41,7 @@
 
         public LottieCanvas()
         {
-            _resizeTimer.Interval = TimeSpan.FromMilliseconds(100);
+            _resizeTimer.Interval = TimeSpan.FromMilliseconds(50);
             _resizeTimer.Tick += OnResizeTimerTick;
         }
 
@@ -220,7 +225,7 @@
             var height = 0f;
 
             var renderSizeDip = RenderSize;
-            var renderSizePixels = CreateSize(out var scaleX, out var scaleY);
+            _ = CreateSize(out var scaleX, out var scaleY);
 
             var animationSize = animation.Size;
             if (animationSize != default)
@@ -363,20 +368,20 @@
 
         private void RenderAnimation(Animation animation, SKCanvas canvas)
         {
-#if DEBUG
+#if DEBUG_TIMING
             var renderTimeStart = _frameWatcher.Elapsed.TotalMilliseconds;
 #endif
 
             canvas.Clear();
 
-#if DEBUG
+#if DEBUG_BACKGROUND
             canvas.DrawRect(_renderSize, _debugPaint);
 #endif
 
             animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
             animation.Render(canvas, _renderSize);
 
-#if DEBUG
+#if DEBUG_TIMING
             var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
 
             Log.Debug($"Frame render time: {renderTime} ms");
