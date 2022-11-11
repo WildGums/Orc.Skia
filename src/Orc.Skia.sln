@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33103.201
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{1FE0D431-A761-4239-B2D6-D32C70723FD2}"
 	ProjectSection(SolutionItems) = preProject
@@ -27,17 +27,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{672B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orc.Skia", "Orc.Skia\Orc.Skia.csproj", "{9A158429-3DC0-4EAE-99EF-82362CD4EAE0}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Orc.Skia.Example.Shared", "Orc.Skia.Example.Shared\Orc.Skia.Example.Shared.shproj", "{405DB1F0-378A-454D-9899-FF6B3E246310}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orc.Skia.Example.NET", "Orc.Skia.Example.NET\Orc.Skia.Example.NET.csproj", "{5E81F56A-CD44-4FD8-8D2A-EE38BEB8FDEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orc.Skia.Example", "Orc.Skia.Example\Orc.Skia.Example.csproj", "{5E81F56A-CD44-4FD8-8D2A-EE38BEB8FDEE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orc.Skia.Tests", "Orc.Skia.Tests\Orc.Skia.Tests.csproj", "{798B63DD-B316-4AAA-83CF-E6AC7829AA2E}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Orc.Skia.Example.Shared\Orc.Skia.Example.Shared.projitems*{405db1f0-378a-454d-9899-ff6b3e246310}*SharedItemsImports = 13
-		Orc.Skia.Example.Shared\Orc.Skia.Example.Shared.projitems*{5e81f56a-cd44-4fd8-8d2a-ee38beb8fdee}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM
@@ -106,7 +100,6 @@ Global
 		{D3EA1078-BF3D-4709-871C-AAFF70B95045} = {A8A1A4EE-E04A-43AB-90C9-41E7B82EE1E5}
 		{672BFA2E-9F93-496F-B188-40579FB5D301} = {A8A1A4EE-E04A-43AB-90C9-41E7B82EE1E5}
 		{9A158429-3DC0-4EAE-99EF-82362CD4EAE0} = {0787DFC6-AB24-4D00-A8A4-FF203DC7D080}
-		{405DB1F0-378A-454D-9899-FF6B3E246310} = {672BFA2E-9F93-496F-B188-40579FB5D301}
 		{5E81F56A-CD44-4FD8-8D2A-EE38BEB8FDEE} = {672BFA2E-9F93-496F-B188-40579FB5D301}
 		{798B63DD-B316-4AAA-83CF-E6AC7829AA2E} = {D3EA1078-BF3D-4709-871C-AAFF70B95045}
 	EndGlobalSection
