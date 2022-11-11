@@ -296,7 +296,7 @@ namespace Orc.Skia
             return renderContext;
         }
 
-        private SKSizeI CreateSize(out double scaleX, out double scaleY)
+        protected SKSizeI CreateSize(out double scaleX, out double scaleY)
         {
             scaleX = 1.0;
             scaleY = 1.0;
@@ -309,7 +309,7 @@ namespace Orc.Skia
                 return SKSizeI.Empty;
             }
 
-            if (IgnorePixelScaling)
+            if (_ignorePixelScaling)
             {
                 return new SKSizeI((int)w, (int)h);
             }
