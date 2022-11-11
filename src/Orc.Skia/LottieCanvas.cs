@@ -11,7 +11,6 @@ namespace Orc.Skia
     using System.IO;
     using System.Web;
     using System.Windows;
-    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Threading;
     using Catel;
@@ -30,7 +29,7 @@ namespace Orc.Skia
         private readonly Stopwatch _frameWatcher = new();
 
         private int _repeatCount = 0;
-
+        private bool _clearCanvas;
         private bool _autoPaused;
         private bool _isDirty = false;
         private SKRect _renderSize;
@@ -108,6 +107,9 @@ namespace Orc.Skia
                 SetCurrentValue(StreamSourceProperty, null);
                 SetCurrentValue(AnimationProperty, null);
 
+                _clearCanvas = true;
+                Update();
+
                 if (uri is null)
                 {
                     return;
@@ -152,6 +154,9 @@ namespace Orc.Skia
                 // Sync sources
                 SetCurrentValue(UriSourceProperty, null);
                 SetCurrentValue(AnimationProperty, null);
+
+                _clearCanvas = true;
+                Update();
 
                 var animationFromStreamSource = StreamSource;
                 if (animationFromStreamSource is not null)
@@ -315,6 +320,13 @@ namespace Orc.Skia
 
         protected override void Render(SKCanvas canvas, bool isClearCanvas)
         {
+            if (_clearCanvas)
+            {
+                canvas.Clear();
+                _clearCanvas = false;
+                return;
+            }
+
             var animation = Animation;
             if (animation is null)
             {
