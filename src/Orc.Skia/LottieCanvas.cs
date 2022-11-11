@@ -298,7 +298,7 @@ namespace Orc.Skia
                     _autoPaused = false;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Resuming animatin, canvas became visible");
+                    Log.Debug("Resuming animation, canvas became visible");
 #endif
 
                     ResumeAnimation();
@@ -312,7 +312,7 @@ namespace Orc.Skia
                     _autoPaused = true;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Pausing animatin, canvas is invisible");
+                    Log.Debug("Pausing animation, canvas became invisible");
 #endif
                 }
             }
@@ -410,7 +410,7 @@ namespace Orc.Skia
             CalculateRenderOffset();
         }
 
-        private void OnInvalidationTimerTick(object sender, EventArgs e)
+        private void OnInvalidationTimerTick(object? sender, EventArgs e)
         {
 #if DEBUG_LOGGING
             Log.Debug("Invalidating animation frame");
@@ -419,7 +419,7 @@ namespace Orc.Skia
             if (!IsVisible)
             {
 #if DEBUG_LOGGING
-                Log.Debug("Pausing animatin, canvas is invisible");
+                Log.Debug("Pausing animation, canvas is invisible");
 #endif
 
                 _autoPaused = IsPlaying;
