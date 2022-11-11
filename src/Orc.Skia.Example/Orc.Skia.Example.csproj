@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
     <TargetFrameworks>net6.0-windows</TargetFrameworks>
-    <AssemblyName>Orc.Skia.Example.NET</AssemblyName>
+    <AssemblyName>Orc.Skia.Example</AssemblyName>
     <RootNamespace>Orc.Skia.Example</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <SonarQubeExclude>true</SonarQubeExclude>
@@ -27,15 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="NETStandard.Library" Version="2.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Orc.Skia\Orc.Skia.csproj" />
   </ItemGroup>
 
-  <Import Project="..\Orc.Skia.Example.Shared\Orc.Skia.Example.Shared.projitems" Label="Shared" />
-  
   <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props')" />
   <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.shared.mat.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.shared.mat.props')" />
 </Project>

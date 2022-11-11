@@ -13,7 +13,7 @@
                 return null;
             }
 
-            return new Uri(value);
+            return new Uri(value, UriKind.RelativeOrAbsolute);
         }
 
         protected override object ConvertBack(Uri value, Type targetType, object parameter)
