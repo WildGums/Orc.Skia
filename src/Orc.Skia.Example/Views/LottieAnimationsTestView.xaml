@@ -86,7 +86,7 @@
                                  Command="{Binding SetMouseOverBehaviorCommand}" CommandParameter="Stop"/>
                 </Grid>
             </GroupBox>
-           
+
         </StackPanel>
 
         <Border Grid.Column="1" BorderThickness="1" Margin="60">
@@ -106,13 +106,14 @@
                     </DrawingBrush.Drawing>
                 </DrawingBrush>
             </Border.BorderBrush>
+
             <skia:LottieCanvas x:Name="canvas"
-                           Animation="{Binding AnimationInPlayback, Mode=OneWayToSource}"
-                           MouseOver="{Binding MouseOverBehavior}"
-                           UriSource="{Binding SelectedFile, Converter={skia:StringToUriConverter}}"
-                           Repeat="{Binding ElementName=RepeatCheckBox, Path=IsChecked, Converter={skia:BooleanToRepeatBehaviorConverter}}"/>
+                               Animation="{Binding AnimationInPlayback, Mode=OneWayToSource}"
+                               MouseOver="{Binding MouseOverBehavior}"
+                               UriSource="{Binding SelectedFile, Converter={skia:StringToUriConverter}}"
+                               Repeat="{Binding ElementName=RepeatCheckBox, Path=IsChecked, Converter={skia:BooleanToRepeatBehaviorConverter}}"/>
         </Border>
-      
+
 
     </Grid>
 </catel:UserControl>
