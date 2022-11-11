@@ -96,8 +96,11 @@ namespace Orc.Skia
             {
                 var uri = UriSource;
 
+                StopAnimation();
+
                 // Sync sources
                 SetCurrentValue(StreamSourceProperty, null);
+                SetCurrentValue(AnimationProperty, null);
 
                 if (uri is null)
                 {
@@ -138,9 +141,17 @@ namespace Orc.Skia
         {
             try
             {
+                StopAnimation();
+
                 // Sync sources
                 SetCurrentValue(UriSourceProperty, null);
-                InitializeAnimationFromSource(StreamSource);
+                SetCurrentValue(AnimationProperty, null);
+
+                var animationFromStreamSource = StreamSource;
+                if (animationFromStreamSource is not null)
+                {
+                    InitializeAnimationFromSource(animationFromStreamSource);
+                }
             }
             catch (Exception ex)
             {
