@@ -77,6 +77,8 @@ namespace Orc.Skia
         #region Properties
         public int FrameDelayInMilliseconds { get; set; }
 
+        public bool RenderWhenInvisible { get; set; }
+
         public static bool ForceNewBitmapsDefaultValue { get; set; }
 
         public bool ForceNewBitmaps { get; set; }
@@ -135,7 +137,7 @@ namespace Orc.Skia
                 return;
             }
 
-            if (!IsVisible)
+            if (!RenderWhenInvisible && !IsVisible)
             {
                 return;
             }
