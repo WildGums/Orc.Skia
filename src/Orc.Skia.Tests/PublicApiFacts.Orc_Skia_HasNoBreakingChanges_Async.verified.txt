@@ -19,7 +19,7 @@ namespace Orc.Skia
     public class BooleanToRepeatBehaviorConverter : Catel.MVVM.Converters.ValueConverterBase<bool, System.Windows.Media.Animation.RepeatBehavior>
     {
         public BooleanToRepeatBehaviorConverter() { }
-        protected override object Convert(bool value, System.Type targetType, object parameter) { }
+        protected override object? Convert(bool value, System.Type targetType, object? parameter) { }
     }
     public class CanvasRenderingEventArgs : System.EventArgs
     {
@@ -51,8 +51,8 @@ namespace Orc.Skia
         public bool IsPlaying { get; set; }
         public Orc.Skia.AnimationMouseOverBehavior MouseOver { get; set; }
         public System.Windows.Media.Animation.RepeatBehavior Repeat { get; set; }
-        public System.IO.Stream StreamSource { get; set; }
-        public System.Uri UriSource { get; set; }
+        public System.IO.Stream? StreamSource { get; set; }
+        public System.Uri? UriSource { get; set; }
         protected override void OnRenderSizeChanged(System.Windows.SizeChangedInfo sizeInfo) { }
         protected override void Render(SkiaSharp.SKCanvas canvas, bool isClearCanvas) { }
         public void ResumeAnimation() { }
@@ -176,12 +176,12 @@ namespace Orc.Skia
     {
         public SkiaException(string message) { }
     }
-    [System.Windows.Data.ValueConversion(typeof(string), typeof(System.Uri))]
+    [System.Windows.Data.ValueConversion(typeof(string?), typeof(System.Uri?))]
     public class StringToUriConverter : Catel.MVVM.Converters.ValueConverterBase<string, System.Uri>
     {
         public StringToUriConverter() { }
-        protected override object Convert(string value, System.Type targetType, object parameter) { }
-        protected override object ConvertBack(System.Uri value, System.Type targetType, object parameter) { }
+        protected override object? Convert(string? value, System.Type targetType, object? parameter) { }
+        protected override object? ConvertBack(System.Uri? value, System.Type targetType, object? parameter) { }
     }
     public static class WriteableBitmapExtensions { }
 }

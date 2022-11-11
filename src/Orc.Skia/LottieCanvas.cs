@@ -81,9 +81,9 @@ namespace Orc.Skia
         public static readonly DependencyProperty IsPlayingProperty =
             DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(LottieCanvas), new PropertyMetadata(false));
 
-        public Uri UriSource
+        public Uri? UriSource
         {
-            get => (Uri)GetValue(UriSourceProperty);
+            get => (Uri?)GetValue(UriSourceProperty);
             set => SetValue(UriSourceProperty, value);
         }
 
@@ -96,8 +96,11 @@ namespace Orc.Skia
             {
                 var uri = UriSource;
 
+                StopAnimation();
+
                 // Sync sources
                 SetCurrentValue(StreamSourceProperty, null);
+                SetCurrentValue(AnimationProperty, null);
 
                 if (uri is null)
                 {
@@ -125,9 +128,9 @@ namespace Orc.Skia
             }
         }
 
-        public Stream StreamSource
+        public Stream? StreamSource
         {
-            get => (Stream)GetValue(StreamSourceProperty);
+            get => (Stream?)GetValue(StreamSourceProperty);
             set => SetValue(StreamSourceProperty, value);
         }
 
@@ -138,9 +141,17 @@ namespace Orc.Skia
         {
             try
             {
+                StopAnimation();
+
                 // Sync sources
                 SetCurrentValue(UriSourceProperty, null);
-                InitializeAnimationFromSource(StreamSource);
+                SetCurrentValue(AnimationProperty, null);
+
+                var animationFromStreamSource = StreamSource;
+                if (animationFromStreamSource is not null)
+                {
+                    InitializeAnimationFromSource(animationFromStreamSource);
+                }
             }
             catch (Exception ex)
             {
@@ -161,7 +172,7 @@ namespace Orc.Skia
 
         public void SetAnimation(Animation animation)
         {
-            Argument.IsNotNull(() => animation);
+            ArgumentNullException.ThrowIfNull(animation);
 
             animation.Seek(0, null);
 
@@ -333,7 +344,7 @@ namespace Orc.Skia
             _resizeTimer.Start();
         }
 
-        private void OnResizeTimerTick(object sender, EventArgs e)
+        private void OnResizeTimerTick(object? sender, EventArgs e)
         {
             _resizeTimer.Stop();
 

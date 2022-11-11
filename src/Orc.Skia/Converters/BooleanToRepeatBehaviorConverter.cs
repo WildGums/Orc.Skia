@@ -9,7 +9,7 @@
     {
         private readonly RepeatBehavior _oneTimeRepeat = new RepeatBehavior(1);
 
-        protected override object Convert(bool value, Type targetType, object parameter)
+        protected override object? Convert(bool value, Type targetType, object? parameter)
         {
             return value ? RepeatBehavior.Forever : _oneTimeRepeat;
         }

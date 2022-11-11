@@ -6,7 +6,7 @@
     [System.Windows.Data.ValueConversion(typeof(string), typeof(Uri))]
     public class StringToUriConverter : ValueConverterBase<string, Uri>
     {
-        protected override object Convert(string value, Type targetType, object parameter)
+        protected override object? Convert(string? value, Type targetType, object? parameter)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -16,7 +16,7 @@
             return new Uri(value);
         }
 
-        protected override object ConvertBack(Uri value, Type targetType, object parameter)
+        protected override object? ConvertBack(Uri? value, Type targetType, object? parameter)
         {
             return value?.ToString();
         }
