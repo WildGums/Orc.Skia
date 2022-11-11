@@ -115,19 +115,29 @@ namespace Orc.Skia
                     return;
                 }
 
+                if (!uri.IsAbsoluteUri)
+                {
+                    var resourceStreamInfo = Application.GetResourceStream(uri);
+                    if (resourceStreamInfo is not null)
+                    {
+                        using (resourceStreamInfo.Stream)
+                        {
+                            InitializeAnimationFromSource(resourceStreamInfo.Stream);
+                        }
+                    }
+
+                    return;
+                }
+
+                // Note: checkign uri.IsFile can only be done if absolute path
                 if (uri.IsFile)
                 {
                     using (var fileStream = File.OpenRead(HttpUtility.UrlDecode(uri.AbsolutePath)))
                     {
                         InitializeAnimationFromSource(fileStream);
-                        return;
                     }
-                }
 
-                var resourceStreamInfo = Application.GetResourceStream(uri);
-                using (resourceStreamInfo.Stream)
-                {
-                    InitializeAnimationFromSource(resourceStreamInfo.Stream);
+                    return;
                 }
             }
             catch (Exception ex)
@@ -192,7 +202,6 @@ namespace Orc.Skia
             CalculateRenderOffset();
 
             _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramesPerSecond, 1 / animation.Fps));
-
 
             StartAnimation();
         }
@@ -298,7 +307,7 @@ namespace Orc.Skia
                     _autoPaused = false;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Resuming animatin, canvas became visible");
+                    Log.Debug("Resuming animation, canvas became visible");
 #endif
 
                     ResumeAnimation();
@@ -312,7 +321,7 @@ namespace Orc.Skia
                     _autoPaused = true;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Pausing animatin, canvas is invisible");
+                    Log.Debug("Pausing animation, canvas is invisible");
 #endif
                 }
             }

@@ -9,6 +9,7 @@
         public LottieAnimationsTestViewModel()
         {
             SetMouseOverBehaviorCommand = new TaskCommand<string>(OnSetMouseOverBehaviorCommandExecuteAsync);
+            SelectedFile = "/Orc.Skia.Example;component/Resources/Lottie/loading-files.json";
         }
 
         public string SelectedFile { get; set; }
