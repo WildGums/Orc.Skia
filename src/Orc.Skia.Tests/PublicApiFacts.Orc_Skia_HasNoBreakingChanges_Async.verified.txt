@@ -143,6 +143,7 @@ namespace Orc.Skia
         public bool ForceNewBitmaps { get; set; }
         public int FrameDelayInMilliseconds { get; set; }
         public bool IgnorePixelScaling { get; set; }
+        public bool RenderWhenInvisible { get; set; }
         public static bool ForceNewBitmapsDefaultValue { get; set; }
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendered;
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendering;

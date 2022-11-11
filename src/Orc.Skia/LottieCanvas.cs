@@ -1,6 +1,7 @@
 ﻿#if DEBUG
 //#define DEBUG_BACKGROUND
-//#define DEBUG_TIMING
+#define DEBUG_TIMING
+#define DEBUG_LOGGING
 #endif
 
 namespace Orc.Skia
@@ -10,7 +11,6 @@ namespace Orc.Skia
     using System.IO;
     using System.Web;
     using System.Windows;
-    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Threading;
     using Catel;
@@ -29,7 +29,8 @@ namespace Orc.Skia
         private readonly Stopwatch _frameWatcher = new();
 
         private int _repeatCount = 0;
-
+        private bool _clearCanvas;
+        private bool _autoPaused;
         private bool _isDirty = false;
         private SKRect _renderSize;
 
@@ -43,6 +44,10 @@ namespace Orc.Skia
         {
             _resizeTimer.Interval = TimeSpan.FromMilliseconds(50);
             _resizeTimer.Tick += OnResizeTimerTick;
+
+            _invalidationTimer.Tick += OnInvalidationTimerTick;
+
+            IsVisibleChanged += OnIsVisibleChanged;
         }
 
         public Animation Animation
@@ -102,6 +107,9 @@ namespace Orc.Skia
                 SetCurrentValue(StreamSourceProperty, null);
                 SetCurrentValue(AnimationProperty, null);
 
+                _clearCanvas = true;
+                Update();
+
                 if (uri is null)
                 {
                     return;
@@ -147,6 +155,9 @@ namespace Orc.Skia
                 SetCurrentValue(UriSourceProperty, null);
                 SetCurrentValue(AnimationProperty, null);
 
+                _clearCanvas = true;
+                Update();
+
                 var animationFromStreamSource = StreamSource;
                 if (animationFromStreamSource is not null)
                 {
@@ -181,21 +192,21 @@ namespace Orc.Skia
             CalculateRenderOffset();
 
             _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramesPerSecond, 1 / animation.Fps));
-            _invalidationTimer.Tick += (s, e) =>
-            {
-                if (IsPlaying)
-                {
-                    _isDirty = true;
-                    Update();
-                }
-            };
+
 
             StartAnimation();
         }
 
         public void StartAnimation()
         {
+            if (Animation is null)
+            {
+                return;
+            }
+
             SetCurrentValue(IsPlayingProperty, true);
+
+            CalculateRenderOffset();
 
             _invalidationTimer.Start();
             _frameWatcher.Restart();
@@ -203,12 +214,19 @@ namespace Orc.Skia
 
         public void ResumeAnimation()
         {
+            if (Animation is null)
+            {
+                return;
+            }
+
             if (!CanRestart())
             {
                 return;
             }
 
             SetCurrentValue(IsPlayingProperty, true);
+
+            CalculateRenderOffset();
 
             _invalidationTimer.Start();
             _frameWatcher.Start();
@@ -271,10 +289,51 @@ namespace Orc.Skia
             ScheduleRenderSizeUpdate();
         }
 
+        private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (IsVisible)
+            {
+                if (_autoPaused)
+                {
+                    _autoPaused = false;
+
+#if DEBUG_LOGGING
+                    Log.Debug("Resuming animatin, canvas became visible");
+#endif
+
+                    ResumeAnimation();
+                }
+            }
+            else
+            {
+                if (_invalidationTimer.IsEnabled)
+                {
+                    _invalidationTimer.Stop();
+                    _autoPaused = true;
+
+#if DEBUG_LOGGING
+                    Log.Debug("Pausing animatin, canvas is invisible");
+#endif
+                }
+            }
+        }
+
         protected override void Render(SKCanvas canvas, bool isClearCanvas)
         {
+            if (_clearCanvas)
+            {
+                canvas.Clear();
+                _clearCanvas = false;
+                return;
+            }
+
             var animation = Animation;
             if (animation is null)
+            {
+                return;
+            }
+
+            if (!IsVisible)
             {
                 return;
             }
@@ -349,6 +408,29 @@ namespace Orc.Skia
             _resizeTimer.Stop();
 
             CalculateRenderOffset();
+        }
+
+        private void OnInvalidationTimerTick(object sender, EventArgs e)
+        {
+#if DEBUG_LOGGING
+            Log.Debug("Invalidating animation frame");
+#endif
+
+            if (!IsVisible)
+            {
+#if DEBUG_LOGGING
+                Log.Debug("Pausing animatin, canvas is invisible");
+#endif
+
+                _autoPaused = IsPlaying;
+                StopAnimation();
+            }
+
+            if (IsPlaying)
+            {
+                _isDirty = true;
+                Update();
+            }
         }
 
         /// <summary>
