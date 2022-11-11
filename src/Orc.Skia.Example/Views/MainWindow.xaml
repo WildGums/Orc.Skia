@@ -7,6 +7,7 @@
               xmlns:orccontrols="http://schemas.wildgums.com/orc/controls"
               xmlns:controls="clr-namespace:Orc.Skia.Example.Controls" 
               xmlns:orctheming="http://schemas.wildgums.com/orc/theming"
+              xmlns:local="clr-namespace:Orc.Skia.Example.Views"
               mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="400">
 
     <orccontrols:StackGrid>
@@ -32,6 +33,10 @@
 
             <TabItem Header="Customized Canvas" Width="183">
                 <controls:CustomizedCanvasView />
+            </TabItem>
+
+            <TabItem Header="Lottie animation Canvas" Width="183">
+                <local:LottieAnimationsTestView />
             </TabItem>
         </orccontrols:TabControl>
 

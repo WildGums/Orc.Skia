@@ -9,6 +9,18 @@ public static class ModuleInitializer
 }
 namespace Orc.Skia
 {
+    public enum AnimationMouseOverBehavior
+    {
+        None = 0,
+        Start = 1,
+        Stop = 2,
+    }
+    [System.Windows.Data.ValueConversion(typeof(bool), typeof(System.Windows.Media.Animation.RepeatBehavior))]
+    public class BooleanToRepeatBehaviorConverter : Catel.MVVM.Converters.ValueConverterBase<bool, System.Windows.Media.Animation.RepeatBehavior>
+    {
+        public BooleanToRepeatBehaviorConverter() { }
+        protected override object Convert(bool value, System.Type targetType, object parameter) { }
+    }
     public class CanvasRenderingEventArgs : System.EventArgs
     {
         public CanvasRenderingEventArgs(SkiaSharp.SKCanvas canvas) { }
@@ -25,6 +37,28 @@ namespace Orc.Skia
         Solid = 0,
         Dashed = 1,
         Dotted = 2,
+    }
+    public class LottieCanvas : Orc.Skia.SkiaCanvas
+    {
+        public static readonly System.Windows.DependencyProperty AnimationProperty;
+        public static readonly System.Windows.DependencyProperty IsPlayingProperty;
+        public static readonly System.Windows.DependencyProperty MouseOverProperty;
+        public static readonly System.Windows.DependencyProperty RepeatProperty;
+        public static readonly System.Windows.DependencyProperty StreamSourceProperty;
+        public static readonly System.Windows.DependencyProperty UriSourceProperty;
+        public LottieCanvas() { }
+        public SkiaSharp.Skottie.Animation Animation { get; set; }
+        public bool IsPlaying { get; set; }
+        public Orc.Skia.AnimationMouseOverBehavior MouseOver { get; set; }
+        public System.Windows.Media.Animation.RepeatBehavior Repeat { get; set; }
+        public System.IO.Stream StreamSource { get; set; }
+        public System.Uri UriSource { get; set; }
+        protected override void OnRenderSizeChanged(System.Windows.SizeChangedInfo sizeInfo) { }
+        protected override void Render(SkiaSharp.SKCanvas canvas, bool isClearCanvas) { }
+        public void ResumeAnimation() { }
+        public void SetAnimation(SkiaSharp.Skottie.Animation animation) { }
+        public void StartAnimation() { }
+        public void StopAnimation() { }
     }
     public class Margin
     {
@@ -113,6 +147,7 @@ namespace Orc.Skia
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendered;
         public event System.EventHandler<Orc.Skia.CanvasRenderingEventArgs>? Rendering;
         protected SkiaSharp.GRContext CreateRenderContext() { }
+        protected SkiaSharp.SKSizeI CreateSize(out double scaleX, out double scaleY) { }
         protected SkiaSharp.SKImageInfo GetImageInfo() { }
         public System.Windows.Rect GetSurfaceBoundary() { }
         protected virtual void Initialize() { }
@@ -140,6 +175,13 @@ namespace Orc.Skia
     public class SkiaException : System.Exception
     {
         public SkiaException(string message) { }
+    }
+    [System.Windows.Data.ValueConversion(typeof(string), typeof(System.Uri))]
+    public class StringToUriConverter : Catel.MVVM.Converters.ValueConverterBase<string, System.Uri>
+    {
+        public StringToUriConverter() { }
+        protected override object Convert(string value, System.Type targetType, object parameter) { }
+        protected override object ConvertBack(System.Uri value, System.Type targetType, object parameter) { }
     }
     public static class WriteableBitmapExtensions { }
 }
