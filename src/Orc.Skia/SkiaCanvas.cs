@@ -135,6 +135,11 @@ namespace Orc.Skia
                 return;
             }
 
+            if (!IsVisible)
+            {
+                return;
+            }
+
             Update(true);
 
             _stopwatch = Stopwatch.StartNew();
