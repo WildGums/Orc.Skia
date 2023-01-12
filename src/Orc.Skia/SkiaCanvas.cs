@@ -310,10 +310,6 @@ namespace Orc.Skia
             var previousDpiX = DpiX;
             var previousDpiY = DpiY;
 
-#if NETFX_CORE
-            var display = DisplayInformation.GetForCurrentView();
-            _dpiX = _dpiY = display.LogicalDpi / 96.0f;
-#elif NET || NETCORE
             var source = PresentationSource.FromVisual(this);
             if (source is not null)
             {
@@ -322,9 +318,6 @@ namespace Orc.Skia
                 DpiX = transformToDevice.M11;
                 DpiY = transformToDevice.M22;
             }
-#else
-            TARGET PLATFORM NOT YET SUPPORTED
-#endif
 
             if (Math.Abs(DpiX - previousDpiX) > 0.1d ||
                 Math.Abs(DpiY - previousDpiY) > 0.1d)

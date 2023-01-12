@@ -1,11 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="CanvasTest.cs" company="WildGums">
-//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-#pragma warning disable IDISP001 // Dispose created.
-#pragma warning disable IDISP003 // Dispose previous before re-assigning.
+﻿#pragma warning disable IDISP001 // Dispose created
+#pragma warning disable IDISP003 // Dispose previous before re-assigning
 
 namespace Orc.Skia.Example
 {
@@ -13,21 +7,14 @@ namespace Orc.Skia.Example
     using SkiaSharp;
     using Orc.Theming;
 
-#if NETFX_CORE
-    using Windows.Foundation;
-    using Windows.UI;
-    using Windows.UI.Xaml.Media;
-#else
     using System.Windows;
     using System.Windows.Media;
-#endif
 
     /// <summary>
     /// The canvas test.
     /// </summary>
     public class CanvasTest
     {
-        #region Methods
         /// <summary>
         /// The run tests.
         /// </summary>
@@ -165,6 +152,5 @@ namespace Orc.Skia.Example
 
             return points.ToArray();
         }
-        #endregion
     }
 }

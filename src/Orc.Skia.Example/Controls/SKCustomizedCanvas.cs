@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="CustomizedCanvas.cs" company="WildGums">
-//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.Skia.Example.Controls
+﻿namespace Orc.Skia.Example.Controls
 {
     using SkiaSharp;
     using Catel.Windows.Data;
