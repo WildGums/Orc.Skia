@@ -1,27 +1,26 @@
-﻿namespace Orc.Skia
+﻿namespace Orc.Skia;
+
+using System;
+using SkiaSharp.Views.Desktop;
+using SkiaSharp.Views.WPF;
+
+public class SkiaElement : SKElement, ISkiaElement
 {
-    using System;
-    using SkiaSharp.Views.Desktop;
-    using SkiaSharp.Views.WPF;
+    public event EventHandler<CanvasRenderingEventArgs>? Rendering;
 
-    public class SkiaElement : SKElement, ISkiaElement
+    public event EventHandler<CanvasRenderingEventArgs>? Rendered;
+
+    public void Update()
     {
-        public event EventHandler<CanvasRenderingEventArgs>? Rendering;
+        InvalidateVisual();
+    }
 
-        public event EventHandler<CanvasRenderingEventArgs>? Rendered;
+    protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
+    {
+        Rendering?.Invoke(this, new CanvasRenderingEventArgs(e.Surface.Canvas));
 
-        public void Update()
-        {
-            InvalidateVisual();
-        }
+        base.OnPaintSurface(e);
 
-        protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
-        {
-            Rendering?.Invoke(this, new CanvasRenderingEventArgs(e.Surface.Canvas));
-
-            base.OnPaintSurface(e);
-
-            Rendered?.Invoke(this, new CanvasRenderingEventArgs(e.Surface.Canvas));
-        }
+        Rendered?.Invoke(this, new CanvasRenderingEventArgs(e.Surface.Canvas));
     }
 }

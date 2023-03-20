@@ -1,27 +1,26 @@
-﻿namespace Orc.Skia.Example.Controls
+﻿namespace Orc.Skia.Example.Controls;
+
+using UiEventArgs = System.EventArgs;
+
+public partial class LineCanvasView
 {
-    using UiEventArgs = System.EventArgs;
-
-    public partial class LineCanvasView
+    public LineCanvasView()
     {
-        public LineCanvasView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        private void Clear(object sender, UiEventArgs e)
-        {
-            //LineCanvasTest.Clear();
-        }
+    private void Clear(object sender, UiEventArgs e)
+    {
+        //LineCanvasTest.Clear();
+    }
 
-        private void RunTests(object sender, UiEventArgs e)
-        {
-            //CanvasTest.RunTests(LineCanvasTest);
-        }
+    private void RunTests(object sender, UiEventArgs e)
+    {
+        //CanvasTest.RunTests(LineCanvasTest);
+    }
 
-        private void RunZigZagTests(object sender, UiEventArgs e)
-        {
-            //CanvasTest.RunZigZagTests(LineCanvasTest);
-        }
+    private void RunZigZagTests(object sender, UiEventArgs e)
+    {
+        //CanvasTest.RunZigZagTests(LineCanvasTest);
     }
 }

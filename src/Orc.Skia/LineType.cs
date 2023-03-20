@@ -1,23 +1,22 @@
-﻿namespace Orc.Skia
+﻿namespace Orc.Skia;
+
+/// <summary>
+/// The line type.
+/// </summary>
+public enum LineType
 {
     /// <summary>
-    /// The line type.
+    /// The solid.
     /// </summary>
-    public enum LineType
-    {
-        /// <summary>
-        /// The solid.
-        /// </summary>
-        Solid,
+    Solid = 0,
 
-        /// <summary>
-        /// The dashed.
-        /// </summary>
-        Dashed,
+    /// <summary>
+    /// The dashed.
+    /// </summary>
+    Dashed = 1,
 
-        /// <summary>
-        /// The dotted.
-        /// </summary>
-        Dotted
-    }
+    /// <summary>
+    /// The dotted.
+    /// </summary>
+    Dotted = 2
 }

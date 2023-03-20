@@ -1,10 +1,9 @@
-﻿namespace Orc.Skia.Example.Views
+﻿namespace Orc.Skia.Example.Views;
+
+public partial class LottieAnimationsTestView
 {
-    public partial class LottieAnimationsTestView
+    public LottieAnimationsTestView()
     {
-        public LottieAnimationsTestView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

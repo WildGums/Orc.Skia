@@ -1,10 +1,9 @@
-﻿namespace Orc.Skia.Example.Controls
+﻿namespace Orc.Skia.Example.Controls;
+
+public sealed partial class PerformanceView
 {
-    public sealed partial class PerformanceView
+    public PerformanceView()
     {
-        public PerformanceView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

@@ -1,12 +1,9 @@
-namespace Orc.Skia.Example.Views
+﻿namespace Orc.Skia.Example.Views;
+
+public partial class MainWindow 
 {
-    public partial class MainWindow 
+    public MainWindow()
     {
-        #region Constructors
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
-        #endregion
+        InitializeComponent();
     }
 }
