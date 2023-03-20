@@ -47,7 +47,7 @@ namespace Orc.Skia
         public static readonly System.Windows.DependencyProperty StreamSourceProperty;
         public static readonly System.Windows.DependencyProperty UriSourceProperty;
         public LottieCanvas() { }
-        public SkiaSharp.Skottie.Animation Animation { get; set; }
+        public SkiaSharp.Skottie.Animation? Animation { get; set; }
         public bool IsPlaying { get; set; }
         public Orc.Skia.AnimationMouseOverBehavior MouseOver { get; set; }
         public System.Windows.Media.Animation.RepeatBehavior Repeat { get; set; }
@@ -80,7 +80,6 @@ namespace Orc.Skia
         public static System.Windows.Media.Matrix Multiply(this System.Windows.Media.Matrix matrix, System.Windows.Media.Matrix secondMatrix) { }
         public static System.Windows.Rect TransformRectangle(this System.Windows.Media.Matrix matrix, System.Windows.Rect rectangle) { }
     }
-    public static class PointExtensions { }
     public static class RectangleExtensions
     {
         public static System.Windows.Point GetTopLeft(this System.Windows.Rect rect) { }
@@ -110,7 +109,6 @@ namespace Orc.Skia
     {
         public static SkiaSharp.SKColor ToSKColor(this System.Windows.Media.Color color) { }
     }
-    public static class SKMatrixExtensions { }
     public static class SKPaintHelper
     {
         public static SkiaSharp.SKPaint CreateLinePaint(double width, System.Windows.Media.Color color, Orc.Skia.LineType lineType = 0) { }
@@ -172,7 +170,6 @@ namespace Orc.Skia
         protected override void OnPaintSurface(SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e) { }
         public void Update() { }
     }
-    public static class SkiaEnvironment { }
     public class SkiaException : System.Exception
     {
         public SkiaException(string message) { }
@@ -184,5 +181,4 @@ namespace Orc.Skia
         protected override object? Convert(string? value, System.Type targetType, object? parameter) { }
         protected override object? ConvertBack(System.Uri? value, System.Type targetType, object? parameter) { }
     }
-    public static class WriteableBitmapExtensions { }
 }

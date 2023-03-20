@@ -1,9 +1,8 @@
-﻿namespace Orc.Skia
+﻿namespace Orc.Skia;
+
+public enum AnimationMouseOverBehavior
 {
-    public enum AnimationMouseOverBehavior
-    {
-        None = 0,
-        Start = 1,
-        Stop = 2,
-    }
+    None = 0,
+    Start = 1,
+    Stop = 2,
 }

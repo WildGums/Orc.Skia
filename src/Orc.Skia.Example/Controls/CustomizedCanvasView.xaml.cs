@@ -1,10 +1,9 @@
-﻿namespace Orc.Skia.Example.Controls
+﻿namespace Orc.Skia.Example.Controls;
+
+public partial class CustomizedCanvasView
 {
-    public partial class CustomizedCanvasView
+    public CustomizedCanvasView()
     {
-        public CustomizedCanvasView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
