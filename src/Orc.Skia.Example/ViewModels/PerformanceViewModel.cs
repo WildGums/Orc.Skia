@@ -1,110 +1,108 @@
-﻿namespace Orc.Skia.Example.ViewModels
+﻿namespace Orc.Skia.Example.ViewModels;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Windows;
+using Catel.MVVM;
+
+public class PerformanceViewModel : ViewModelBase
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading.Tasks;
-    using System.Windows;
-    using Catel.MVVM;
-
-    public class PerformanceViewModel : ViewModelBase
+    public PerformanceViewModel()
     {
-        public PerformanceViewModel()
-        {
-            RunTest = new TaskCommand<PerformanceTest>(OnRunTestExecuteAsync);
-            RunTests = new TaskCommand<string>(OnRunTestsExecuteAsync);
+        RunTest = new TaskCommand<PerformanceTest>(OnRunTestExecuteAsync);
+        RunTests = new TaskCommand<string>(OnRunTestsExecuteAsync);
 
-            PerformanceTests = new List<PerformanceTest>(new[]
+        PerformanceTests = new List<PerformanceTest>(new[]
+        {
+            new PerformanceTest
             {
-                new PerformanceTest
+                Name = "SkiaCanvas - reuse bitmaps",
+                CanvasElement = new SkiaCanvas
                 {
-                    Name = "SkiaCanvas - reuse bitmaps",
-                    CanvasElement = new SkiaCanvas
-                    {
-                        FrameDelayInMilliseconds = 0, // for performance test only
-                        ForceNewBitmaps = false
-                    }
-                },
-                new PerformanceTest
-                {
-                    Name = "SkiaCanvas - force new bitmaps",
-                    CanvasElement = new SkiaCanvas
-                    {
-                        FrameDelayInMilliseconds = 0, // for performance test only,
-                        ForceNewBitmaps = true
-                    }
-                },
-                new PerformanceTest
-                {
-                    Name = "SkiaElement",
-                    CanvasElement = new SkiaElement()
+                    FrameDelayInMilliseconds = 0, // for performance test only
+                    ForceNewBitmaps = false
                 }
-            });
-        }
-
-        public List<PerformanceTest> PerformanceTests { get; private set; }
-
-        public TaskCommand<PerformanceTest> RunTest { get; private set; }
-
-        private async Task OnRunTestExecuteAsync(PerformanceTest performanceTest)
-        {
-            await RunTestAsync(performanceTest, 1);
-        }
-
-        public TaskCommand<string> RunTests { get; private set; }
-
-        private async Task OnRunTestsExecuteAsync(string numberOfFramesAsString)
-        {
-            var numberOfFrames = int.Parse(numberOfFramesAsString);
-
-            foreach (var performanceTest in PerformanceTests)
+            },
+            new PerformanceTest
             {
-                await RunTestAsync(performanceTest, numberOfFrames);
-            }
-        }
-
-        private async Task RunTestAsync(PerformanceTest performanceTest, int numberOfFrames)
-        {
-            var skiaElement = performanceTest.CanvasElement;
-            var skiaFxElement = (FrameworkElement)skiaElement;
-            var performanceTestResult = new PerformanceTestResult();
-
-            skiaElement.Rendering += OnSkiaRendering;
-
-            for (var i = 0; i < numberOfFrames; i++)
-            {
-                var tsc = new TaskCompletionSource();
-
-                EventHandler<CanvasRenderingEventArgs> handler = null;
-                handler = (sender, e) =>
+                Name = "SkiaCanvas - force new bitmaps",
+                CanvasElement = new SkiaCanvas
                 {
-                    skiaElement.Rendered -= handler;
-                    tsc.SetResult();
-                };
+                    FrameDelayInMilliseconds = 0, // for performance test only,
+                    ForceNewBitmaps = true
+                }
+            },
+            new PerformanceTest
+            {
+                Name = "SkiaElement",
+                CanvasElement = new SkiaElement()
+            }
+        });
+    }
 
-                skiaElement.Rendered += handler;
+    public List<PerformanceTest> PerformanceTests { get; }
 
-                var stopwatch = Stopwatch.StartNew();
+    public TaskCommand<PerformanceTest> RunTest { get; }
 
-                // Instead of calling Update, call InvalidateRect for fair comparison
-                skiaFxElement.InvalidateVisual();
-                //skiaElement.Update();
+    private async Task OnRunTestExecuteAsync(PerformanceTest performanceTest)
+    {
+        await RunTestAsync(performanceTest, 1);
+    }
 
-                await tsc.Task;
+    public TaskCommand<string> RunTests { get; }
 
-                stopwatch.Stop();
+    private async Task OnRunTestsExecuteAsync(string numberOfFramesAsString)
+    {
+        var numberOfFrames = int.Parse(numberOfFramesAsString);
 
-                performanceTestResult.RegisterFrame((int)stopwatch.ElapsedMilliseconds);
+        foreach (var performanceTest in PerformanceTests)
+        {
+            await RunTestAsync(performanceTest, numberOfFrames);
+        }
+    }
+
+    private async Task RunTestAsync(PerformanceTest performanceTest, int numberOfFrames)
+    {
+        var skiaElement = performanceTest.CanvasElement;
+        var skiaFxElement = (FrameworkElement)skiaElement;
+        var performanceTestResult = new PerformanceTestResult();
+
+        skiaElement.Rendering += OnSkiaRendering;
+
+        for (var i = 0; i < numberOfFrames; i++)
+        {
+            var tsc = new TaskCompletionSource();
+
+            void Handler(object sender, CanvasRenderingEventArgs e)
+            {
+                skiaElement.Rendered -= Handler;
+                tsc.SetResult();
             }
 
-            skiaElement.Rendering -= OnSkiaRendering;
+            skiaElement.Rendered += Handler;
 
-            performanceTest.Result = performanceTestResult;
+            var stopwatch = Stopwatch.StartNew();
+
+            // Instead of calling Update, call InvalidateRect for fair comparison
+            skiaFxElement.InvalidateVisual();
+            //skiaElement.Update();
+
+            await tsc.Task;
+
+            stopwatch.Stop();
+
+            performanceTestResult.RegisterFrame((int)stopwatch.ElapsedMilliseconds);
         }
 
-        private void OnSkiaRendering(object sender, CanvasRenderingEventArgs e)
-        {
-            CanvasTest.RunTests(e.Canvas);
-        }
+        skiaElement.Rendering -= OnSkiaRendering;
+
+        performanceTest.Result = performanceTestResult;
+    }
+
+    private void OnSkiaRendering(object sender, CanvasRenderingEventArgs e)
+    {
+        CanvasTest.RunTests(e.Canvas);
     }
 }

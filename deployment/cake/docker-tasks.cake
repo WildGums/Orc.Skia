@@ -1,7 +1,7 @@
 #l "docker-variables.cake"
 #l "lib-octopusdeploy.cake"
 
-#addin "nuget:?package=Cake.Docker&version=1.1.2"
+#addin "nuget:?package=Cake.Docker&version=1.2.3"
 
 //-------------------------------------------------------------
 
@@ -203,9 +203,9 @@ public class DockerImagesProcessor : ProcessorBase
 
         foreach (var dockerImage in BuildContext.DockerImages.Items)
         {
-            if (!ShouldDeployProject(BuildContext, dockerImage))
+            if (!ShouldPackageProject(BuildContext, dockerImage))
             {
-                CakeContext.Information("Docker image '{0}' should not be deployed", dockerImage);
+                CakeContext.Information("Docker image '{0}' should not be packaged", dockerImage);
                 continue;
             }
 

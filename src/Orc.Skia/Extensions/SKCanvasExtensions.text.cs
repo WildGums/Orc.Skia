@@ -1,109 +1,84 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SKCanvasExtensions.text.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿namespace Orc.Skia;
 
+using SkiaSharp;
+using System.Windows;
+using System.Windows.Media;
 
-namespace Orc.Skia
+public static partial class SKCanvasExtensions
 {
-    using System;
-    using System.Collections.Generic;
-    using SkiaSharp;
+    public const float DefaultFontSize = 14f;
+    public const float DefaultFontWidth = 4f;
 
-#if NETFX_CORE
-    using Windows.Foundation;
-    using Windows.UI;
-#else
-    using System.Windows;
-    using System.Windows.Media;
-#endif
-
-    public static partial class SKCanvasExtensions
+    public static Rect MeasureTextBounds(this SKCanvas canvas, string text, Color color, float fontSize = DefaultFontSize, double width = DefaultFontWidth, SKTextAlign textAlign = SKTextAlign.Left)
     {
-        public const float DefaultFontSize = 14f;
-        public const float DefaultFontWidth = 4f;
+        using var paint = SKPaintHelper.CreateTextPaint(fontSize, width, color, textAlign);
+        var bounds = SKRect.Empty;
+        paint.MeasureText(text, ref bounds);
 
-        public static Rect MeasureTextBounds(this SKCanvas canvas, string text, Color color, float fontSize = DefaultFontSize, double width = DefaultFontWidth, SKTextAlign textAlign = SKTextAlign.Left)
+        return bounds.ToRect();
+    }
+
+    public static void DrawText(this SKCanvas canvas, string line, Rect rect, Color color, float fontSize = DefaultFontSize, 
+        double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
+    {
+        DrawText(canvas, line.SplitLines(), rect, color, fontSize, width, lineSpacing, textAlign);
+    }
+
+    public static void DrawText(this SKCanvas canvas, string[] lines, Rect rect, Color color, float fontSize = DefaultFontSize, 
+        double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
+    {
+        using var paint = SKPaintHelper.CreateTextPaint(fontSize, width, color, textAlign);
+        var finalLineSpacing = lineSpacing ?? paint.FontSpacing;
+        var finalCharSpacing = fontSize / 8f;
+
+        var begin = rect.GetTopLeft();
+        var currentPoint = begin;
+
+        for (var i = 0; i < lines.Length; i++)
         {
-            using (var paint = SKPaintHelper.CreateTextPaint(fontSize, width, color, textAlign))
+            var line = lines[i];
+            var lineHeight = 0f;
+
+            var lineBounds = SKRect.Empty;
+            paint.MeasureText(line, ref lineBounds);
+
+            if (clip && begin.Y + rect.Height < currentPoint.Y + lineBounds.Height)
             {
+                break;
+            }
+
+            // To get the right spacing, duplicate the spaces
+            line = line.Replace(" ", "  ");
+
+            for (var j = 0; j < line.Length; j++)
+            {
+                var charString = line[j].ToString();
+
                 var bounds = SKRect.Empty;
-                paint.MeasureText(text, ref bounds);
+                paint.MeasureText(charString, ref bounds);
 
-                return bounds.ToRect();
-            }
-        }
-
-        public static void DrawText(this SKCanvas canvas, string line, Rect rect, Color color, float fontSize = DefaultFontSize, 
-            double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
-        {
-            DrawText(canvas, line.SplitLines(), rect, color, fontSize, width, lineSpacing, textAlign);
-        }
-
-        public static void DrawText(this SKCanvas canvas, string[] lines, Rect rect, Color color, float fontSize = DefaultFontSize, 
-            double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
-        {
-            if (lines is null)
-            {
-                return;
-            }
-
-            using (var paint = SKPaintHelper.CreateTextPaint(fontSize, width, color, textAlign))
-            {
-                var finalLineSpacing = lineSpacing ?? paint.FontSpacing;
-                var finalCharSpacing = fontSize / 8f;
-
-                var begin = rect.GetTopLeft();
-                var currentPoint = begin;
-
-                for (var i = 0; i < lines.Length; i++)
+                if (clip && begin.X + rect.Width < currentPoint.X + bounds.Width)
                 {
-                    var line = lines[i];
-                    var lineHeight = 0f;
+                    break;
+                }
 
-                    var lineBounds = SKRect.Empty;
-                    paint.MeasureText(line, ref lineBounds);
+                if (bounds.Height > lineHeight)
+                {
+                    lineHeight = bounds.Height;
+                }
 
-                    if (clip && begin.Y + rect.Height < currentPoint.Y + lineBounds.Height)
-                    {
-                        break;
-                    }
+                canvas.DrawText(charString, (float)currentPoint.X, (float)currentPoint.Y, paint);
 
-                    // To get the right spacing, duplicate the spaces
-                    line = line.Replace(" ", "  ");
+                currentPoint.X += bounds.Width;
 
-                    for (var j = 0; j < line.Length; j++)
-                    {
-                        var charString = line[j].ToString();
-
-                        var bounds = SKRect.Empty;
-                        paint.MeasureText(charString, ref bounds);
-
-                        if (clip && begin.X + rect.Width < currentPoint.X + bounds.Width)
-                        {
-                            break;
-                        }
-
-                        if (bounds.Height > lineHeight)
-                        {
-                            lineHeight = bounds.Height;
-                        }
-
-                        canvas.DrawText(charString, (float)currentPoint.X, (float)currentPoint.Y, paint);
-
-                        currentPoint.X += bounds.Width;
-
-                        if (charString == " ")
-                        {
-                            currentPoint.X += finalCharSpacing;
-                        }
-                    }
-
-                    currentPoint.X = begin.X;
-                    currentPoint.Y = currentPoint.Y + lineHeight + finalLineSpacing;
+                if (charString == " ")
+                {
+                    currentPoint.X += finalCharSpacing;
                 }
             }
+
+            currentPoint.X = begin.X;
+            currentPoint.Y = currentPoint.Y + lineHeight + finalLineSpacing;
         }
     }
 }

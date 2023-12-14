@@ -13,7 +13,6 @@ namespace Orc.Skia
     using System.Windows;
     using System.Windows.Media.Animation;
     using System.Windows.Threading;
-    using Catel;
     using Catel.Logging;
     using SkiaSharp;
     using SkiaSharp.Skottie;
@@ -50,9 +49,9 @@ namespace Orc.Skia
             IsVisibleChanged += OnIsVisibleChanged;
         }
 
-        public Animation Animation
+        public Animation? Animation
         {
-            get => (Animation)GetValue(AnimationProperty);
+            get => (Animation?)GetValue(AnimationProperty);
             set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
         }
 
@@ -86,14 +85,15 @@ namespace Orc.Skia
         public static readonly DependencyProperty IsPlayingProperty =
             DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(LottieCanvas), new PropertyMetadata(false));
 
-        public Uri UriSource
+        public Uri? UriSource
         {
-            get => (Uri)GetValue(UriSourceProperty);
+            get => (Uri?)GetValue(UriSourceProperty);
             set => SetValue(UriSourceProperty, value);
         }
 
         public static readonly DependencyProperty UriSourceProperty =
-            DependencyProperty.Register(nameof(UriSource), typeof(Uri), typeof(LottieCanvas), new PropertyMetadata((s, e) => ((LottieCanvas)s).OnUriSourceChanged()));
+            DependencyProperty.Register(nameof(UriSource), typeof(Uri), typeof(LottieCanvas),
+                new PropertyMetadata((s, _) => ((LottieCanvas)s).OnUriSourceChanged()));
 
         private void OnUriSourceChanged()
         {
@@ -118,27 +118,29 @@ namespace Orc.Skia
                 if (!uri.IsAbsoluteUri)
                 {
                     var resourceStreamInfo = Application.GetResourceStream(uri);
-                    if (resourceStreamInfo is not null)
+                    if (resourceStreamInfo is null)
                     {
-                        using (resourceStreamInfo.Stream)
-                        {
-                            InitializeAnimationFromSource(resourceStreamInfo.Stream);
-                        }
+                        return;
+                    }
+
+                    using (resourceStreamInfo.Stream)
+                    {
+                        InitializeAnimationFromSource(resourceStreamInfo.Stream);
                     }
 
                     return;
                 }
 
                 // Note: checkign uri.IsFile can only be done if absolute path
-                if (uri.IsFile)
+                if (!uri.IsFile)
                 {
-                    using (var fileStream = File.OpenRead(HttpUtility.UrlDecode(uri.AbsolutePath)))
-                    {
-                        InitializeAnimationFromSource(fileStream);
-                    }
-
                     return;
                 }
+
+                using var fileStream = File.OpenRead(HttpUtility.UrlDecode(uri.AbsolutePath));
+                InitializeAnimationFromSource(fileStream);
+
+                return;
             }
             catch (Exception ex)
             {
@@ -146,9 +148,9 @@ namespace Orc.Skia
             }
         }
 
-        public Stream StreamSource
+        public Stream? StreamSource
         {
-            get => (Stream)GetValue(StreamSourceProperty);
+            get => (Stream?)GetValue(StreamSourceProperty);
             set => SetValue(StreamSourceProperty, value);
         }
 
@@ -182,20 +184,18 @@ namespace Orc.Skia
 
         private void InitializeAnimationFromSource(Stream source)
         {
-            using (var skiaStream = new SKManagedStream(source))
+            using var skiaStream = new SKManagedStream(source);
+            if (Animation.TryCreate(skiaStream, out var animation))
             {
-                if (Animation.TryCreate(skiaStream, out var animation))
-                {
-                    SetAnimation(animation);
-                }
+                SetAnimation(animation);
             }
         }
 
         public void SetAnimation(Animation animation)
         {
-            Argument.IsNotNull(() => animation);
+            ArgumentNullException.ThrowIfNull(animation);
 
-            animation.Seek(0, null);
+            animation.Seek(0);
 
             SetCurrentValue(AnimationProperty, animation);
 
@@ -321,7 +321,7 @@ namespace Orc.Skia
                     _autoPaused = true;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Pausing animation, canvas is invisible");
+                    Log.Debug("Pausing animation, canvas became invisible");
 #endif
                 }
             }
@@ -412,14 +412,14 @@ namespace Orc.Skia
             _resizeTimer.Start();
         }
 
-        private void OnResizeTimerTick(object sender, EventArgs e)
+        private void OnResizeTimerTick(object? sender, EventArgs e)
         {
             _resizeTimer.Stop();
 
             CalculateRenderOffset();
         }
 
-        private void OnInvalidationTimerTick(object sender, EventArgs e)
+        private void OnInvalidationTimerTick(object? sender, EventArgs e)
         {
 #if DEBUG_LOGGING
             Log.Debug("Invalidating animation frame");
@@ -428,7 +428,7 @@ namespace Orc.Skia
             if (!IsVisible)
             {
 #if DEBUG_LOGGING
-                Log.Debug("Pausing animatin, canvas is invisible");
+                Log.Debug("Pausing animation, canvas is invisible");
 #endif
 
                 _autoPaused = IsPlaying;
@@ -480,7 +480,7 @@ namespace Orc.Skia
             canvas.DrawRect(_renderSize, _debugPaint);
 #endif
 
-            animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds, null);
+            animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds);
             animation.Render(canvas, _renderSize);
 
 #if DEBUG_TIMING

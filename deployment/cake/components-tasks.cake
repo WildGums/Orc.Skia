@@ -154,6 +154,17 @@ public class ComponentsProcessor : ProcessorBase
             }
 
             RunMsBuild(BuildContext, component, projectFileName, msBuildSettings, "build");
+
+            // Specific code signing, requires the following MSBuild properties:
+            // * CodeSignEnabled
+            // * CodeSignCommand
+            //
+            // This feature is built to allow projects that have post-build copy
+            // steps (e.g. for assets) to be signed correctly before being embedded
+            if (ShouldSignImmediately(BuildContext, component))
+            {
+                SignProjectFiles(BuildContext, component);
+            }
         }        
     }
 
@@ -171,9 +182,9 @@ public class ComponentsProcessor : ProcessorBase
             // Note: some projects, such as Catel.Fody, require packaging
             // of non-deployable projects
             if (BuildContext.General.SkipComponentsThatAreNotDeployable && 
-                !ShouldDeployProject(BuildContext, component))
+                !ShouldPackageProject(BuildContext, component))
             {
-                CakeContext.Information("Component '{0}' should not be deployed", component);
+                CakeContext.Information("Component '{0}' should not be packaged", component);
                 continue;
             }
 

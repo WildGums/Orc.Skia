@@ -41,10 +41,12 @@
         Overridable output path can be set for a project, but directly referenced projects need a way 
         to use this correctly. Therefore this property checks whether it's explicitly set and already
         contains the correct paths. If not, it will automatically be appended.
+		
+		Also make sure to not use this when in in Docker and Debug
     -->
 
-    <OutputPath Condition=" '$(OverridableOutputPath)' != '$(__OverridableOutputPathDefault)' ">$(OverridableOutputPath)\..\$(MSBuildProjectName)\</OutputPath>
-    <OutputPath Condition=" '$(OverridableOutputPath)' == '$(__OverridableOutputPathDefault)' ">$(OverridableOutputPath)</OutputPath>
+    <OutputPath Condition=" ('$(DockerDefaultTargetOS)' == '' OR '$(Configuration)'!='Debug') AND ('$(OverridableOutputPath)' != '$(__OverridableOutputPathDefault)') ">$(OverridableOutputPath)\..\$(MSBuildProjectName)\</OutputPath>
+    <OutputPath Condition=" ('$(DockerDefaultTargetOS)' == '' OR '$(Configuration)'!='Debug') AND ('$(OverridableOutputPath)' == '$(__OverridableOutputPathDefault)') ">$(OverridableOutputPath)</OutputPath>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   
@@ -223,6 +225,30 @@
   </PropertyGroup>
   
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net8.0')) ">
+    <None Remove="Platforms\net\**\*.cs;Platforms\net\**\*.xaml;Platforms\net\**\*.xaml.cs" />
+    <Compile Include="Platforms\net\**\*.cs" DependentUpon="%(Filename)" />
+    <Page Include="Platforms\net\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Compile Update="Platforms\net\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
+  </ItemGroup>
+  
+  <!-- .NET 9.0 -->
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net9.0')) ">
+    <DefineConstants>$(DefineConstants);NETCORE;NETCORE9;NETCORE9_0;NET9;NET9_0</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net9.0')) ">
+    <None Remove="Platforms\net\**\*.cs;Platforms\net\**\*.xaml;Platforms\net\**\*.xaml.cs" />
+    <Compile Include="Platforms\net\**\*.cs" DependentUpon="%(Filename)" />
+    <Page Include="Platforms\net\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Compile Update="Platforms\net\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
+  </ItemGroup>
+  
+  <!-- .NET 10.0 -->
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net10.0')) ">
+    <DefineConstants>$(DefineConstants);NETCORE;NETCORE10;NETCORE10_0;NET10;NET10_0</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net10.0')) ">
     <None Remove="Platforms\net\**\*.cs;Platforms\net\**\*.xaml;Platforms\net\**\*.xaml.cs" />
     <Compile Include="Platforms\net\**\*.cs" DependentUpon="%(Filename)" />
     <Page Include="Platforms\net\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />

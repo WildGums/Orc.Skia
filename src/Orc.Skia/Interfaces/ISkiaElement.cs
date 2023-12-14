@@ -1,12 +1,11 @@
-﻿namespace Orc.Skia
+﻿namespace Orc.Skia;
+
+using System;
+
+public interface ISkiaElement
 {
-    using System;
+    event EventHandler<CanvasRenderingEventArgs>? Rendering;
+    event EventHandler<CanvasRenderingEventArgs>? Rendered;
 
-    public interface ISkiaElement
-    {
-        event EventHandler<CanvasRenderingEventArgs> Rendering;
-        event EventHandler<CanvasRenderingEventArgs> Rendered;
-
-        void Update();
-    }
+    void Update();
 }

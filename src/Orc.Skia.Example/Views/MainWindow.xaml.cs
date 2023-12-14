@@ -1,18 +1,9 @@
-// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MainWindow.xaml.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿namespace Orc.Skia.Example.Views;
 
-namespace Orc.Skia.Example.Views
+public partial class MainWindow 
 {
-    public partial class MainWindow 
+    public MainWindow()
     {
-        #region Constructors
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
-        #endregion
+        InitializeComponent();
     }
 }

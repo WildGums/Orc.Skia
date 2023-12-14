@@ -1,89 +1,88 @@
-﻿namespace Orc.Skia.Example
+﻿namespace Orc.Skia.Example;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Catel.Data;
+
+public class PerformanceTestResult : ModelBase
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Catel.Data;
+    private readonly List<int> _registeredFrames = new();
 
-    public class PerformanceTestResult : ModelBase
+    public int? Slowest
     {
-        private readonly List<int> _registeredFrames = new List<int>();
-
-        public int? Slowest
+        get
         {
-            get
+            if (_registeredFrames.Count == 0)
             {
-                if (_registeredFrames.Count == 0)
-                {
-                    return null;
-                }
-
-                return _registeredFrames.OrderByDescending(x => x).First();
+                return null;
             }
-        }
 
-        public int? Fastest
+            return _registeredFrames.MaxBy(x => x);
+        }
+    }
+
+    public int? Fastest
+    {
+        get
         {
-            get
+            if (_registeredFrames.Count == 0)
             {
-                if (_registeredFrames.Count == 0)
-                {
-                    return null;
-                }
-
-                return _registeredFrames.OrderBy(x => x).First();
+                return null;
             }
-        }
 
-        public int TotalRenders
+            return _registeredFrames.MinBy(x => x);
+        }
+    }
+
+    public int TotalRenders
+    {
+        get
         {
-            get
+            return _registeredFrames.Count;
+        }
+    }
+
+    public TimeSpan TotalDuration
+    {
+        get
+        {
+            return TimeSpan.FromMilliseconds(_registeredFrames.Sum());
+        }
+    }
+
+    public TimeSpan AverageDuration
+    {
+        get
+        {
+            if (_registeredFrames.Count == 0)
             {
-                return _registeredFrames.Count;
+                return TimeSpan.Zero;
             }
-        }
 
-        public TimeSpan TotalDuration
+            var total = _registeredFrames.Sum();
+            var average = total / _registeredFrames.Count;
+
+            return TimeSpan.FromMilliseconds(average);
+        }
+    }
+
+    public double FramesPerSecond
+    {
+        get
         {
-            get
+            var averageDuration = AverageDuration.TotalMilliseconds;
+            if (averageDuration < 1d)
             {
-                return TimeSpan.FromMilliseconds(_registeredFrames.Sum());
+                return 0d;
             }
+
+            return 1000d / averageDuration;
         }
+    }
 
-        public TimeSpan AverageDuration
-        {
-            get
-            {
-                if (_registeredFrames.Count == 0)
-                {
-                    return TimeSpan.Zero;
-                }
-
-                var total = _registeredFrames.Sum();
-                var average = total / _registeredFrames.Count;
-
-                return TimeSpan.FromMilliseconds(average);
-            }
-        }
-
-        public double FramesPerSecond
-        {
-            get
-            {
-                var averageDuration = AverageDuration.TotalMilliseconds;
-                if (averageDuration < 1d)
-                {
-                    return 0d;
-                }
-
-                return 1000d / averageDuration;
-            }
-        }
-
-        public void RegisterFrame(int duration)
-        {
-            _registeredFrames.Add(duration);
-        }
+    public void RegisterFrame(int duration)
+    {
+        _registeredFrames.Add(duration);
     }
 }

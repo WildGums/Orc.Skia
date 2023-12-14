@@ -1,21 +1,11 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SkiaException.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿namespace Orc.Skia;
 
+using System;
 
-namespace Orc.Skia
+public class SkiaException : Exception
 {
-    using System;
-
-    public class SkiaException : Exception
+    public SkiaException(string message)
+        : base(message)
     {
-        #region Constructors
-        public SkiaException(string message)
-            : base(message)
-        {
-        }
-        #endregion
     }
 }

@@ -1,31 +1,14 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StringExtensions.cs" company="WildGums">
-//   Copyright (c) 2008 - 2017 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿namespace Orc.Skia;
 
+using System;
 
-namespace Orc.Skia
+internal static class StringExtensions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    private static readonly string[] LineSplitters = new[] { "\r\n", "\r", "\n" };
 
-    internal static class StringExtensions
+    internal static string[] SplitLines(this string text)
     {
-        private static readonly string[] LineSplitters = new[] { "\r\n", "\r", "\n" };
-
-        #region Methods
-        internal static string[] SplitLines(this string text)
-        {
-            if (text is null)
-            {
-                return Array.Empty<string>();
-            }
-
-            var lines = text.Split(LineSplitters, StringSplitOptions.None);
-            return lines;
-        }
-        #endregion
+        var lines = text.Split(LineSplitters, StringSplitOptions.None);
+        return lines;
     }
 }
