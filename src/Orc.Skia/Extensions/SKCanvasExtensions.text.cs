@@ -1,6 +1,7 @@
 ﻿namespace Orc.Skia;
 
 using SkiaSharp;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 
@@ -8,6 +9,8 @@ public static partial class SKCanvasExtensions
 {
     public const float DefaultFontSize = 14f;
     public const float DefaultFontWidth = 4f;
+
+    private static Dictionary<char, string> CharToStringCache = new Dictionary<char, string>();
 
     public static Rect MeasureTextBounds(this SKCanvas canvas, string text, Color color, float fontSize = DefaultFontSize, double width = DefaultFontWidth, SKTextAlign textAlign = SKTextAlign.Left)
     {
@@ -52,7 +55,15 @@ public static partial class SKCanvasExtensions
 
             for (var j = 0; j < line.Length; j++)
             {
-                var charString = line[j].ToString();
+                var character = line[j];
+
+                // Note: memory optimization
+                //var charString = line[j].ToString();
+                if (!CharToStringCache.TryGetValue(character, out var characterAsString))
+                {
+                    characterAsString = character.ToString();
+                    CharToStringCache[character] = characterAsString;
+                }
 
                 var bounds = SKRect.Empty;
                 paint.MeasureText(charString, ref bounds);
