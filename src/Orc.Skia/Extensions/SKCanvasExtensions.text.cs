@@ -10,13 +10,13 @@ public static partial class SKCanvasExtensions
     public const float DefaultFontSize = 14f;
     public const float DefaultFontWidth = 4f;
 
-    private static Dictionary<char, string> CharToStringCache = new Dictionary<char, string>();
+    private static readonly Dictionary<char, string> CharToStringCache = new Dictionary<char, string>();
 
     public static Rect MeasureTextBounds(this SKCanvas canvas, string text, Color color, float fontSize = DefaultFontSize, double width = DefaultFontWidth, SKTextAlign textAlign = SKTextAlign.Left)
     {
-        using var paint = SKPaintHelper.CreateTextPaint(fontSize, width, color, textAlign);
+        using var font = SKPaintHelper.CreateFont(fontSize, width, color, textAlign);
 
-        paint.MeasureText(text, out var bounds);
+        font.MeasureText(text, out var bounds);
 
         return bounds.ToRect();
     }
@@ -31,7 +31,9 @@ public static partial class SKCanvasExtensions
         double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
     {
         using var paint = SKPaintHelper.CreateTextPaint(fontSize, width, color, textAlign);
-        var finalLineSpacing = lineSpacing ?? paint.Spacing;
+        using var font = SKPaintHelper.CreateFont(fontSize, width, color, textAlign);
+
+        var finalLineSpacing = lineSpacing ?? font.Spacing;
         var finalCharSpacing = fontSize / 8f;
 
         var begin = rect.GetTopLeft();
@@ -42,7 +44,7 @@ public static partial class SKCanvasExtensions
             var line = lines[i];
             var lineHeight = 0f;
 
-            paint.MeasureText(line, out var lineBounds);
+            font.MeasureText(line, out var lineBounds);
 
             if (clip && begin.Y + rect.Height < currentPoint.Y + lineBounds.Height)
             {
@@ -64,7 +66,7 @@ public static partial class SKCanvasExtensions
                     CharToStringCache[character] = characterAsString;
                 }
 
-                paint.MeasureText(characterAsString, out var bounds);
+                font.MeasureText(characterAsString, out var bounds);
 
                 if (clip && begin.X + rect.Width < currentPoint.X + bounds.Width)
                 {
@@ -76,7 +78,7 @@ public static partial class SKCanvasExtensions
                     lineHeight = bounds.Height;
                 }
 
-                canvas.DrawText(characterAsString, (float)currentPoint.X, (float)currentPoint.Y, paint);
+                canvas.DrawText(characterAsString, (float)currentPoint.X, (float)currentPoint.Y, font, paint);
 
                 currentPoint.X += bounds.Width;
 

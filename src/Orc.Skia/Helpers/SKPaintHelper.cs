@@ -6,24 +6,25 @@ using System.Windows.Media;
 
 public static class SKPaintHelper
 {
-    public static SKFont CreateTextPaint(double fontSize, double width, Color color, SKTextAlign textAlign = SKTextAlign.Left)
+    public static SKPaint CreateTextPaint(double fontSize, double width, Color color, SKTextAlign textAlign = SKTextAlign.Left)
     {
-        var paint = new SKFont
+        var paint = new SKPaint
         {
             Style = SKPaintStyle.Fill,
             Color = color.ToSKColor(),
             StrokeWidth = (float)width,
-            TextSize = (float)fontSize,
-            TextAlign = textAlign,
-            Subpixel = true,
-            Typeface = new SKTypeface
-            {
-                FontStyle = new SKFontStyle
-                {
-                    Slant = new 
-                }
-            }
             IsAntialias = true,
+        };
+
+        return paint;
+    }
+
+    public static SKFont CreateFont(double fontSize, double width, Color color, SKTextAlign textAlign = SKTextAlign.Left)
+    {
+        var paint = new SKFont
+        {
+            Size = (float)fontSize,
+            Subpixel = true,
         };
 
         return paint;
