@@ -10,11 +10,11 @@ public static partial class SKCanvasExtensions
     public const float DefaultFontSize = 14f;
     public const float DefaultFontWidth = 4f;
 
-    private static readonly Dictionary<char, string> CharToStringCache = new Dictionary<char, string>();
+    private static readonly Dictionary<char, string> CharToStringCache = new();
 
     public static Rect MeasureTextBounds(this SKCanvas canvas, string text, Color color, float fontSize = DefaultFontSize, double width = DefaultFontWidth, SKTextAlign textAlign = SKTextAlign.Left)
     {
-        using var font = SKPaintHelper.CreateFont(fontSize, width, color, textAlign);
+        using var font = SKPaintHelper.CreateFont(fontSize);
 
         font.MeasureText(text, out var bounds);
 
@@ -30,8 +30,8 @@ public static partial class SKCanvasExtensions
     public static void DrawText(this SKCanvas canvas, string[] lines, Rect rect, Color color, float fontSize = DefaultFontSize,
         double width = DefaultFontWidth, double? lineSpacing = null, SKTextAlign textAlign = SKTextAlign.Left, bool clip = true)
     {
-        using var paint = SKPaintHelper.CreateTextPaint(fontSize, width, color, textAlign);
-        using var font = SKPaintHelper.CreateFont(fontSize, width, color, textAlign);
+        using var paint = SKPaintHelper.CreateTextPaint(width, color);
+        using var font = SKPaintHelper.CreateFont(fontSize);
 
         var finalLineSpacing = lineSpacing ?? font.Spacing;
         var finalCharSpacing = fontSize / 8f;

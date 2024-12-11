@@ -6,6 +6,7 @@ using System.Windows.Media;
 
 public static class SKPaintHelper
 {
+    [ObsoleteEx(RemoveInVersion = "6.0.0", TreatAsErrorFromVersion = "5.1.0", Message = "Use CreateTextPaint with 2 parameters")]
     public static SKPaint CreateTextPaint(double fontSize, double width, Color color, SKTextAlign textAlign = SKTextAlign.Left)
     {
         var paint = new SKPaint
@@ -19,7 +20,20 @@ public static class SKPaintHelper
         return paint;
     }
 
-    public static SKFont CreateFont(double fontSize, double width, Color color, SKTextAlign textAlign = SKTextAlign.Left)
+    public static SKPaint CreateTextPaint(double width, Color color)
+    {
+        var paint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = color.ToSKColor(),
+            StrokeWidth = (float)width,
+            IsAntialias = true,
+        };
+
+        return paint;
+    }
+
+    public static SKFont CreateFont(double fontSize)
     {
         var paint = new SKFont
         {
