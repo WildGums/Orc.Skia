@@ -1,16 +1,26 @@
-﻿namespace Orc.Skia;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SKCanvasExtensions.cs" company="WildGums">
+//   Copyright (c) 2008 - 2024 WildGums. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
-using SkiaSharp;
+
+namespace Orc.Skia.Example;
+
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
+using SkiaSharp;
 
-public static partial class SKCanvasExtensions
+public static class SKCanvasExtensions
 {
     public const float DefaultFontSize = 14f;
     public const float DefaultFontWidth = 4f;
 
     private static readonly Dictionary<char, string> CharToStringCache = new();
+
+    private static readonly string[] LineSplitters = new[] { "\r\n", "\r", "\n" };
 
     public static Rect MeasureTextBounds(this SKCanvas canvas, string text, Color color, float fontSize = DefaultFontSize, double width = DefaultFontWidth, SKTextAlign textAlign = SKTextAlign.Left)
     {
@@ -91,5 +101,11 @@ public static partial class SKCanvasExtensions
             currentPoint.X = begin.X;
             currentPoint.Y = currentPoint.Y + lineHeight + finalLineSpacing;
         }
+    }
+
+    private static string[] SplitLines(this string text)
+    {
+        var lines = text.Split(LineSplitters, StringSplitOptions.None);
+        return lines;
     }
 }
