@@ -6,22 +6,6 @@ using System.Windows.Media;
 
 public static class SKPaintHelper
 {
-    public static SKPaint CreateTextPaint(double fontSize, double width, Color color, SKTextAlign textAlign = SKTextAlign.Left)
-    {
-        var paint = new SKPaint
-        {
-            Style = SKPaintStyle.Fill,
-            Color = color.ToSKColor(),
-            StrokeWidth = (float)width,
-            TextSize = (float)fontSize,
-            TextAlign = textAlign,
-            SubpixelText = true,
-            IsAntialias = true,
-        };
-
-        return paint;
-    }
-
     public static SKPaint CreateLinePaint(double width, Color color, LineType lineType = LineType.Solid)
     {
         var paint = new SKPaint
