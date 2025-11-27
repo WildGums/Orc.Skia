@@ -197,7 +197,7 @@ public class SkiaCanvas : Canvas, ISkiaElement
                 Stretch = Stretch.None
             };
 
-            SetValue(BackgroundProperty, brush);
+            SetCurrentValue(BackgroundProperty, brush);
         }
     }
 
@@ -378,7 +378,7 @@ public class SkiaCanvas : Canvas, ISkiaElement
             return;
         }
 
-        SetValue(BackgroundProperty, null);
+        SetCurrentValue(BackgroundProperty, null);
         _bitmap = null;
     }
 
