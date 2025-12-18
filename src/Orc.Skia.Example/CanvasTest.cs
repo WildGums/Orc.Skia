@@ -23,9 +23,9 @@ public class CanvasTest
     {
         var colorData = BuildColor(255, 28, 255);
 
-        var solidLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Solid);
-        var dashedLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dashed);
-        var dottedLinePaint = SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dotted);
+        var solidLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(1, colorData, LineType.Solid);
+        var dashedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dashed);
+        var dottedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(1, colorData, LineType.Dotted);
 
         canvas.DrawHorizontalLine(new Point(10, 10), new Point(210, 15), solidLinePaint);
         canvas.DrawHorizontalLine(new Point(10, 30), new Point(210, 35), dashedLinePaint);
@@ -46,9 +46,9 @@ public class CanvasTest
 
         colorData = BuildColor(255, 155, 155);
 
-        solidLinePaint = SKPaintHelper.CreateLinePaint(5, colorData, LineType.Solid);
-        dashedLinePaint = SKPaintHelper.CreateLinePaint(5, colorData, LineType.Dashed);
-        dottedLinePaint = SKPaintHelper.CreateLinePaint(5, colorData, LineType.Dotted);
+        solidLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(5, colorData, LineType.Solid);
+        dashedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(5, colorData, LineType.Dashed);
+        dottedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(5, colorData, LineType.Dotted);
 
         var points = new[] { new Point(10, 100), new Point(210, 100), new Point(210, 130), new Point(10, 130), new Point(10, 160), new Point(210, 160) };
         canvas.DrawLineThroughPoints(points, solidLinePaint);
@@ -61,9 +61,9 @@ public class CanvasTest
 
         colorData = BuildColor(0, 127, 127);
 
-        solidLinePaint = SKPaintHelper.CreateLinePaint(2, colorData, LineType.Solid);
-        dashedLinePaint = SKPaintHelper.CreateLinePaint(2, colorData, LineType.Dashed);
-        dottedLinePaint = SKPaintHelper.CreateLinePaint(2, colorData, LineType.Dotted);
+        solidLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(2, colorData, LineType.Solid);
+        dashedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(2, colorData, LineType.Dashed);
+        dottedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(2, colorData, LineType.Dotted);
 
         points = new[] { new Point(40, -10), new Point(40, 70), new Point(590, 70), new Point(590, 490), new Point(610, 490) };
         canvas.DrawLineThroughPoints(points, solidLinePaint);
@@ -92,9 +92,9 @@ public class CanvasTest
     {
         var colorData = BuildColor(148, 131, 72);
 
-        var solidLinePaint = SKPaintHelper.CreateLinePaint(3, colorData, LineType.Solid);
-        var dashedLinePaint = SKPaintHelper.CreateLinePaint(3, colorData, LineType.Dashed);
-        var dottedLinePaint = SKPaintHelper.CreateLinePaint(3, colorData, LineType.Dotted);
+        var solidLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(3, colorData, LineType.Solid);
+        var dashedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(3, colorData, LineType.Dashed);
+        var dottedLinePaint = Orc.Skia.SKPaintHelper.CreateLinePaint(3, colorData, LineType.Dotted);
 
         var points = BuildVerticalZigZag(-20, 20, -20, 520, 15);
         canvas.DrawLineThroughPoints(points, solidLinePaint);

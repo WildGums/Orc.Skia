@@ -16,7 +16,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <orctheming:ThemeSwitcherView />
+        <StackPanel Orientation="Horizontal">
+            <orctheming:ThemeSwitcherView />
+            <orctheming:FontSizeSwitcherView />
+        </StackPanel>
 
         <orccontrols:TabControl LoadTabItems="LazyLoading">
             <TabItem Header="LineCanvas Tests">

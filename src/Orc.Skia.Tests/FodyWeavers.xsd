@@ -4,7 +4,6 @@
   <xs:element name="Weavers">
     <xs:complexType>
       <xs:all>
-        <xs:element name="ModuleInit" minOccurs="0" maxOccurs="1" type="xs:anyType" />
         <xs:element name="Catel" minOccurs="0" maxOccurs="1">
           <xs:complexType>
             <xs:attribute name="WeaveProperties" type="xs:boolean">
@@ -46,6 +45,13 @@
               <xs:annotation>
                 <xs:documentation>
         Generate xml schemas for all classes that inherit (directly or indirectly) from `Catel.Data.ModelBase`. The default value is <c>false</c>.
+      </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="DisableWarningsForAutoPropertyInitializers" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>
+        Disables the warning that Catel.Fody generates when using auto property initalizers. The default value is <c>false</c>.
       </xs:documentation>
               </xs:annotation>
             </xs:attribute>

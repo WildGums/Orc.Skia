@@ -1,10 +1,11 @@
 ﻿[assembly: System.Resources.NeutralResourcesLanguage("en-US")]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
 [assembly: System.Windows.Markup.XmlnsDefinition("http://schemas.wildgums.com/orc/skia", "Orc.Skia")]
 [assembly: System.Windows.Markup.XmlnsPrefix("http://schemas.wildgums.com/orc/skia", "orcskia")]
 [assembly: System.Windows.ThemeInfo(System.Windows.ResourceDictionaryLocation.None, System.Windows.ResourceDictionaryLocation.SourceAssembly)]
 public static class ModuleInitializer
 {
+    [System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize() { }
 }
 namespace Orc.Skia
@@ -94,16 +95,11 @@ namespace Orc.Skia
     }
     public static class SKCanvasExtensions
     {
-        public const float DefaultFontSize = 14F;
-        public const float DefaultFontWidth = 4F;
         public static void DrawDiagonalLine(this SkiaSharp.SKCanvas canvas, System.Windows.Point begin, System.Windows.Point end, SkiaSharp.SKPaint paint) { }
         public static void DrawHorizontalLine(this SkiaSharp.SKCanvas canvas, System.Windows.Point begin, System.Windows.Point end, SkiaSharp.SKPaint paint) { }
         public static void DrawLine(this SkiaSharp.SKCanvas canvas, System.Windows.Point begin, System.Windows.Point end, SkiaSharp.SKPaint paint) { }
         public static void DrawLineThroughPoints(this SkiaSharp.SKCanvas canvas, System.Collections.Generic.IEnumerable<System.Windows.Point> points, SkiaSharp.SKPaint paint) { }
-        public static void DrawText(this SkiaSharp.SKCanvas canvas, string line, System.Windows.Rect rect, System.Windows.Media.Color color, float fontSize = 14, double width = 4, double? lineSpacing = default, SkiaSharp.SKTextAlign textAlign = 0, bool clip = true) { }
-        public static void DrawText(this SkiaSharp.SKCanvas canvas, string[] lines, System.Windows.Rect rect, System.Windows.Media.Color color, float fontSize = 14, double width = 4, double? lineSpacing = default, SkiaSharp.SKTextAlign textAlign = 0, bool clip = true) { }
         public static void DrawVerticalLine(this SkiaSharp.SKCanvas canvas, System.Windows.Point begin, System.Windows.Point end, SkiaSharp.SKPaint paint) { }
-        public static System.Windows.Rect MeasureTextBounds(this SkiaSharp.SKCanvas canvas, string text, System.Windows.Media.Color color, float fontSize = 14, double width = 4, SkiaSharp.SKTextAlign textAlign = 0) { }
     }
     public static class SKColorExtensions
     {
@@ -112,7 +108,6 @@ namespace Orc.Skia
     public static class SKPaintHelper
     {
         public static SkiaSharp.SKPaint CreateLinePaint(double width, System.Windows.Media.Color color, Orc.Skia.LineType lineType = 0) { }
-        public static SkiaSharp.SKPaint CreateTextPaint(double fontSize, double width, System.Windows.Media.Color color, SkiaSharp.SKTextAlign textAlign = 0) { }
     }
     public static class SKPointExtensions
     {
