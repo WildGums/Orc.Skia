@@ -9,10 +9,11 @@ using Catel.MVVM;
 
 public class PerformanceViewModel : ViewModelBase
 {
-    public PerformanceViewModel()
+    public PerformanceViewModel(IServiceProvider serviceProvider)
+        : base(serviceProvider)
     {
-        RunTest = new TaskCommand<PerformanceTest>(OnRunTestExecuteAsync);
-        RunTests = new TaskCommand<string>(OnRunTestsExecuteAsync);
+        RunTest = new TaskCommand<PerformanceTest>(serviceProvider, OnRunTestExecuteAsync);
+        RunTests = new TaskCommand<string>(serviceProvider, OnRunTestsExecuteAsync);
 
         PerformanceTests = new List<PerformanceTest>(new[]
         {

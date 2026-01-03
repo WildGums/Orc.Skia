@@ -1,14 +1,16 @@
 ﻿namespace Orc.Skia.Example.ViewModels;
 
+using System;
 using System.Threading.Tasks;
 using Catel.MVVM;
 using SkiaSharp.Skottie;
 
 internal sealed class LottieAnimationsTestViewModel : ViewModelBase
 {
-    public LottieAnimationsTestViewModel()
+    public LottieAnimationsTestViewModel(IServiceProvider serviceProvider)
+        : base(serviceProvider)
     {
-        SetMouseOverBehaviorCommand = new TaskCommand<string>(OnSetMouseOverBehaviorCommandExecuteAsync);
+        SetMouseOverBehaviorCommand = new TaskCommand<string>(serviceProvider, OnSetMouseOverBehaviorCommandExecuteAsync);
         SelectedFile = "/Orc.Skia.Example;component/Resources/Lottie/loading-files.json";
     }
 
