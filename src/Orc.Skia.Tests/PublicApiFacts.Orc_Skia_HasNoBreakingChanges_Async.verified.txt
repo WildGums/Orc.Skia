@@ -81,6 +81,10 @@ namespace Orc.Skia
         public static System.Windows.Media.Matrix Multiply(this System.Windows.Media.Matrix matrix, System.Windows.Media.Matrix secondMatrix) { }
         public static System.Windows.Rect TransformRectangle(this System.Windows.Media.Matrix matrix, System.Windows.Rect rectangle) { }
     }
+    public static class OrcSkiaModule
+    {
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddOrcSkia(this Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection) { }
+    }
     public static class RectangleExtensions
     {
         public static System.Windows.Point GetTopLeft(this System.Windows.Rect rect) { }

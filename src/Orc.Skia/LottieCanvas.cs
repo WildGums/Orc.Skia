@@ -14,12 +14,13 @@ namespace Orc.Skia
     using System.Windows.Media.Animation;
     using System.Windows.Threading;
     using Catel.Logging;
+    using Microsoft.Extensions.Logging;
     using SkiaSharp;
     using SkiaSharp.Skottie;
 
     public class LottieCanvas : SkiaCanvas
     {
-        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger(typeof(LottieCanvas));
 
         private const float FramesPerSecond = 60;
 
@@ -52,7 +53,7 @@ namespace Orc.Skia
         public Animation? Animation
         {
             get => (Animation?)GetValue(AnimationProperty);
-            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
+            set => throw Logger.LogErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
         }
 
         public static readonly DependencyProperty AnimationProperty =
@@ -79,7 +80,7 @@ namespace Orc.Skia
         public bool IsPlaying
         {
             get => (bool)GetValue(IsPlayingProperty);
-            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(IsPlaying)}\". Use \"OneWayToSource\" Mode Binding");
+            set => throw Logger.LogErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(IsPlaying)}\". Use \"OneWayToSource\" Mode Binding");
         }
 
         public static readonly DependencyProperty IsPlayingProperty =
@@ -144,7 +145,7 @@ namespace Orc.Skia
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                Logger.LogError(ex, "An error occurred");
             }
         }
 
@@ -178,7 +179,7 @@ namespace Orc.Skia
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                Logger.LogError(ex, "An error occurred");
             }
         }
 
@@ -307,7 +308,7 @@ namespace Orc.Skia
                     _autoPaused = false;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Resuming animation, canvas became visible");
+                    Logger.LogDebug("Resuming animation, canvas became visible");
 #endif
 
                     ResumeAnimation();
@@ -321,7 +322,7 @@ namespace Orc.Skia
                     _autoPaused = true;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Pausing animation, canvas became invisible");
+                    Logger.LogDebug("Pausing animation, canvas became invisible");
 #endif
                 }
             }
@@ -422,13 +423,13 @@ namespace Orc.Skia
         private void OnInvalidationTimerTick(object? sender, EventArgs e)
         {
 #if DEBUG_LOGGING
-            Log.Debug("Invalidating animation frame");
+            Logger.LogDebug("Invalidating animation frame");
 #endif
 
             if (!IsVisible)
             {
 #if DEBUG_LOGGING
-                Log.Debug("Pausing animation, canvas is invisible");
+                Logger.LogDebug("Pausing animation, canvas is invisible");
 #endif
 
                 _autoPaused = IsPlaying;
@@ -486,7 +487,7 @@ namespace Orc.Skia
 #if DEBUG_TIMING
             var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
 
-            Log.Debug($"Frame render time: {renderTime} ms");
+            Logger.LogDebug($"Frame render time: {renderTime} ms");
 #endif
         }
     }
