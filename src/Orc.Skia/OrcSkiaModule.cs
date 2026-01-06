@@ -1,4 +1,4 @@
-﻿namespace Orc.Skia
+﻿namespace Orc
 {
     using Catel.Services;
     using Catel.ThirdPartyNotices;
