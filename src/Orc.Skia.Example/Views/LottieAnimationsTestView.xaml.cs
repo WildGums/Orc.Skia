@@ -2,8 +2,5 @@
 
 public partial class LottieAnimationsTestView
 {
-    public LottieAnimationsTestView()
-    {
-        InitializeComponent();
-    }
+
 }

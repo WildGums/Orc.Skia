@@ -4,490 +4,490 @@
 #define DEBUG_LOGGING
 #endif
 
-namespace Orc.Skia
+namespace Orc.Skia;
+
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Web;
+using System.Windows;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
+using Catel.Logging;
+using Microsoft.Extensions.Logging;
+using SkiaSharp;
+using SkiaSharp.Skottie;
+
+public class LottieCanvas : SkiaCanvas
 {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Web;
-    using System.Windows;
-    using System.Windows.Media.Animation;
-    using System.Windows.Threading;
-    using Catel.Logging;
-    using SkiaSharp;
-    using SkiaSharp.Skottie;
+    private static readonly ILogger Logger = LogManager.GetLogger(typeof(LottieCanvas));
 
-    public class LottieCanvas : SkiaCanvas
-    {
-        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+    private const float FramesPerSecond = 60;
 
-        private const float FramesPerSecond = 60;
+    private readonly DispatcherTimer _invalidationTimer = new();
+    private readonly DispatcherTimer _resizeTimer = new();
+    private readonly Stopwatch _frameWatcher = new();
 
-        private readonly DispatcherTimer _invalidationTimer = new();
-        private readonly DispatcherTimer _resizeTimer = new();
-        private readonly Stopwatch _frameWatcher = new();
-
-        private int _repeatCount = 0;
-        private bool _clearCanvas;
-        private bool _autoPaused;
-        private bool _isDirty = false;
-        private SKRect _renderSize;
+    private int _repeatCount = 0;
+    private bool _clearCanvas;
+    private bool _autoPaused;
+    private bool _isDirty = false;
+    private SKRect _renderSize;
 
 #if DEBUG_BACKGROUND
 #pragma warning disable IDISP006 // Implement IDisposable
-        private readonly SKPaint _debugPaint = SKPaintHelper.CreateLinePaint(2d, Colors.Red);
+    private readonly SKPaint _debugPaint = SKPaintHelper.CreateLinePaint(2d, Colors.Red);
 #pragma warning restore IDISP006 // Implement IDisposable
 #endif
 
-        public LottieCanvas()
+    public LottieCanvas()
+    {
+        _resizeTimer.Interval = TimeSpan.FromMilliseconds(50);
+        _resizeTimer.Tick += OnResizeTimerTick;
+
+        _invalidationTimer.Tick += OnInvalidationTimerTick;
+
+        IsVisibleChanged += OnIsVisibleChanged;
+    }
+
+    public Animation? Animation
+    {
+        get => (Animation?)GetValue(AnimationProperty);
+        set => throw Logger.LogErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
+    }
+
+    public static readonly DependencyProperty AnimationProperty =
+        DependencyProperty.Register(nameof(Animation), typeof(Animation), typeof(LottieCanvas), new PropertyMetadata(null));
+
+    public RepeatBehavior Repeat
+    {
+        get => (RepeatBehavior)GetValue(RepeatProperty);
+        set => SetValue(RepeatProperty, value);
+    }
+
+    public static readonly DependencyProperty RepeatProperty =
+        DependencyProperty.Register(nameof(Repeat), typeof(RepeatBehavior), typeof(LottieCanvas), new PropertyMetadata(RepeatBehavior.Forever));
+
+    public AnimationMouseOverBehavior MouseOver
+    {
+        get => (AnimationMouseOverBehavior)GetValue(MouseOverProperty);
+        set => SetValue(MouseOverProperty, value);
+    }
+
+    public static readonly DependencyProperty MouseOverProperty =
+     DependencyProperty.Register(nameof(MouseOver), typeof(AnimationMouseOverBehavior), typeof(LottieCanvas), new PropertyMetadata(AnimationMouseOverBehavior.None));
+
+    public bool IsPlaying
+    {
+        get => (bool)GetValue(IsPlayingProperty);
+        set => throw Logger.LogErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(IsPlaying)}\". Use \"OneWayToSource\" Mode Binding");
+    }
+
+    public static readonly DependencyProperty IsPlayingProperty =
+        DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(LottieCanvas), new PropertyMetadata(false));
+
+    public Uri? UriSource
+    {
+        get => (Uri?)GetValue(UriSourceProperty);
+        set => SetValue(UriSourceProperty, value);
+    }
+
+    public static readonly DependencyProperty UriSourceProperty =
+        DependencyProperty.Register(nameof(UriSource), typeof(Uri), typeof(LottieCanvas),
+            new PropertyMetadata((s, _) => ((LottieCanvas)s).OnUriSourceChanged()));
+
+    private void OnUriSourceChanged()
+    {
+        try
         {
-            _resizeTimer.Interval = TimeSpan.FromMilliseconds(50);
-            _resizeTimer.Tick += OnResizeTimerTick;
+            var uri = UriSource;
 
-            _invalidationTimer.Tick += OnInvalidationTimerTick;
+            StopAnimation();
 
-            IsVisibleChanged += OnIsVisibleChanged;
-        }
+            // Sync sources
+            SetCurrentValue(StreamSourceProperty, null);
+            SetCurrentValue(AnimationProperty, null);
 
-        public Animation? Animation
-        {
-            get => (Animation?)GetValue(AnimationProperty);
-            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
-        }
+            _clearCanvas = true;
+            Update();
 
-        public static readonly DependencyProperty AnimationProperty =
-            DependencyProperty.Register(nameof(Animation), typeof(Animation), typeof(LottieCanvas), new PropertyMetadata(null));
-
-        public RepeatBehavior Repeat
-        {
-            get => (RepeatBehavior)GetValue(RepeatProperty);
-            set => SetValue(RepeatProperty, value);
-        }
-
-        public static readonly DependencyProperty RepeatProperty =
-            DependencyProperty.Register(nameof(Repeat), typeof(RepeatBehavior), typeof(LottieCanvas), new PropertyMetadata(RepeatBehavior.Forever));
-
-        public AnimationMouseOverBehavior MouseOver
-        {
-            get => (AnimationMouseOverBehavior)GetValue(MouseOverProperty);
-            set => SetValue(MouseOverProperty, value);
-        }
-
-        public static readonly DependencyProperty MouseOverProperty =
-         DependencyProperty.Register(nameof(MouseOver), typeof(AnimationMouseOverBehavior), typeof(LottieCanvas), new PropertyMetadata(AnimationMouseOverBehavior.None));
-
-        public bool IsPlaying
-        {
-            get => (bool)GetValue(IsPlayingProperty);
-            set => throw Log.ErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(IsPlaying)}\". Use \"OneWayToSource\" Mode Binding");
-        }
-
-        public static readonly DependencyProperty IsPlayingProperty =
-            DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(LottieCanvas), new PropertyMetadata(false));
-
-        public Uri? UriSource
-        {
-            get => (Uri?)GetValue(UriSourceProperty);
-            set => SetValue(UriSourceProperty, value);
-        }
-
-        public static readonly DependencyProperty UriSourceProperty =
-            DependencyProperty.Register(nameof(UriSource), typeof(Uri), typeof(LottieCanvas),
-                new PropertyMetadata((s, _) => ((LottieCanvas)s).OnUriSourceChanged()));
-
-        private void OnUriSourceChanged()
-        {
-            try
+            if (uri is null)
             {
-                var uri = UriSource;
+                return;
+            }
 
-                StopAnimation();
-
-                // Sync sources
-                SetCurrentValue(StreamSourceProperty, null);
-                SetCurrentValue(AnimationProperty, null);
-
-                _clearCanvas = true;
-                Update();
-
-                if (uri is null)
+            if (!uri.IsAbsoluteUri)
+            {
+                var resourceStreamInfo = Application.GetResourceStream(uri);
+                if (resourceStreamInfo is null)
                 {
                     return;
                 }
 
-                if (!uri.IsAbsoluteUri)
+                using (resourceStreamInfo.Stream)
                 {
-                    var resourceStreamInfo = Application.GetResourceStream(uri);
-                    if (resourceStreamInfo is null)
-                    {
-                        return;
-                    }
-
-                    using (resourceStreamInfo.Stream)
-                    {
-                        InitializeAnimationFromSource(resourceStreamInfo.Stream);
-                    }
-
-                    return;
+                    InitializeAnimationFromSource(resourceStreamInfo.Stream);
                 }
 
-                // Note: checkign uri.IsFile can only be done if absolute path
-                if (!uri.IsFile)
-                {
-                    return;
-                }
-
-                using var fileStream = File.OpenRead(HttpUtility.UrlDecode(uri.AbsolutePath));
-                InitializeAnimationFromSource(fileStream);
-
                 return;
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex);
-            }
-        }
 
-        public Stream? StreamSource
-        {
-            get => (Stream?)GetValue(StreamSourceProperty);
-            set => SetValue(StreamSourceProperty, value);
-        }
-
-        public static readonly DependencyProperty StreamSourceProperty =
-            DependencyProperty.Register(nameof(StreamSource), typeof(Stream), typeof(LottieCanvas), new PropertyMetadata((s, e) => ((LottieCanvas)s).OnStreamSourceChanged()));
-
-        private void OnStreamSourceChanged()
-        {
-            try
-            {
-                StopAnimation();
-
-                // Sync sources
-                SetCurrentValue(UriSourceProperty, null);
-                SetCurrentValue(AnimationProperty, null);
-
-                _clearCanvas = true;
-                Update();
-
-                var animationFromStreamSource = StreamSource;
-                if (animationFromStreamSource is not null)
-                {
-                    InitializeAnimationFromSource(animationFromStreamSource);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex);
-            }
-        }
-
-        private void InitializeAnimationFromSource(Stream source)
-        {
-            using var skiaStream = new SKManagedStream(source);
-            if (Animation.TryCreate(skiaStream, out var animation))
-            {
-                SetAnimation(animation);
-            }
-        }
-
-        public void SetAnimation(Animation animation)
-        {
-            ArgumentNullException.ThrowIfNull(animation);
-
-            animation.Seek(0);
-
-            SetCurrentValue(AnimationProperty, animation);
-
-            CalculateRenderOffset();
-
-            _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramesPerSecond, 1 / animation.Fps));
-
-            StartAnimation();
-        }
-
-        public void StartAnimation()
-        {
-            if (Animation is null)
+            // Note: checkign uri.IsFile can only be done if absolute path
+            if (!uri.IsFile)
             {
                 return;
             }
 
-            SetCurrentValue(IsPlayingProperty, true);
+            using var fileStream = File.OpenRead(HttpUtility.UrlDecode(uri.AbsolutePath));
+            InitializeAnimationFromSource(fileStream);
 
-            CalculateRenderOffset();
-
-            _invalidationTimer.Start();
-            _frameWatcher.Restart();
+            return;
         }
-
-        public void ResumeAnimation()
+        catch (Exception ex)
         {
-            if (Animation is null)
+            Logger.LogError(ex, "An error occurred");
+        }
+    }
+
+    public Stream? StreamSource
+    {
+        get => (Stream?)GetValue(StreamSourceProperty);
+        set => SetValue(StreamSourceProperty, value);
+    }
+
+    public static readonly DependencyProperty StreamSourceProperty =
+        DependencyProperty.Register(nameof(StreamSource), typeof(Stream), typeof(LottieCanvas), new PropertyMetadata((s, e) => ((LottieCanvas)s).OnStreamSourceChanged()));
+
+    private void OnStreamSourceChanged()
+    {
+        try
+        {
+            StopAnimation();
+
+            // Sync sources
+            SetCurrentValue(UriSourceProperty, null);
+            SetCurrentValue(AnimationProperty, null);
+
+            _clearCanvas = true;
+            Update();
+
+            var animationFromStreamSource = StreamSource;
+            if (animationFromStreamSource is not null)
             {
-                return;
+                InitializeAnimationFromSource(animationFromStreamSource);
             }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "An error occurred");
+        }
+    }
 
-            if (!CanRestart())
-            {
-                return;
-            }
+    private void InitializeAnimationFromSource(Stream source)
+    {
+        using var skiaStream = new SKManagedStream(source);
+        if (Animation.TryCreate(skiaStream, out var animation))
+        {
+            SetAnimation(animation);
+        }
+    }
 
-            SetCurrentValue(IsPlayingProperty, true);
+    public void SetAnimation(Animation animation)
+    {
+        ArgumentNullException.ThrowIfNull(animation);
 
-            CalculateRenderOffset();
+        animation.Seek(0);
 
-            _invalidationTimer.Start();
-            _frameWatcher.Start();
+        SetCurrentValue(AnimationProperty, animation);
+
+        CalculateRenderOffset();
+
+        _invalidationTimer.Interval = TimeSpan.FromSeconds(Math.Max(1 / FramesPerSecond, 1 / animation.Fps));
+
+        StartAnimation();
+    }
+
+    public void StartAnimation()
+    {
+        if (Animation is null)
+        {
+            return;
         }
 
-        public void StopAnimation()
-        {
-            SetCurrentValue(IsPlayingProperty, false);
+        SetCurrentValue(IsPlayingProperty, true);
 
-            _invalidationTimer.Stop();
-            _frameWatcher.Stop();
+        CalculateRenderOffset();
+
+        _invalidationTimer.Start();
+        _frameWatcher.Restart();
+    }
+
+    public void ResumeAnimation()
+    {
+        if (Animation is null)
+        {
+            return;
         }
 
-        private void CalculateRenderOffset()
+        if (!CanRestart())
         {
-            var animation = Animation;
-            if (animation is null)
-            {
-                return;
-            }
-
-            var left = 0f;
-            var top = 0f;
-            var width = 0f;
-            var height = 0f;
-
-            var renderSizeDip = RenderSize;
-            _ = CreateSize(out var scaleX, out var scaleY);
-
-            var animationSize = animation.Size;
-            if (animationSize != default)
-            {
-                var correctAnimationSize = new SKSize(animationSize.Width * (float)scaleX,
-                    animationSize.Height * (float)scaleY);
-
-                var ratioX = (float)(renderSizeDip.Width / correctAnimationSize.Width);
-                var ratioY = (float)(renderSizeDip.Height / correctAnimationSize.Height);
-
-                var ratio = Math.Min(ratioX, ratioY);
-
-                width = correctAnimationSize.Width * ratio;
-                height = correctAnimationSize.Height * ratio;
-
-                left = ((float)renderSizeDip.Width - width) / 2f;
-                top = ((float)renderSizeDip.Height - height) / 2f;
-            }
-
-            var leftScaled = left * (float)scaleX;
-            var topScaled = top * (float)scaleY;
-            var widthScaled = (left + width) * (float)scaleX;
-            var heightScaled = (top + height) * (float)scaleY;
-
-            _renderSize = new SKRect(leftScaled, topScaled, widthScaled, heightScaled);
+            return;
         }
 
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-        {
-            base.OnRenderSizeChanged(sizeInfo);
+        SetCurrentValue(IsPlayingProperty, true);
 
-            ScheduleRenderSizeUpdate();
+        CalculateRenderOffset();
+
+        _invalidationTimer.Start();
+        _frameWatcher.Start();
+    }
+
+    public void StopAnimation()
+    {
+        SetCurrentValue(IsPlayingProperty, false);
+
+        _invalidationTimer.Stop();
+        _frameWatcher.Stop();
+    }
+
+    private void CalculateRenderOffset()
+    {
+        var animation = Animation;
+        if (animation is null)
+        {
+            return;
         }
 
-        private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        var left = 0f;
+        var top = 0f;
+        var width = 0f;
+        var height = 0f;
+
+        var renderSizeDip = RenderSize;
+        _ = CreateSize(out var scaleX, out var scaleY);
+
+        var animationSize = animation.Size;
+        if (animationSize != default)
         {
-            if (IsVisible)
+            var correctAnimationSize = new SKSize(animationSize.Width * (float)scaleX,
+                animationSize.Height * (float)scaleY);
+
+            var ratioX = (float)(renderSizeDip.Width / correctAnimationSize.Width);
+            var ratioY = (float)(renderSizeDip.Height / correctAnimationSize.Height);
+
+            var ratio = Math.Min(ratioX, ratioY);
+
+            width = correctAnimationSize.Width * ratio;
+            height = correctAnimationSize.Height * ratio;
+
+            left = ((float)renderSizeDip.Width - width) / 2f;
+            top = ((float)renderSizeDip.Height - height) / 2f;
+        }
+
+        var leftScaled = left * (float)scaleX;
+        var topScaled = top * (float)scaleY;
+        var widthScaled = (left + width) * (float)scaleX;
+        var heightScaled = (top + height) * (float)scaleY;
+
+        _renderSize = new SKRect(leftScaled, topScaled, widthScaled, heightScaled);
+    }
+
+    protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+    {
+        base.OnRenderSizeChanged(sizeInfo);
+
+        ScheduleRenderSizeUpdate();
+    }
+
+    private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (IsVisible)
+        {
+            if (_autoPaused)
             {
-                if (_autoPaused)
-                {
-                    _autoPaused = false;
+                _autoPaused = false;
 
 #if DEBUG_LOGGING
-                    Log.Debug("Resuming animation, canvas became visible");
+                Logger.LogDebug("Resuming animation, canvas became visible");
 #endif
 
-                    ResumeAnimation();
-                }
+                ResumeAnimation();
+            }
+        }
+        else
+        {
+            if (_invalidationTimer.IsEnabled)
+            {
+                _invalidationTimer.Stop();
+                _autoPaused = true;
+
+#if DEBUG_LOGGING
+                Logger.LogDebug("Pausing animation, canvas became invisible");
+#endif
+            }
+        }
+    }
+
+    protected override void Render(SKCanvas canvas, bool isClearCanvas)
+    {
+        if (_clearCanvas)
+        {
+            canvas.Clear();
+            _clearCanvas = false;
+            return;
+        }
+
+        var animation = Animation;
+        if (animation is null)
+        {
+            return;
+        }
+
+        if (!IsVisible)
+        {
+            return;
+        }
+
+        var halt = false;
+
+        // Check mouse
+        if (MouseOver == AnimationMouseOverBehavior.Start)
+        {
+            if (IsMouseOver)
+            {
+                ResumeAnimation();
             }
             else
             {
-                if (_invalidationTimer.IsEnabled)
-                {
-                    _invalidationTimer.Stop();
-                    _autoPaused = true;
-
-#if DEBUG_LOGGING
-                    Log.Debug("Pausing animation, canvas became invisible");
-#endif
-                }
+                StopAnimation();
+                halt = true;
             }
         }
 
-        protected override void Render(SKCanvas canvas, bool isClearCanvas)
+        if (MouseOver == AnimationMouseOverBehavior.Stop)
         {
-            if (_clearCanvas)
+            if (IsMouseOver)
             {
-                canvas.Clear();
-                _clearCanvas = false;
-                return;
+                StopAnimation();
+                halt = true;
             }
-
-            var animation = Animation;
-            if (animation is null)
+            else
             {
-                return;
-            }
-
-            if (!IsVisible)
-            {
-                return;
-            }
-
-            var halt = false;
-
-            // Check mouse
-            if (MouseOver == AnimationMouseOverBehavior.Start)
-            {
-                if (IsMouseOver)
-                {
-                    ResumeAnimation();
-                }
-                else
-                {
-                    StopAnimation();
-                    halt = true;
-                }
-            }
-
-            if (MouseOver == AnimationMouseOverBehavior.Stop)
-            {
-                if (IsMouseOver)
-                {
-                    StopAnimation();
-                    halt = true;
-                }
-                else
-                {
-                    ResumeAnimation();
-                }
-            }
-
-            if (MouseOver == AnimationMouseOverBehavior.None)
-            {
-                // Always try resume, ResumeAnimation() handles cases when animation cannot continue
                 ResumeAnimation();
             }
+        }
 
-            if (!halt && _frameWatcher.Elapsed > animation.Duration)
+        if (MouseOver == AnimationMouseOverBehavior.None)
+        {
+            // Always try resume, ResumeAnimation() handles cases when animation cannot continue
+            ResumeAnimation();
+        }
+
+        if (!halt && _frameWatcher.Elapsed > animation.Duration)
+        {
+            if (CanRestart())
             {
-                if (CanRestart())
-                {
-                    _repeatCount++;
+                _repeatCount++;
 
-                    StartAnimation();
-                }
-                else
-                {
-                    StopAnimation();
-                }
+                StartAnimation();
             }
-
-            if (!_isDirty)
+            else
             {
-                return;
-            }
-
-            RenderAnimation(animation, canvas);
-
-            _isDirty = false;
-        }
-
-        private void ScheduleRenderSizeUpdate()
-        {
-            _resizeTimer.Stop();
-            _resizeTimer.Start();
-        }
-
-        private void OnResizeTimerTick(object? sender, EventArgs e)
-        {
-            _resizeTimer.Stop();
-
-            CalculateRenderOffset();
-        }
-
-        private void OnInvalidationTimerTick(object? sender, EventArgs e)
-        {
-#if DEBUG_LOGGING
-            Log.Debug("Invalidating animation frame");
-#endif
-
-            if (!IsVisible)
-            {
-#if DEBUG_LOGGING
-                Log.Debug("Pausing animation, canvas is invisible");
-#endif
-
-                _autoPaused = IsPlaying;
                 StopAnimation();
             }
-
-            if (IsPlaying)
-            {
-                _isDirty = true;
-                Update();
-            }
         }
 
-        /// <summary>
-        /// Support different Repeat behaviors.
-        /// Repeat count prevail over time
-        /// </summary>
-        /// <returns></returns>
-        private bool CanRestart()
+        if (!_isDirty)
         {
-            if (Repeat == RepeatBehavior.Forever)
-            {
-                return true;
-            }
-
-            if (Repeat.HasCount && Repeat.Count >= _repeatCount)
-            {
-                return true;
-            }
-
-            if (Repeat.HasDuration && Repeat.Duration >= _frameWatcher.Elapsed)
-            {
-
-                return true;
-            }
-
-            return false;
+            return;
         }
 
-        private void RenderAnimation(Animation animation, SKCanvas canvas)
-        {
-#if DEBUG_TIMING
-            var renderTimeStart = _frameWatcher.Elapsed.TotalMilliseconds;
+        RenderAnimation(animation, canvas);
+
+        _isDirty = false;
+    }
+
+    private void ScheduleRenderSizeUpdate()
+    {
+        _resizeTimer.Stop();
+        _resizeTimer.Start();
+    }
+
+    private void OnResizeTimerTick(object? sender, EventArgs e)
+    {
+        _resizeTimer.Stop();
+
+        CalculateRenderOffset();
+    }
+
+    private void OnInvalidationTimerTick(object? sender, EventArgs e)
+    {
+#if DEBUG_LOGGING
+        Logger.LogDebug("Invalidating animation frame");
 #endif
 
-            canvas.Clear();
+        if (!IsVisible)
+        {
+#if DEBUG_LOGGING
+            Logger.LogDebug("Pausing animation, canvas is invisible");
+#endif
+
+            _autoPaused = IsPlaying;
+            StopAnimation();
+        }
+
+        if (IsPlaying)
+        {
+            _isDirty = true;
+            Update();
+        }
+    }
+
+    /// <summary>
+    /// Support different Repeat behaviors.
+    /// Repeat count prevail over time
+    /// </summary>
+    /// <returns></returns>
+    private bool CanRestart()
+    {
+        if (Repeat == RepeatBehavior.Forever)
+        {
+            return true;
+        }
+
+        if (Repeat.HasCount && Repeat.Count >= _repeatCount)
+        {
+            return true;
+        }
+
+        if (Repeat.HasDuration && Repeat.Duration >= _frameWatcher.Elapsed)
+        {
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void RenderAnimation(Animation animation, SKCanvas canvas)
+    {
+#if DEBUG_TIMING
+        var renderTimeStart = _frameWatcher.Elapsed.TotalMilliseconds;
+#endif
+
+        canvas.Clear();
 
 #if DEBUG_BACKGROUND
-            canvas.DrawRect(_renderSize, _debugPaint);
+        canvas.DrawRect(_renderSize, _debugPaint);
 #endif
 
-            animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds);
-            animation.Render(canvas, _renderSize);
+        animation.SeekFrameTime((float)_frameWatcher.Elapsed.TotalSeconds);
+        animation.Render(canvas, _renderSize);
 
 #if DEBUG_TIMING
-            var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
+        var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
 
-            Log.Debug($"Frame render time: {renderTime} ms");
+        Logger.LogDebug($"Frame render time: {renderTime} ms");
 #endif
-        }
     }
 }
