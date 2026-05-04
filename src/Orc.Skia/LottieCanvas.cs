@@ -53,7 +53,7 @@ public class LottieCanvas : SkiaCanvas
     public Animation? Animation
     {
         get => (Animation?)GetValue(AnimationProperty);
-        set => throw Logger.LogErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(Animation)}\". Use \"OneWayToSource\" Mode Binding");
+        set => throw Logger.LogErrorAndCreateException<InvalidOperationException>("An attempt to modify read-only property \"{PropertyName}\". Use \"OneWayToSource\" Mode Binding", nameof(Animation));
     }
 
     public static readonly DependencyProperty AnimationProperty =
@@ -80,7 +80,7 @@ public class LottieCanvas : SkiaCanvas
     public bool IsPlaying
     {
         get => (bool)GetValue(IsPlayingProperty);
-        set => throw Logger.LogErrorAndCreateException<InvalidOperationException>($"An attempt to modify read-only property \"{nameof(IsPlaying)}\". Use \"OneWayToSource\" Mode Binding");
+        set => throw Logger.LogErrorAndCreateException<InvalidOperationException>("An attempt to modify read-only property \"{PropertyName}\". Use \"OneWayToSource\" Mode Binding", nameof(IsPlaying));
     }
 
     public static readonly DependencyProperty IsPlayingProperty =
@@ -487,7 +487,7 @@ public class LottieCanvas : SkiaCanvas
 #if DEBUG_TIMING
         var renderTime = _frameWatcher.Elapsed.TotalMilliseconds - renderTimeStart;
 
-        Logger.LogDebug($"Frame render time: {renderTime} ms");
+        Logger.LogDebug("Frame render time: {RenderTime} ms", renderTime);
 #endif
     }
 }
