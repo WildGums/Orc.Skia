@@ -88,7 +88,7 @@ public static class SKCanvasExtensions
                     lineHeight = bounds.Height;
                 }
 
-                canvas.DrawText(characterAsString, (float)currentPoint.X, (float)currentPoint.Y, font, paint);
+                canvas.DrawText(characterAsString, (float)currentPoint.X, (float)currentPoint.Y, textAlign, font, paint);
 
                 currentPoint.X += bounds.Width;
 
