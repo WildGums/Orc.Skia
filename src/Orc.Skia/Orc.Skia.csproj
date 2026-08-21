@@ -33,8 +33,8 @@
     </PackageReference>
     <PackageReference Include="MethodTimer.Fody" Version="3.2.3" PrivateAssets="all" />
     <PackageReference Include="Obsolete.Fody" Version="5.3.1" PrivateAssets="all" />
-    <PackageReference Include="SkiaSharp.Skottie" Version="4.148.0" />
-    <PackageReference Include="SkiaSharp.Views.WPF" Version="4.148.0" />
+    <PackageReference Include="SkiaSharp.Skottie" Version="4.151.1" />
+    <PackageReference Include="SkiaSharp.Views.WPF" Version="4.151.1" />
   </ItemGroup>
 
   <Import Project="$(MSBuildProjectDirectory)\..\Directory.Build.nullable.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.Build.nullable.props')" />
